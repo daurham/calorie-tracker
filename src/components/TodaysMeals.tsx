@@ -29,6 +29,15 @@ const TodaysMeals = ({ meals, onRemoveMeal }) => {
         <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
           <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
           Today's Meals ({meals.length})
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onRemoveMeal("all")}
+            className="ml-auto text-red-500 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+            <span className="ml-2 text-sm">Clear All</span>
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent>

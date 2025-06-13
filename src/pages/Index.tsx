@@ -1,14 +1,27 @@
-
 import { useState, useEffect } from "react";
-import { Plus, Target, TrendingUp, Calendar, Settings, Eye, EyeOff } from "lucide-react";
+import { Plus, Target, TrendingUp, Calendar, Settings, Eye, EyeOff, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import MealComboDialog from "@/components/MealComboDialog";
 import MealLogDialog from "@/components/MealLogDialog";
 import TodaysMeals from "@/components/TodaysMeals";
 import MacroSettings from "@/components/MacroSettings";
 import { sampleMealCombos } from "@/data/sampleData";
+import { caloricGoal, carbsGoal, fatGoal, proteinGoal } from "@/settings.config";
+
+// Local storage keys
+const STORAGE_KEYS = {
+  DAILY_GOAL: 'nutritrack_daily_goal',
+  MACRO_GOALS: 'nutritrack_macro_goals',
+  TODAYS_MEALS: 'nutritrack_todays_meals',
+  VISIBLE_MACROS: 'nutritrack_visible_macros',
+  SHOW_MACROS: 'nutritrack_show_macros',
+  QUICK_STATS_OPEN: 'nutritrack_quick_stats_open',
+  TODAYS_MEALS_OPEN: 'nutritrack_todays_meals_open',
+  MEAL_COMBOS_OPEN: 'nutritrack_meal_combos_open'
+};
 
 const Index = () => {
   const [isComboDialogOpen, setIsComboDialogOpen] = useState(false);
@@ -19,12 +32,17 @@ const Index = () => {
   const [dailyMacros, setDailyMacros] = useState({ protein: 0, carbs: 0, fat: 0 });
   const [showMacros, setShowMacros] = useState(false);
   
+  // Collapsible states
+  const [isQuickStatsOpen, setIsQuickStatsOpen] = useState(true);
+  const [isTodaysMealsOpen, setIsTodaysMealsOpen] = useState(true);
+  const [isMealCombosOpen, setIsMealCombosOpen] = useState(true);
+  
   // Configurable goals
-  const [dailyGoal, setDailyGoal] = useState(2000);
+  const [dailyGoal, setDailyGoal] = useState(caloricGoal);
   const [macroGoals, setMacroGoals] = useState({
-    protein: 150, // grams
-    carbs: 200,   // grams
-    fat: 70       // grams
+    protein: proteinGoal, // grams
+    carbs: carbsGoal,   // grams
+    fat: fatGoal       // grams
   });
   
   const [visibleMacros, setVisibleMacros] = useState({
@@ -32,6 +50,98 @@ const Index = () => {
     carbs: true,
     fat: true
   });
+
+  // Load saved state from localStorage on component mount
+  useEffect(() => {
+    // Load daily goal
+    const savedDailyGoal = localStorage.getItem(STORAGE_KEYS.DAILY_GOAL);
+    if (savedDailyGoal) {
+      setDailyGoal(Number(savedDailyGoal));
+    }
+
+    // Load macro goals
+    const savedMacroGoals = localStorage.getItem(STORAGE_KEYS.MACRO_GOALS);
+    if (savedMacroGoals) {
+      setMacroGoals(JSON.parse(savedMacroGoals));
+    }
+
+    // Load today's meals
+    const savedTodaysMeals = localStorage.getItem(STORAGE_KEYS.TODAYS_MEALS);
+    if (savedTodaysMeals) {
+      const meals = JSON.parse(savedTodaysMeals);
+      setTodaysMeals(meals);
+      // Recalculate daily calories and macros
+      const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
+      const totalMacros = meals.reduce((acc, meal) => ({
+        protein: acc.protein + meal.protein,
+        carbs: acc.carbs + meal.carbs,
+        fat: acc.fat + meal.fat
+      }), { protein: 0, carbs: 0, fat: 0 });
+      setDailyCalories(totalCalories);
+      setDailyMacros(totalMacros);
+    }
+
+    // Load visible macros
+    const savedVisibleMacros = localStorage.getItem(STORAGE_KEYS.VISIBLE_MACROS);
+    if (savedVisibleMacros) {
+      setVisibleMacros(JSON.parse(savedVisibleMacros));
+    }
+
+    // Load show macros state
+    const savedShowMacros = localStorage.getItem(STORAGE_KEYS.SHOW_MACROS);
+    if (savedShowMacros !== null) {
+      setShowMacros(JSON.parse(savedShowMacros));
+    }
+
+    // Load collapsible states
+    const savedQuickStatsOpen = localStorage.getItem(STORAGE_KEYS.QUICK_STATS_OPEN);
+    if (savedQuickStatsOpen !== null) {
+      setIsQuickStatsOpen(JSON.parse(savedQuickStatsOpen));
+    }
+
+    const savedTodaysMealsOpen = localStorage.getItem(STORAGE_KEYS.TODAYS_MEALS_OPEN);
+    if (savedTodaysMealsOpen !== null) {
+      setIsTodaysMealsOpen(JSON.parse(savedTodaysMealsOpen));
+    }
+
+    const savedMealCombosOpen = localStorage.getItem(STORAGE_KEYS.MEAL_COMBOS_OPEN);
+    if (savedMealCombosOpen !== null) {
+      setIsMealCombosOpen(JSON.parse(savedMealCombosOpen));
+    }
+  }, []);
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.DAILY_GOAL, dailyGoal.toString());
+  }, [dailyGoal]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.MACRO_GOALS, JSON.stringify(macroGoals));
+  }, [macroGoals]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.TODAYS_MEALS, JSON.stringify(todaysMeals));
+  }, [todaysMeals]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.VISIBLE_MACROS, JSON.stringify(visibleMacros));
+  }, [visibleMacros]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SHOW_MACROS, JSON.stringify(showMacros));
+  }, [showMacros]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.QUICK_STATS_OPEN, JSON.stringify(isQuickStatsOpen));
+  }, [isQuickStatsOpen]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.TODAYS_MEALS_OPEN, JSON.stringify(isTodaysMealsOpen));
+  }, [isTodaysMealsOpen]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.MEAL_COMBOS_OPEN, JSON.stringify(isMealCombosOpen));
+  }, [isMealCombosOpen]);
   
   const progressPercentage = Math.min((dailyCalories / dailyGoal) * 100, 100);
   const macroProgress = {
@@ -52,6 +162,18 @@ const Index = () => {
   };
 
   const removeMealFromToday = (mealId) => {
+    if (mealId === "all") {
+      console.log("removing all meals")
+      todaysMeals.length = 0;
+      setTodaysMeals([]);
+      setDailyCalories(0);
+      setDailyMacros({
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+      })
+      return;
+    }
     const meal = todaysMeals.find(m => m.id === mealId);
     if (meal) {
       setTodaysMeals(prev => prev.filter(m => m.id !== mealId));
@@ -191,118 +313,156 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm">
-            <CardHeader className="pb-3 sm:pb-6">
-              <CardTitle className="flex items-center gap-2 text-emerald-700 text-lg sm:text-xl">
-                <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-                Quick Stats
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs sm:text-sm text-muted-foreground">Avg. per meal</span>
-                  <span className="font-semibold text-sm sm:text-base">
-                    {todaysMeals.length > 0 ? Math.round(dailyCalories / todaysMeals.length) : 0} cal
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs sm:text-sm text-muted-foreground">Progress</span>
-                  <span className="font-semibold text-emerald-600 text-sm sm:text-base">
-                    {Math.round(progressPercentage)}%
-                  </span>
-                </div>
-                {showMacros && (
-                  <>
-                    {visibleMacros.protein && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs sm:text-sm text-muted-foreground">Protein</span>
-                        <span className="font-semibold text-blue-600 text-sm sm:text-base">
-                          {Math.round(macroProgress.protein)}%
-                        </span>
-                      </div>
+          {/* Quick Stats */}
+          <Collapsible open={isQuickStatsOpen} onOpenChange={setIsQuickStatsOpen}>
+            <Card className="bg-white/80 backdrop-blur-sm">
+              <CollapsibleTrigger asChild>
+                <CardHeader className="pb-3 sm:pb-6 cursor-pointer hover:bg-slate-50/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-emerald-700 text-lg sm:text-xl">
+                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+                      Quick Stats
+                    </CardTitle>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isQuickStatsOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="pt-0">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Avg. per meal</span>
+                      <span className="font-semibold text-sm sm:text-base">
+                        {todaysMeals.length > 0 ? Math.round(dailyCalories / todaysMeals.length) : 0} cal
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Progress</span>
+                      <span className="font-semibold text-emerald-600 text-sm sm:text-base">
+                        {Math.round(progressPercentage)}%
+                      </span>
+                    </div>
+                    {showMacros && (
+                      <>
+                        {visibleMacros.protein && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs sm:text-sm text-muted-foreground">Protein</span>
+                            <span className="font-semibold text-blue-600 text-sm sm:text-base">
+                              {Math.round(macroProgress.protein)}%
+                            </span>
+                          </div>
+                        )}
+                        {visibleMacros.carbs && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs sm:text-sm text-muted-foreground">Carbs</span>
+                            <span className="font-semibold text-orange-600 text-sm sm:text-base">
+                              {Math.round(macroProgress.carbs)}%
+                            </span>
+                          </div>
+                        )}
+                        {visibleMacros.fat && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs sm:text-sm text-muted-foreground">Fat</span>
+                            <span className="font-semibold text-purple-600 text-sm sm:text-base">
+                              {Math.round(macroProgress.fat)}%
+                            </span>
+                          </div>
+                        )}
+                      </>
                     )}
-                    {visibleMacros.carbs && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs sm:text-sm text-muted-foreground">Carbs</span>
-                        <span className="font-semibold text-orange-600 text-sm sm:text-base">
-                          {Math.round(macroProgress.carbs)}%
-                        </span>
-                      </div>
-                    )}
-                    {visibleMacros.fat && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs sm:text-sm text-muted-foreground">Fat</span>
-                        <span className="font-semibold text-purple-600 text-sm sm:text-base">
-                          {Math.round(macroProgress.fat)}%
-                        </span>
-                      </div>
-                    )}
-                  </>
-                )}
-                <div className="flex justify-between items-center">
-                  <span className="text-xs sm:text-sm text-muted-foreground">Goal status</span>
-                  <span className={`text-xs sm:text-sm font-semibold ${
-                    progressPercentage >= 100 ? 'text-emerald-600' : 
-                    progressPercentage >= 75 ? 'text-yellow-600' : 'text-blue-600'
-                  }`}>
-                    {progressPercentage >= 100 ? 'Complete!' : 
-                     progressPercentage >= 75 ? 'Almost there' : 'On track'}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-muted-foreground">Goal status</span>
+                      <span className={`text-xs sm:text-sm font-semibold ${
+                        progressPercentage >= 100 ? 'text-emerald-600' : 
+                        progressPercentage >= 75 ? 'text-yellow-600' : 'text-blue-600'
+                      }`}>
+                        {progressPercentage >= 100 ? 'Complete!' : 
+                         progressPercentage >= 75 ? 'Almost there' : 'On track'}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
         </div>
 
         {/* Today's Meals */}
-        <TodaysMeals 
-          meals={todaysMeals} 
-          onRemoveMeal={removeMealFromToday}
-        />
+        <Collapsible open={isTodaysMealsOpen} onOpenChange={setIsTodaysMealsOpen} className="mb-6">
+          <Card className="bg-white/80 backdrop-blur-sm">
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-slate-50/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+                    Today's Meals
+                  </CardTitle>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isTodaysMealsOpen ? 'rotate-180' : ''}`} />
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent>
+                <TodaysMeals 
+                  meals={todaysMeals} 
+                  onRemoveMeal={removeMealFromToday}
+                />
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         {/* Available Meal Combos */}
-        <Card className="bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
-              Available Meal Combos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {sampleMealCombos.map((combo) => (
-                <Card key={combo.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer group">
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="flex justify-between items-start mb-2 sm:mb-3">
-                      <h3 className="font-semibold group-hover:text-emerald-600 transition-colors text-sm sm:text-base">
-                        {combo.name}
-                      </h3>
-                      <span className="text-lg sm:text-xl font-bold text-emerald-600 ml-2">
-                        {combo.calories}
-                      </span>
-                    </div>
-                    <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
-                      {combo.ingredients.join(", ")}
-                    </p>
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                      <div className="text-xs text-muted-foreground">
-                        P: {combo.protein}g | C: {combo.carbs}g | F: {combo.fat}g
-                      </div>
-                      <Button 
-                        size="sm" 
-                        onClick={() => addMealToToday(combo)}
-                        className="bg-emerald-500 hover:bg-emerald-600 w-full sm:w-auto"
-                      >
-                        Add
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <Collapsible open={isMealCombosOpen} onOpenChange={setIsMealCombosOpen}>
+          <Card className="bg-white/80 backdrop-blur-sm">
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-slate-50/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+                    Available Meal Combos
+                  </CardTitle>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isMealCombosOpen ? 'rotate-180' : ''}`} />
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent>
+                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {sampleMealCombos.map((combo) => (
+                    <Card key={combo.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer group">
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="flex justify-between items-start mb-2 sm:mb-3">
+                          <h3 className="font-semibold group-hover:text-emerald-600 transition-colors text-sm sm:text-base">
+                            {combo.name}
+                          </h3>
+                          <span className="text-lg sm:text-xl font-bold text-emerald-600 ml-2">
+                            {combo.calories}
+                          </span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
+                          {combo.ingredients.join(", ")}
+                        </p>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                          <div className="text-xs text-muted-foreground">
+                            P: {combo.protein}g | C: {combo.carbs}g | F: {combo.fat}g
+                          </div>
+                          <Button 
+                            size="sm" 
+                            onClick={() => addMealToToday(combo)}
+                            className="bg-emerald-500 hover:bg-emerald-600 w-full sm:w-auto"
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
       </main>
 
       {/* Dialogs */}
