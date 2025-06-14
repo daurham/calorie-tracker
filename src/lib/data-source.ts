@@ -1,7 +1,7 @@
 import { availableIngredients, sampleMealCombos } from '@/data/sampleData';
-import { Ingredient, MealCombo, getIngredients, getMealCombos } from './db/schema';
+import { Ingredient, MealCombo, getIngredients, getMealCombos } from './api-client';
 
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isDevelopment = import.meta.env.NODE_ENV === 'development';
 
 export async function getIngredientsData(): Promise<Ingredient[]> {
   if (isDevelopment) {

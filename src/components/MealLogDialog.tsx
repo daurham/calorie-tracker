@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,21 +11,53 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
-import { sampleMealCombos } from "@/data/sampleData";
 import { useToast } from "@/hooks/use-toast";
+import { getMealCombos } from "@/lib/api-client";
+import { MealCombo } from "@/lib/api-client";
 
-const MealLogDialog = ({ open, onOpenChange, onAddMeal }) => {
+interface MealLogDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onAddMeal: (meal: MealCombo) => void;
+}
+
+const MealLogDialog = ({ open, onOpenChange, onAddMeal }: MealLogDialogProps) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [meals, setMeals] = useState<MealCombo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const filteredMeals = sampleMealCombos.filter(meal =>
+  useEffect(() => {
+    if (open) {
+      loadMeals();
+    }
+  }, [open]);
+
+  const loadMeals = async () => {
+    try {
+      setIsLoading(true);
+      const data = await getMealCombos();
+      setMeals(data);
+    } catch (error) {
+      console.error('Error loading meals:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load meals. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredMeals = meals.filter(meal =>
     meal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     meal.ingredients.some(ingredient => 
       ingredient.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  const handleAddMeal = (meal) => {
+  const handleAddMeal = (meal: MealCombo) => {
     onAddMeal(meal);
     toast({
       title: "Meal logged!",
@@ -64,7 +95,11 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal }) => {
           </div>
 
           <div className="space-y-3 max-h-96 overflow-y-auto">
-            {filteredMeals.length === 0 ? (
+            {isLoading ? (
+              <p className="text-center text-muted-foreground py-8">
+                Loading meals...
+              </p>
+            ) : filteredMeals.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
                 {searchTerm ? "No meals found matching your search." : "No meal combos available."}
               </p>

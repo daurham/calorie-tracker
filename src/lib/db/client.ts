@@ -1,16 +1,18 @@
 import { sql } from '@vercel/postgres';
 import { Pool } from 'pg';
 
+console.log('process.env.POSTGRES_URL', import.meta.env.POSTGRES_URL);
+
 // Create a connection pool
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  connectionString: import.meta.env.POSTGRES_URL,
+  ssl: import.meta.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
 // Helper function to execute queries
 export async function query(text: string, params?: any[]) {
+  const start = Date.now();
   try {
-    const start = Date.now();
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
     console.log('Executed query', { text, duration, rows: res.rowCount });

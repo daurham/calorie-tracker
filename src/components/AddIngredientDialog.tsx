@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,10 +12,19 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
+interface IngredientFormData {
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  unit: string;
+}
+
 interface AddIngredientDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddIngredient: (ingredient: any) => void;
+  onAddIngredient: (formData: IngredientFormData) => void;
 }
 
 const AddIngredientDialog = ({ open, onOpenChange, onAddIngredient }: AddIngredientDialogProps) => {
@@ -38,8 +46,7 @@ const AddIngredientDialog = ({ open, onOpenChange, onAddIngredient }: AddIngredi
       return;
     }
 
-    const newIngredient = {
-      id: Date.now(),
+    const formData = {
       name,
       calories: parseFloat(calories) || 0,
       protein: parseFloat(protein) || 0,
@@ -48,7 +55,7 @@ const AddIngredientDialog = ({ open, onOpenChange, onAddIngredient }: AddIngredi
       unit
     };
 
-    onAddIngredient(newIngredient);
+    onAddIngredient(formData);
     
     toast({
       title: "Ingredient added!",

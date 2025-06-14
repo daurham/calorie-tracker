@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Target, TrendingUp, Calendar, Settings, Eye, EyeOff, ChevronDown } from "lucide-react";
+import { Plus, Target, TrendingUp, Calendar, Settings, Eye, EyeOff, ChevronDown, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -7,9 +7,12 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import MealComboDialog from "@/components/MealComboDialog";
 import MealLogDialog from "@/components/MealLogDialog";
 import TodaysMeals from "@/components/TodaysMeals";
-import MacroSettings from "@/components/MacroSettings";
-import { sampleMealCombos } from "@/data/sampleData";
+import SettingsMenu from "@/components/SettingsMenu";
+import IngredientManager from "@/components/IngredientManager";
+import { getIngredientsData, getMealCombosData } from "@/lib/data-source";
 import { caloricGoal, carbsGoal, fatGoal, proteinGoal } from "@/settings.config";
+import { deleteMealCombo } from "@/lib/api-client";
+import { toast } from "@/components/ui/use-toast";
 
 // Local storage keys
 const STORAGE_KEYS = {
@@ -31,11 +34,14 @@ const Index = () => {
   const [dailyCalories, setDailyCalories] = useState(0);
   const [dailyMacros, setDailyMacros] = useState({ protein: 0, carbs: 0, fat: 0 });
   const [showMacros, setShowMacros] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [mealCombos, setMealCombos] = useState([]);
   
   // Collapsible states
   const [isQuickStatsOpen, setIsQuickStatsOpen] = useState(true);
   const [isTodaysMealsOpen, setIsTodaysMealsOpen] = useState(true);
   const [isMealCombosOpen, setIsMealCombosOpen] = useState(true);
+  const [isIngredientsOpen, setIsIngredientsOpen] = useState(false);
   
   // Configurable goals
   const [dailyGoal, setDailyGoal] = useState(caloricGoal);
@@ -50,6 +56,29 @@ const Index = () => {
     carbs: true,
     fat: true
   });
+
+  const [editingCombo, setEditingCombo] = useState(null);
+
+  // Load data from database or sample data
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const [ingredients, combos] = await Promise.all([
+        getIngredientsData(),
+        getMealCombosData()
+      ]);
+      setMealCombos(combos);
+      // You might want to store ingredients in state if needed
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   // Load saved state from localStorage on component mount
   useEffect(() => {
@@ -184,6 +213,16 @@ const Index = () => {
         fat: prev.fat - meal.fat
       }));
     }
+  };
+
+  const handleEditCombo = (combo) => {
+    setEditingCombo(combo);
+    setIsComboDialogOpen(true);
+  };
+
+  const handleComboDialogClose = () => {
+    setIsComboDialogOpen(false);
+    setEditingCombo(null);
   };
 
   return (
@@ -428,37 +467,96 @@ const Index = () => {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <CardContent>
-                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {sampleMealCombos.map((combo) => (
-                    <Card key={combo.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer group">
-                      <CardContent className="p-3 sm:p-4">
-                        <div className="flex justify-between items-start mb-2 sm:mb-3">
-                          <h3 className="font-semibold group-hover:text-emerald-600 transition-colors text-sm sm:text-base">
-                            {combo.name}
-                          </h3>
-                          <span className="text-lg sm:text-xl font-bold text-emerald-600 ml-2">
-                            {combo.calories}
-                          </span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
-                          {combo.ingredients.join(", ")}
-                        </p>
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                          <div className="text-xs text-muted-foreground">
-                            P: {combo.protein}g | C: {combo.carbs}g | F: {combo.fat}g
+                {isLoading ? (
+                  <div className="text-center py-4">Loading meal combos...</div>
+                ) : (
+                  <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {mealCombos.map((combo) => (
+                      <Card key={combo.id} className="hover:shadow-lg transition-all duration-200">
+                        <CardContent className="p-3 sm:p-4">
+                          <div className="flex justify-between items-start mb-2 sm:mb-3">
+                            <h3 className="font-semibold text-sm sm:text-base">
+                              {combo.name}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditCombo(combo)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={async () => {
+                                  if (window.confirm('Are you sure you want to delete this meal combo?')) {
+                                    try {
+                                      await deleteMealCombo(combo.id);
+                                      loadData(); // Refresh the list
+                                      toast({
+                                        title: "Meal combo deleted",
+                                        description: `${combo.name} has been removed.`,
+                                      });
+                                    } catch (error) {
+                                      console.error('Error deleting meal combo:', error);
+                                      toast({
+                                        title: "Error",
+                                        description: "Failed to delete meal combo. Please try again.",
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  }
+                                }}
+                                className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                          <Button 
-                            size="sm" 
-                            onClick={() => addMealToToday(combo)}
-                            className="bg-emerald-500 hover:bg-emerald-600 w-full sm:w-auto"
-                          >
-                            Add
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
+                            {combo.ingredients.join(", ")}
+                          </p>
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                            <div className="text-xs text-muted-foreground">
+                              P: {combo.protein}g | C: {combo.carbs}g | F: {combo.fat}g
+                            </div>
+                            <Button 
+                              size="sm" 
+                              onClick={() => addMealToToday(combo)}
+                              className="bg-emerald-500 hover:bg-emerald-600 w-full sm:w-auto"
+                            >
+                              Add
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+
+        {/* Ingredients Manager */}
+        <Collapsible open={isIngredientsOpen} onOpenChange={setIsIngredientsOpen} className="mt-6">
+          <Card className="bg-white/80 backdrop-blur-sm">
+            <CollapsibleTrigger asChild>
+              <CardHeader className="cursor-pointer hover:bg-slate-50/50 transition-colors">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+                    Manage Ingredients
+                  </CardTitle>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isIngredientsOpen ? 'rotate-180' : ''}`} />
                 </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent>
+                <IngredientManager />
               </CardContent>
             </CollapsibleContent>
           </Card>
@@ -468,16 +566,20 @@ const Index = () => {
       {/* Dialogs */}
       <MealComboDialog 
         open={isComboDialogOpen} 
-        onOpenChange={setIsComboDialogOpen}
+        onOpenChange={handleComboDialogClose}
+        onSave={loadData}
+        editingCombo={editingCombo}
       />
       <MealLogDialog 
         open={isLogDialogOpen} 
         onOpenChange={setIsLogDialogOpen}
         onAddMeal={addMealToToday}
       />
-      <MacroSettings
+      <SettingsMenu
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
+        dailyGoal={dailyGoal}
+        onDailyGoalChange={setDailyGoal}
         macroGoals={macroGoals}
         onMacroGoalsChange={setMacroGoals}
         visibleMacros={visibleMacros}

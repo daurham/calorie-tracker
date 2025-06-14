@@ -1,4 +1,3 @@
-
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -15,6 +14,8 @@ import {
 interface MacroSettingsProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  dailyGoal: number;
+  onDailyGoalChange: (goal: number) => void;
   macroGoals: {
     protein: number;
     carbs: number;
@@ -32,6 +33,8 @@ interface MacroSettingsProps {
 const MacroSettings = ({ 
   open, 
   onOpenChange, 
+  dailyGoal,
+  onDailyGoalChange,
   macroGoals, 
   onMacroGoalsChange,
   visibleMacros,
@@ -57,19 +60,29 @@ const MacroSettings = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Macro Settings
+            Settings
           </DialogTitle>
           <DialogDescription>
-            Configure your macro goals and visibility preferences.
+            Configure your daily goals and visibility preferences.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           <div>
-            <h3 className="text-sm font-medium mb-4">Daily Goals (grams)</h3>
+            {/* <h3 className="text-sm font-medium mb-4">Daily Goals</h3> */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label htmlFor="protein-goal">Protein</Label>
+                <Label htmlFor="calorie-goal">Daily Calories</Label>
+                <Input
+                  id="calorie-goal"
+                  type="number"
+                  value={dailyGoal}
+                  onChange={(e) => onDailyGoalChange(parseFloat(e.target.value) || 0)}
+                  className="w-24"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="protein-goal">Protein (g)</Label>
                 <Input
                   id="protein-goal"
                   type="number"
@@ -79,7 +92,7 @@ const MacroSettings = ({
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="carbs-goal">Carbs</Label>
+                <Label htmlFor="carbs-goal">Carbs (g)</Label>
                 <Input
                   id="carbs-goal"
                   type="number"
@@ -89,7 +102,7 @@ const MacroSettings = ({
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="fat-goal">Fat</Label>
+                <Label htmlFor="fat-goal">Fat (g)</Label>
                 <Input
                   id="fat-goal"
                   type="number"
