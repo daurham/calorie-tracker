@@ -7,6 +7,7 @@ export async function getIngredientsData(): Promise<Ingredient[]> {
   if (isDevelopment) {
     return availableIngredients;
   }
+  console.log('Getting ingredients from database');
   return getIngredients();
 }
 
@@ -14,5 +15,6 @@ export async function getMealCombosData(): Promise<MealCombo[]> {
   if (isDevelopment) {
     return sampleMealCombos;
   }
+  console.log('Getting meal combos from database');
   return getMealCombos();
 } 
