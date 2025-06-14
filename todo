@@ -1,0 +1,6 @@
+TODO: 
+- [ ] currently debugging issue: 
+        when testing this out, it doesnt work. when i clear the meals, make a new one (fruit salad) of a few fruit ingredients (apple, pear), then update the apple ingredients calories by 20, it doesnt reflect on the fruit salad meal.
+  - [ ] so, console log the data coming in from db. maybe the localstorage is the issue -- i checked the log meal btn and the old data persists
+- [ ] get data to render in and update smoothly.
+- [ ] 

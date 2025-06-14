@@ -1,13 +1,27 @@
-import { sql } from '@vercel/postgres';
 import { Pool } from 'pg';
+import dotenv from 'dotenv';
 
-console.log('process.env.POSTGRES_URL', import.meta.env.POSTGRES_URL);
+// Load environment variables
+dotenv.config();
+
+// Log the environment for debugging
+console.log('Environment:', {
+  NODE_ENV: process.env.NODE_ENV,
+  POSTGRES_URL: process.env.POSTGRES_URL,
+});
 
 // Create a connection pool
 const pool = new Pool({
-  connectionString: import.meta.env.POSTGRES_URL,
-  ssl: import.meta.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  connectionString: process.env.POSTGRES_URL,
+  ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: false
+  } : false
 });
+
+// Test the connection
+pool.connect()
+  .then(() => console.log('Successfully connected to the database'))
+  .catch(err => console.error('Error connecting to the database:', err));
 
 // Helper function to execute queries
 export async function query(text: string, params?: any[]) {

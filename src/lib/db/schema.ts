@@ -1,4 +1,5 @@
 import { query } from './client';
+import { sql } from '@vercel/postgres';
 
 // Types
 export interface Ingredient {
@@ -27,38 +28,149 @@ export interface MealCombo {
 export async function createTables() {
   try {
     // Create ingredients table
-    await query(`
+    await sql.query(`
       CREATE TABLE IF NOT EXISTS ingredients (
         id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL UNIQUE,
+        name VARCHAR(255) NOT NULL,
         calories INTEGER NOT NULL,
         protein DECIMAL(5,2) NOT NULL,
         carbs DECIMAL(5,2) NOT NULL,
         fat DECIMAL(5,2) NOT NULL,
         unit VARCHAR(50) NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
     `);
 
     // Create meal_combos table
-    await query(`
+    await sql.query(`
       CREATE TABLE IF NOT EXISTS meal_combos (
         id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL UNIQUE,
-        ingredients TEXT[] NOT NULL,
+        name VARCHAR(255) NOT NULL,
         calories INTEGER NOT NULL,
         protein DECIMAL(5,2) NOT NULL,
         carbs DECIMAL(5,2) NOT NULL,
         fat DECIMAL(5,2) NOT NULL,
         notes TEXT,
         instructions TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
     `);
 
-    console.log('Database tables created successfully');
+    // Create meal_combo_ingredients junction table
+    await sql.query(`
+      CREATE TABLE IF NOT EXISTS meal_combo_ingredients (
+        meal_combo_id INTEGER REFERENCES meal_combos(id) ON DELETE CASCADE,
+        ingredient_id INTEGER REFERENCES ingredients(id) ON DELETE CASCADE,
+        quantity DECIMAL(5,2) NOT NULL DEFAULT 1,
+        PRIMARY KEY (meal_combo_id, ingredient_id)
+      )
+    `);
+
+    // Create trigger function for meal_combo_ingredients changes
+    await sql.query(`
+      CREATE OR REPLACE FUNCTION update_meal_combo_totals()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        UPDATE meal_combos
+        SET 
+          calories = (
+            SELECT COALESCE(SUM(i.calories * mci.quantity), 0)
+            FROM meal_combo_ingredients mci
+            JOIN ingredients i ON i.id = mci.ingredient_id
+            WHERE mci.meal_combo_id = NEW.meal_combo_id
+          ),
+          protein = (
+            SELECT COALESCE(SUM(i.protein * mci.quantity), 0)
+            FROM meal_combo_ingredients mci
+            JOIN ingredients i ON i.id = mci.ingredient_id
+            WHERE mci.meal_combo_id = NEW.meal_combo_id
+          ),
+          carbs = (
+            SELECT COALESCE(SUM(i.carbs * mci.quantity), 0)
+            FROM meal_combo_ingredients mci
+            JOIN ingredients i ON i.id = mci.ingredient_id
+            WHERE mci.meal_combo_id = NEW.meal_combo_id
+          ),
+          fat = (
+            SELECT COALESCE(SUM(i.fat * mci.quantity), 0)
+            FROM meal_combo_ingredients mci
+            JOIN ingredients i ON i.id = mci.ingredient_id
+            WHERE mci.meal_combo_id = NEW.meal_combo_id
+          )
+        WHERE id = NEW.meal_combo_id;
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql
+    `);
+
+    // Create trigger function for ingredient updates
+    await sql.query(`
+      CREATE OR REPLACE FUNCTION update_meal_combos_on_ingredient_change()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        -- Update all meal combos that use this ingredient
+        UPDATE meal_combos mc
+        SET 
+          calories = (
+            SELECT COALESCE(SUM(i.calories * mci.quantity), 0)
+            FROM meal_combo_ingredients mci
+            JOIN ingredients i ON i.id = mci.ingredient_id
+            WHERE mci.meal_combo_id = mc.id
+          ),
+          protein = (
+            SELECT COALESCE(SUM(i.protein * mci.quantity), 0)
+            FROM meal_combo_ingredients mci
+            JOIN ingredients i ON i.id = mci.ingredient_id
+            WHERE mci.meal_combo_id = mc.id
+          ),
+          carbs = (
+            SELECT COALESCE(SUM(i.carbs * mci.quantity), 0)
+            FROM meal_combo_ingredients mci
+            JOIN ingredients i ON i.id = mci.ingredient_id
+            WHERE mci.meal_combo_id = mc.id
+          ),
+          fat = (
+            SELECT COALESCE(SUM(i.fat * mci.quantity), 0)
+            FROM meal_combo_ingredients mci
+            JOIN ingredients i ON i.id = mci.ingredient_id
+            WHERE mci.meal_combo_id = mc.id
+          )
+        WHERE EXISTS (
+          SELECT 1
+          FROM meal_combo_ingredients mci
+          WHERE mci.meal_combo_id = mc.id
+          AND mci.ingredient_id = NEW.id
+        );
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql
+    `);
+
+    // Drop existing triggers if they exist
+    await sql.query(`
+      DROP TRIGGER IF EXISTS update_meal_combo_totals_trigger ON meal_combo_ingredients
+    `);
+
+    await sql.query(`
+      DROP TRIGGER IF EXISTS update_meal_combos_on_ingredient_change_trigger ON ingredients
+    `);
+
+    // Create triggers
+    await sql.query(`
+      CREATE TRIGGER update_meal_combo_totals_trigger
+      AFTER INSERT OR UPDATE OR DELETE ON meal_combo_ingredients
+      FOR EACH ROW
+      EXECUTE FUNCTION update_meal_combo_totals()
+    `);
+
+    await sql.query(`
+      CREATE TRIGGER update_meal_combos_on_ingredient_change_trigger
+      AFTER UPDATE ON ingredients
+      FOR EACH ROW
+      EXECUTE FUNCTION update_meal_combos_on_ingredient_change()
+    `);
+
+    console.log('Database tables and triggers created successfully');
   } catch (error) {
     console.error('Error creating database tables:', error);
     throw error;
