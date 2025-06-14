@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Ingredient, getIngredients, addIngredient, updateIngredient, deleteIngredient } from '@/lib/api-client';
+import { Ingredient } from '@/lib/api-client';
+import { getIngredientsData, addIngredientData, updateIngredientData, deleteIngredientData } from '@/lib/data-source';
 
 interface IngredientFormData {
   name: string;
@@ -37,7 +38,7 @@ export default function IngredientManager() {
   const loadIngredients = async () => {
     try {
       setIsLoading(true);
-      const data = await getIngredients();
+      const data = await getIngredientsData();
       setIngredients(data);
     } catch (error) {
       console.error('Error loading ingredients:', error);
@@ -50,10 +51,10 @@ export default function IngredientManager() {
     e.preventDefault();
     try {
       if (editingIngredient) {
-        const updated = await updateIngredient({ ...editingIngredient, ...formData });
+        const updated = await updateIngredientData({ ...editingIngredient, ...formData });
         setIngredients(prev => prev.map(i => i.id === updated.id ? updated : i));
       } else {
-        const newIngredient = await addIngredient(formData);
+        const newIngredient = await addIngredientData(formData);
         setIngredients(prev => [...prev, newIngredient]);
       }
       setIsDialogOpen(false);
@@ -79,7 +80,7 @@ export default function IngredientManager() {
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this ingredient?')) {
       try {
-        await deleteIngredient(id);
+        await deleteIngredientData(id);
         setIngredients(prev => prev.filter(i => i.id !== id));
       } catch (error) {
         console.error('Error deleting ingredient:', error);

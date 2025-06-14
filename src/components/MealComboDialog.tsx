@@ -15,32 +15,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { availableIngredients } from "@/data/sampleData";
 import { useToast } from "@/hooks/use-toast";
 import AddIngredientDialog from "./AddIngredientDialog";
-import { addIngredient, getIngredients, addMealCombo, updateMealCombo } from "@/lib/api-client";
-// import { Ingredient, getIngredients, addIngredient, updateIngredient, deleteIngredient } from '@/lib/api-client;
+import { Ingredient, MealCombo } from "@/lib/api-client";
+import { getIngredientsData, addIngredientData, addMealComboData, updateMealComboData } from "@/lib/data-source";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-
-interface Ingredient {
-  id: number;
-  name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  unit: string;
-}
-
-interface MealCombo {
-  id: number;
-  name: string;
-  ingredients: string[];
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  notes?: string;
-  instructions?: string;
-}
 
 interface MealComboDialogProps {
   open: boolean;
@@ -107,7 +85,7 @@ const MealComboDialog = ({ open, onOpenChange, onSave, editingCombo }: MealCombo
 
   const loadIngredients = async () => {
     try {
-      const ingredients = await getIngredients();
+      const ingredients = await getIngredientsData();
       setCustomIngredients(ingredients);
     } catch (error) {
       console.error('Error loading ingredients:', error);
@@ -125,7 +103,7 @@ const MealComboDialog = ({ open, onOpenChange, onSave, editingCombo }: MealCombo
   const handleAddIngredient = async (formData: { name: string; calories: number; protein: number; carbs: number; fat: number; unit: string }) => {
     try {
       setIsLoading(true);
-      const ingredient: Ingredient = await addIngredient(formData);
+      const ingredient: Ingredient = await addIngredientData(formData);
       setCustomIngredients((prev: Ingredient[]) => [...prev, ingredient]);
       setNewIngredient({
         name: "",
@@ -197,13 +175,13 @@ const MealComboDialog = ({ open, onOpenChange, onSave, editingCombo }: MealCombo
       };
 
       if (editingCombo) {
-        await updateMealCombo({ ...comboData, id: editingCombo.id });
+        await updateMealComboData({ ...comboData, id: editingCombo.id });
         toast({
           title: "Meal combo updated!",
           description: `${comboName} has been updated.`,
         });
       } else {
-        await addMealCombo(comboData);
+        await addMealComboData(comboData);
         toast({
           title: "Meal combo created!",
           description: `${comboName} has been saved to your meal combos.`,
