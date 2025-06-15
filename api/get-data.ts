@@ -1,13 +1,15 @@
 // api/get-data.js
 import { Pool } from 'pg';
 
+
 export default async function handler(req, res) {
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, // Set this in Vercel dashboard or .env
-  ssl: {
-    rejectUnauthorized: false, // required for NeonDB
-  },
-});
+  console.log("process.env.DATABASE_URL", process.env.DATABASE_URL);
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL, // Set this in Vercel dashboard or .env
+    ssl: {
+      rejectUnauthorized: false, // required for NeonDB
+    },
+  });
 
   console.log("fetching data");
   try {
