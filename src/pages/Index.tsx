@@ -238,6 +238,19 @@ const Index = () => {
               <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Smart calorie tracking made simple</p>
             </div>
             <div className="flex gap-1 sm:gap-2">
+              {/* Test button */}
+              <Button 
+                onClick={() => {
+                  fetch('/api/ingredients')
+                    .then(response => response.json())
+                    .then(data => console.log(data))
+                    .catch(error => console.error('Error:', error));
+                }}
+                variant="outline"
+                size="sm"
+                className="border-emerald-200 hover:bg-emerald-50 px-2 sm:px-3"
+              > API Fetch
+              </Button>
               <Button 
                 onClick={() => setIsSettingsOpen(true)}
                 variant="outline"
