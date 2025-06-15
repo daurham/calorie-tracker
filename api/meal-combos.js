@@ -1,7 +1,7 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
+// import { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql } from '@vercel/postgres';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   switch (req.method) {
     case 'GET':
       try {
