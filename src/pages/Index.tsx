@@ -239,7 +239,7 @@ const Index = () => {
             </div>
             <div className="flex gap-1 sm:gap-2">
               {/* Test button */}
-              {/* <Button 
+              <Button 
                 onClick={() => {
                   fetch('/api/get-data')
                     .then(response => response.json())
@@ -250,7 +250,7 @@ const Index = () => {
                 size="sm"
                 className="border-emerald-200 hover:bg-emerald-50 px-2 sm:px-3"
               > API Fetch
-              </Button> */}
+              </Button>
               <Button 
                 onClick={() => setIsSettingsOpen(true)}
                 variant="outline"
