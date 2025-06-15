@@ -1,6 +1,7 @@
 // api/get-data.js
 import { Pool } from 'pg';
 
+export default async function handler(req, res) {
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL, // Set this in Vercel dashboard or .env
   ssl: {
@@ -8,7 +9,7 @@ const pool = new Pool({
   },
 });
 
-export default async function handler(req, res) {
+  console.log("fetching data");
   try {
     const result = await pool.query('SELECT * FROM ingredients ORDER BY name');
     res.status(200).json(result.rows);
