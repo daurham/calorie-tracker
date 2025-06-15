@@ -233,13 +233,13 @@ const Index = () => {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
               <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-                NutriTrack
+                Caloric Tracker
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Smart calorie tracking made simple</p>
             </div>
             <div className="flex gap-1 sm:gap-2">
               {/* Test button */}
-              <Button 
+              {/* <Button 
                 onClick={() => {
                   fetch('/api/get-data')
                     .then(response => response.json())
@@ -250,7 +250,7 @@ const Index = () => {
                 size="sm"
                 className="border-emerald-200 hover:bg-emerald-50 px-2 sm:px-3"
               > API Fetch
-              </Button>
+              </Button> */}
               <Button 
                 onClick={() => setIsSettingsOpen(true)}
                 variant="outline"
