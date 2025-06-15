@@ -1,6 +1,7 @@
 // api/get-data.js
 import { Pool } from 'pg';
-
+import dotenv from 'dotenv';
+dotenv.config();
 
 export default async function handler(req, res) {
   console.log("process.env.DATABASE_URL", process.env.DATABASE_URL);
