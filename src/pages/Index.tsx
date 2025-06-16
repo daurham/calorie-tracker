@@ -8,12 +8,13 @@ import MealComboDialog from "@/components/MealComboDialog";
 import MealLogDialog from "@/components/MealLogDialog";
 import TodaysMeals from "@/components/TodaysMeals";
 import SettingsMenu from "@/components/SettingsMenu";
-import { addIngredientData, addMealComboData, deleteIngredientData, deleteMealComboData, getIngredientsData, getMealCombosData, updateIngredientData } from "@/lib/data-source";
+import { addIngredientData, addMealComboData, deleteIngredientData, deleteMealComboData, getIngredientsData, getMealCombosData, updateIngredientData, updateMealComboData } from "@/lib/data-source";
 import { caloricGoal, carbsGoal, fatGoal, proteinGoal } from "@/settings.config";
 import { deleteMealCombo } from "@/lib/api-client";
 import { toast } from "@/components/ui/use-toast";
 import IngredientManagementDialog from "@/components/IngredientManagementDialog";
 import ThemeToggle from "@/components/ThemeToggle";
+import { formatMacros, formatMacroProgress } from "@/lib/utils";
 
 // Local storage keys
 const STORAGE_KEYS = {
@@ -70,8 +71,10 @@ const Index = () => {
       ]);
       console.log("ingredients", ingredients);
       console.log("combos", combos);
-      setMealCombos(combos);
-      setAllIngredients(ingredients);
+      const sortedIngredients = ingredients.sort((a, b) => a.name.localeCompare(b.name));
+      const sortedCombos = combos.sort((a, b) => a.name.localeCompare(b.name));
+      setMealCombos(sortedCombos);
+      setAllIngredients(sortedIngredients);
       // You might want to store ingredients in state if needed
     } catch (error) {
       console.error('Error loading data:', error);
@@ -103,12 +106,15 @@ const Index = () => {
     if (savedTodaysMeals) {
       const meals = JSON.parse(savedTodaysMeals);
       setTodaysMeals(meals);
+      // meals.forEach((meal) =>{
+      //   console.log("meal", meal);
+      // })
       // Recalculate daily calories and macros
       const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
       const totalMacros = meals.reduce((acc, meal) => ({
-        protein: acc.protein + meal.protein,
-        carbs: acc.carbs + meal.carbs,
-        fat: acc.fat + meal.fat
+        protein: Number(acc.protein) + Number(meal.protein),
+        carbs: Number(acc.carbs) + Number(meal.carbs),
+        fat: Number(acc.fat) + Number(meal.fat)
       }), { protein: 0, carbs: 0, fat: 0 });
       setDailyCalories(totalCalories);
       setDailyMacros(totalMacros);
@@ -183,14 +189,16 @@ const Index = () => {
     fat: Math.min((dailyMacros.fat / macroGoals.fat) * 100, 100)
   };
 
+  console.log("dailyMacros", dailyMacros);
+
   const addMealToToday = (meal) => {
     const mealWithId = { ...meal, id: Date.now(), timestamp: new Date().toLocaleTimeString() };
     setTodaysMeals(prev => [...prev, mealWithId]);
     setDailyCalories(prev => prev + meal.calories);
     setDailyMacros(prev => ({
-      protein: prev.protein + meal.protein,
-      carbs: prev.carbs + meal.carbs,
-      fat: prev.fat + meal.fat
+      protein: Number(prev.protein) + Number(meal.protein),
+      carbs: Number(prev.carbs) + Number(meal.carbs),
+      fat: Number(prev.fat) + Number(meal.fat)
     }));
   };
 
@@ -212,9 +220,9 @@ const Index = () => {
       setTodaysMeals(prev => prev.filter(m => m.id !== mealId));
       setDailyCalories(prev => prev - meal.calories);
       setDailyMacros(prev => ({
-        protein: prev.protein - meal.protein,
-        carbs: prev.carbs - meal.carbs,
-        fat: prev.fat - meal.fat
+        protein: Number(prev.protein) - Number(meal.protein),
+        carbs: Number(prev.carbs) - Number(meal.carbs),
+        fat: Number(prev.fat) - Number(meal.fat)
       }));
     }
   };
@@ -222,31 +230,37 @@ const Index = () => {
   const addIngredient = async (ingredient) => {
     console.log("adding ingredient", ingredient);
     const newIngredientResult = await addIngredientData(ingredient);
-    setAllIngredients(prev => [...prev, newIngredientResult]);
+    setAllIngredients(prev => [...prev, newIngredientResult].sort((a, b) => a.name.localeCompare(b.name)));
   };
 
   const updateIngredient = async (ingredient) => {
     console.log("updating ingredient", ingredient);
     const updatedIngredientResult = await updateIngredientData(ingredient);
-    setAllIngredients(prev => prev.map(i => i.id === ingredient.id ? updatedIngredientResult : i));
+    setAllIngredients(prev => prev.map(i => i.id === ingredient.id ? updatedIngredientResult : i).sort((a, b) => a.name.localeCompare(b.name)));
   };
 
   const deleteIngredient = async (ingredientId) => {
     console.log("deleting ingredient", ingredientId);
     const deletedIngredientResult = await deleteIngredientData(ingredientId);
-    setAllIngredients(prev => prev.filter(ingredient => ingredient.id !== ingredientId));
+    setAllIngredients(prev => prev.filter(ingredient => ingredient.id !== ingredientId).sort((a, b) => a.name.localeCompare(b.name)));
   };
 
   const addMealCombo = async (combo) => {
-    console.log("adding meal combo", combo);
+    console.log("adding combo", combo);
     const newComboResult = await addMealComboData(combo);
-    console.log("newCombo", newComboResult);
-    setMealCombos(prev => [...prev, newComboResult]);
+    setMealCombos(prev => [...prev, newComboResult].sort((a, b) => a.name.localeCompare(b.name)));
   };
 
-  const deleteMealCombo = (comboId) => {
-    deleteMealComboData(comboId);
-    setMealCombos(prev => prev.filter(combo => combo.id !== comboId));
+  const updateMealCombo = async (combo) => {
+    console.log("updating combo", combo);
+    const updatedComboResult = await updateMealComboData(combo);
+    setMealCombos(prev => prev.map(c => c.id === combo.id ? updatedComboResult : c).sort((a, b) => a.name.localeCompare(b.name)));
+  };
+
+  const deleteMealCombo = async (comboId) => {
+    console.log("deleting combo", comboId);
+    const deletedComboResult = await deleteMealComboData(comboId);
+    setMealCombos(prev => prev.filter(combo => combo.id !== comboId).sort((a, b) => a.name.localeCompare(b.name)));
   };
 
   // const allIngredients = [ ...customIngredients];
@@ -259,12 +273,24 @@ const Index = () => {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
               <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-                NutriTrack
+                Caloric Tracker
               </h1>
               <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Smart calorie tracking made simple</p>
             </div>
+            {/* Navbar Buttons */}
             <div className="flex gap-1 sm:gap-2">
+              {/* Theme Toggle */}
               <ThemeToggle />
+              {/* Settings Button */}
+              <Button 
+                onClick={() => setIsSettingsOpen(true)}
+                variant="outline"
+                size="sm"
+                className="border-emerald-200 hover:bg-emerald-50 dark:border-emerald-700 dark:hover:bg-emerald-950 px-2 sm:px-3"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+              {/* Ingredients Button */}
               <Button 
                 onClick={() => setIsIngredientsDialogOpen(true)}
                 variant="outline"
@@ -274,15 +300,7 @@ const Index = () => {
                 <ChefHat className="h-4 w-4" />
                 <span className="hidden sm:inline ml-2">Ingredients</span>
               </Button>
-              <Button 
-                onClick={() => setIsSettingsOpen(true)}
-                variant="outline"
-                size="sm"
-                className="border-emerald-200 hover:bg-emerald-50 dark:border-emerald-700 dark:hover:bg-emerald-950 px-2 sm:px-3"
-              >
-                <Settings className="h-4 w-4" />
-                <span className="hidden sm:inline ml-2">Settings</span>
-              </Button>
+              {/* Meal Combos Button */}
               <Button 
                 onClick={() => setIsComboDialogOpen(true)}
                 className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 px-2 sm:px-3"
@@ -291,6 +309,7 @@ const Index = () => {
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline ml-2">Create Combo</span>
               </Button>
+              {/* Log Meal Button */}
               <Button 
                 onClick={() => setIsLogDialogOpen(true)}
                 variant="outline"
@@ -304,7 +323,6 @@ const Index = () => {
           </div>
         </div>
       </header>
-
       <main className="container mx-auto px-4 py-4 sm:py-8">
         {/* Daily Progress Section */}
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 mb-6 sm:mb-8">
@@ -337,14 +355,14 @@ const Index = () => {
                 {/* Macro Progress */}
                 {showMacros && (
                   <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-white/20">
-                    <div className="text-sm opacity-90 mb-2">Macronutrients</div>
+                    <div className="text-sm opacity-90 mb-2">Macros</div>
                     
                     {/* Protein */}
                     {visibleMacros.protein && (
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-xs sm:text-sm">
                           <span>Protein</span>
-                          <span>{Math.round(dailyMacros.protein)}g / {macroGoals.protein}g</span>
+                          <span>{formatMacros(dailyMacros.protein, macroGoals.protein).protein}</span>
                         </div>
                         <Progress value={macroProgress.protein} className="h-1.5 sm:h-2 bg-white/20" />
                       </div>
@@ -355,7 +373,7 @@ const Index = () => {
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-xs sm:text-sm">
                           <span>Carbs</span>
-                          <span>{Math.round(dailyMacros.carbs)}g / {macroGoals.carbs}g</span>
+                          <span>{formatMacros(dailyMacros.carbs, macroGoals.carbs).carbs}</span>
                         </div>
                         <Progress value={macroProgress.carbs} className="h-1.5 sm:h-2 bg-white/20" />
                       </div>
@@ -366,7 +384,7 @@ const Index = () => {
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-xs sm:text-sm">
                           <span>Fat</span>
-                          <span>{Math.round(dailyMacros.fat)}g / {macroGoals.fat}g</span>
+                          <span>{formatMacros(dailyMacros.fat, macroGoals.fat).fat}</span>
                         </div>
                         <Progress value={macroProgress.fat} className="h-1.5 sm:h-2 bg-white/20" />
                       </div>
@@ -415,7 +433,7 @@ const Index = () => {
                       <div className="flex justify-between items-center">
                         <span className="text-xs sm:text-sm text-muted-foreground">Protein</span>
                         <span className="font-semibold text-blue-600 dark:text-blue-400 text-sm sm:text-base">
-                          {Math.round(macroProgress.protein)}%
+                          {formatMacroProgress(macroProgress.protein)}
                         </span>
                       </div>
                     )}
@@ -423,7 +441,7 @@ const Index = () => {
                       <div className="flex justify-between items-center">
                         <span className="text-xs sm:text-sm text-muted-foreground">Carbs</span>
                         <span className="font-semibold text-orange-600 dark:text-orange-400 text-sm sm:text-base">
-                          {Math.round(macroProgress.carbs)}%
+                          {formatMacroProgress(macroProgress.carbs)}
                         </span>
                       </div>
                     )}
@@ -431,7 +449,7 @@ const Index = () => {
                       <div className="flex justify-between items-center">
                         <span className="text-xs sm:text-sm text-muted-foreground">Fat</span>
                         <span className="font-semibold text-purple-600 dark:text-purple-400 text-sm sm:text-base">
-                          {Math.round(macroProgress.fat)}%
+                          {formatMacroProgress(macroProgress.fat)}
                         </span>
                       </div>
                     )}

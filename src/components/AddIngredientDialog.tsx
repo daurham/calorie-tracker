@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,10 +20,10 @@ interface AddIngredientDialogProps {
 
 const AddIngredientDialog = ({ open, onOpenChange, onAddIngredient }: AddIngredientDialogProps) => {
   const [name, setName] = useState("");
-  const [calories, setCalories] = useState("");
-  const [protein, setProtein] = useState("");
-  const [carbs, setCarbs] = useState("");
-  const [fat, setFat] = useState("");
+  const [calories, setCalories] = useState(0);
+  const [protein, setProtein] = useState(0);
+  const [carbs, setCarbs] = useState(0);
+  const [fat, setFat] = useState(0);
   const [unit, setUnit] = useState("100g");
   const { toast } = useToast();
 
@@ -41,10 +40,10 @@ const AddIngredientDialog = ({ open, onOpenChange, onAddIngredient }: AddIngredi
     const newIngredient = {
       id: Date.now(),
       name,
-      calories: parseFloat(calories) || 0,
-      protein: parseFloat(protein) || 0,
-      carbs: parseFloat(carbs) || 0,
-      fat: parseFloat(fat) || 0,
+      calories: Math.round(calories || 0),
+      protein: Math.round(protein || 0),
+      carbs: Math.round(carbs || 0),
+      fat: Math.round(fat || 0),
       unit
     };
 
@@ -57,10 +56,10 @@ const AddIngredientDialog = ({ open, onOpenChange, onAddIngredient }: AddIngredi
 
     // Reset form
     setName("");
-    setCalories("");
-    setProtein("");
-    setCarbs("");
-    setFat("");
+    setCalories(0);
+    setProtein(0);
+    setCarbs(0);
+    setFat(0);
     setUnit("100g");
     onOpenChange(false);
   };
@@ -96,7 +95,7 @@ const AddIngredientDialog = ({ open, onOpenChange, onAddIngredient }: AddIngredi
                 id="calories"
                 type="number"
                 value={calories}
-                onChange={(e) => setCalories(e.target.value)}
+                onChange={(e) => setCalories(Number(e.target.value))}
                 placeholder="0"
                 className="mt-1"
               />
@@ -120,7 +119,7 @@ const AddIngredientDialog = ({ open, onOpenChange, onAddIngredient }: AddIngredi
                 id="protein"
                 type="number"
                 value={protein}
-                onChange={(e) => setProtein(e.target.value)}
+                onChange={(e) => setProtein(Number(e.target.value))}
                 placeholder="0"
                 className="mt-1"
               />
@@ -131,7 +130,7 @@ const AddIngredientDialog = ({ open, onOpenChange, onAddIngredient }: AddIngredi
                 id="carbs"
                 type="number"
                 value={carbs}
-                onChange={(e) => setCarbs(e.target.value)}
+                onChange={(e) => setCarbs(Number(e.target.value))}
                 placeholder="0"
                 className="mt-1"
               />
@@ -142,7 +141,7 @@ const AddIngredientDialog = ({ open, onOpenChange, onAddIngredient }: AddIngredi
                 id="fat"
                 type="number"
                 value={fat}
-                onChange={(e) => setFat(e.target.value)}
+                onChange={(e) => setFat(Number(e.target.value))}
                 placeholder="0"
                 className="mt-1"
               />
