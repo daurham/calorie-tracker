@@ -1,4 +1,4 @@
-# 🥗 Caloric Tracker
+# 🍏 Caloric Tracker
 
 A modern, intuitive calorie and macro tracking application built with Vite and TypeScript. Track your daily nutrition goals with ease and precision.
 
