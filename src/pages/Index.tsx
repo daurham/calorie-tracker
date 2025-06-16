@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Plus, Target, TrendingUp, Calendar, Settings, Eye, EyeOff, ChevronDown, Pencil, Trash2, ChefHat } from "lucide-react";
+import { Plus, Target, TrendingUp, Calendar, Settings, Eye, EyeOff, ChevronDown, Pencil, Trash2, ChefHat, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import MealComboDialog from "@/components/MealComboDialog";
@@ -13,8 +13,16 @@ import { caloricGoal, carbsGoal, fatGoal, proteinGoal } from "@/settings.config"
 import { deleteMealCombo } from "@/lib/api-client";
 import { toast } from "@/components/ui/use-toast";
 import IngredientManagementDialog from "@/components/IngredientManagementDialog";
+import { MealComboManagementDialog } from '@/components/MealComboManagementDialog';
 import ThemeToggle from "@/components/ThemeToggle";
 import { formatMacros, formatMacroProgress } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MealCombo, MealComboInput } from '@/lib/api-client';
 
 // Local storage keys
 const STORAGE_KEYS = {
@@ -36,6 +44,7 @@ const Index = () => {
   const [dailyCalories, setDailyCalories] = useState(0);
   const [dailyMacros, setDailyMacros] = useState({ protein: 0, carbs: 0, fat: 0 });
   const [showMacros, setShowMacros] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   // const [mealCombos, setMealCombos] = useState([]);
   
@@ -60,6 +69,8 @@ const Index = () => {
     carbs: true,
     fat: true
   });
+
+  const [isMealComboManagementOpen, setIsMealComboManagementOpen] = useState(false);
 
   // Load data from database or sample data
   const loadData = async () => {
@@ -189,7 +200,7 @@ const Index = () => {
     fat: Math.min((dailyMacros.fat / macroGoals.fat) * 100, 100)
   };
 
-  console.log("dailyMacros", dailyMacros);
+  // console.log("dailyMacros", dailyMacros);
 
   const addMealToToday = (meal) => {
     const mealWithId = { ...meal, id: Date.now(), timestamp: new Date().toLocaleTimeString() };
@@ -228,42 +239,72 @@ const Index = () => {
   };
 
   const addIngredient = async (ingredient) => {
-    console.log("adding ingredient", ingredient);
+    // console.log("adding ingredient", ingredient);
     const newIngredientResult = await addIngredientData(ingredient);
     setAllIngredients(prev => [...prev, newIngredientResult].sort((a, b) => a.name.localeCompare(b.name)));
   };
 
   const updateIngredient = async (ingredient) => {
-    console.log("updating ingredient", ingredient);
+    // console.log("updating ingredient", ingredient);
     const updatedIngredientResult = await updateIngredientData(ingredient);
     setAllIngredients(prev => prev.map(i => i.id === ingredient.id ? updatedIngredientResult : i).sort((a, b) => a.name.localeCompare(b.name)));
   };
 
   const deleteIngredient = async (ingredientId) => {
-    console.log("deleting ingredient", ingredientId);
+    // console.log("deleting ingredient", ingredientId);
     const deletedIngredientResult = await deleteIngredientData(ingredientId);
     setAllIngredients(prev => prev.filter(ingredient => ingredient.id !== ingredientId).sort((a, b) => a.name.localeCompare(b.name)));
   };
 
-  const addMealCombo = async (combo) => {
-    console.log("adding combo", combo);
-    const newComboResult = await addMealComboData(combo);
-    setMealCombos(prev => [...prev, newComboResult].sort((a, b) => a.name.localeCompare(b.name)));
+  const handleAddMealCombo = async (mealCombo: MealComboInput) => {
+    try {
+      const response = await fetch('/api/meal-combos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mealCombo),
+      });
+      if (!response.ok) throw new Error('Failed to add meal combo');
+      const newMealCombo = await response.json();
+      setMealCombos(prev => [...prev, newMealCombo]);
+    } catch (error) {
+      console.error('Error adding meal combo:', error);
+      throw error;
+    }
   };
 
-  const updateMealCombo = async (combo) => {
-    console.log("updating combo", combo);
-    const updatedComboResult = await updateMealComboData(combo);
-    setMealCombos(prev => prev.map(c => c.id === combo.id ? updatedComboResult : c).sort((a, b) => a.name.localeCompare(b.name)));
+  const handleUpdateMealCombo = async (id: number, mealCombo: MealComboInput) => {
+    try {
+      const response = await fetch(`/api/meal-combos?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mealCombo),
+      });
+      if (!response.ok) throw new Error('Failed to update meal combo');
+      const updatedMealCombo = await response.json();
+      setMealCombos(prev => prev.map(mc => mc.id === id ? updatedMealCombo : mc));
+    } catch (error) {
+      console.error('Error updating meal combo:', error);
+      throw error;
+    }
   };
 
-  const deleteMealCombo = async (comboId) => {
-    console.log("deleting combo", comboId);
-    const deletedComboResult = await deleteMealComboData(comboId);
-    setMealCombos(prev => prev.filter(combo => combo.id !== comboId).sort((a, b) => a.name.localeCompare(b.name)));
+  const handleDeleteMealCombo = async (id: number) => {
+    try {
+      const response = await fetch(`/api/meal-combos?id=${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete meal combo');
+      setMealCombos(prev => prev.filter(mc => mc.id !== id));
+    } catch (error) {
+      console.error('Error deleting meal combo:', error);
+      throw error;
+    }
   };
 
-  // const allIngredients = [ ...customIngredients];
+  const openMealEditManagement = (id: number) => {
+    setEditingId(id);
+    setIsMealComboManagementOpen(true);
+  };  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
@@ -474,7 +515,6 @@ const Index = () => {
         <TodaysMeals 
           meals={todaysMeals} 
           onRemoveMeal={removeMealFromToday}
-          onDeleteMeal={removeMealFromToday}
         />
 
         {/* Available Meal Combos */}
@@ -499,7 +539,7 @@ const Index = () => {
                       </span>
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
-                      {combo.ingredients.join(", ")}
+                      {combo.ingredients.map(i => i.name).join(", ")}
                     </p>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                       <div className="text-xs text-muted-foreground">
@@ -513,14 +553,33 @@ const Index = () => {
                         >
                           Add
                         </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => deleteMealCombo(combo.id)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-2"
-                        >
-                          <Plus className="h-3 w-3 rotate-45" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="px-2"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => {
+                              openMealEditManagement(combo.id);
+                              // We'll handle the edit in the management dialog
+                            }}>
+                              <Pencil className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteMealCombo(combo.id)}
+                              className="text-red-500 focus:text-red-500"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </CardContent>
@@ -535,7 +594,7 @@ const Index = () => {
       <MealComboDialog 
         open={isComboDialogOpen} 
         onOpenChange={setIsComboDialogOpen}
-        onAddMealCombo={addMealCombo}
+        onAddMealCombo={handleAddMealCombo}
         availableIngredients={allIngredients}
       />
       <MealLogDialog 
@@ -561,6 +620,17 @@ const Index = () => {
         onAddIngredient={addIngredient}
         onUpdateIngredient={updateIngredient}
         onDeleteIngredient={deleteIngredient}
+      />
+      <MealComboManagementDialog
+        open={isMealComboManagementOpen}
+        onOpenChange={setIsMealComboManagementOpen}
+        mealCombos={mealCombos}
+        availableIngredients={allIngredients}
+        onAddMealCombo={handleAddMealCombo}
+        onUpdateMealCombo={handleUpdateMealCombo}
+        onDeleteMealCombo={handleDeleteMealCombo}
+        macroGoals={macroGoals}
+        mealId={editingId}
       />
     </div>
   );

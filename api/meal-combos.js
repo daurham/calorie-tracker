@@ -7,7 +7,11 @@ export default async function handler(req, res) {
       try {
         const result = await sql`
           SELECT mc.*, 
-                 ARRAY_AGG(i.name) as ingredients
+                 json_agg(json_build_object(
+                   'id', i.id,
+                   'name', i.name,
+                   'quantity', mci.quantity
+                 )) as ingredients
           FROM meal_combos mc
           LEFT JOIN meal_combo_ingredients mci ON mc.id = mci.meal_combo_id
           LEFT JOIN ingredients i ON mci.ingredient_id = i.id
@@ -60,7 +64,11 @@ export default async function handler(req, res) {
         // Get the complete meal combo with ingredients
         const finalResult = await sql`
           SELECT mc.*, 
-                 ARRAY_AGG(i.name) as ingredients
+                 json_agg(json_build_object(
+                   'id', i.id,
+                   'name', i.name,
+                   'quantity', mci.quantity
+                 )) as ingredients
           FROM meal_combos mc
           LEFT JOIN meal_combo_ingredients mci ON mc.id = mci.meal_combo_id
           LEFT JOIN ingredients i ON mci.ingredient_id = i.id
@@ -79,7 +87,13 @@ export default async function handler(req, res) {
 
     case 'PUT':
       try {
-        const { id, name, ingredients, calories, protein, carbs, fat, notes, instructions } = req.body;
+        const id = Array.isArray(req.query.id) ? req.query.id[0] : req.query.id;
+        if (!id) {
+          res.status(400).json({ error: 'ID is required' });
+          return;
+        }
+
+        const { name, ingredients, calories, protein, carbs, fat, notes, instructions } = req.body;
         
         // Start a transaction
         await sql`BEGIN`;
@@ -125,7 +139,11 @@ export default async function handler(req, res) {
         // Get the complete meal combo with ingredients
         const finalResult = await sql`
           SELECT mc.*, 
-                 ARRAY_AGG(i.name) as ingredients
+                 json_agg(json_build_object(
+                   'id', i.id,
+                   'name', i.name,
+                   'quantity', mci.quantity
+                 )) as ingredients
           FROM meal_combos mc
           LEFT JOIN meal_combo_ingredients mci ON mc.id = mci.meal_combo_id
           LEFT JOIN ingredients i ON mci.ingredient_id = i.id

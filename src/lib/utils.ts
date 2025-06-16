@@ -25,7 +25,7 @@ export const formatMacros = (current: number | string, goal: number | string) =>
 };
 
 export const formatMacroProgress = (progress: number | string) => {
-  console.log("progress", progress);
+  // console.log("progress", progress);
   const progressNum = typeof progress === 'string' ? parseFloat(progress) : progress;
   return `${Math.round(progressNum)}%`;
 };

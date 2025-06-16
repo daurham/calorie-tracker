@@ -5,19 +5,54 @@ export interface Ingredient {
   protein: number;
   carbs: number;
   fat: number;
-  unit: string;
+  serving_size: number;
+  serving_unit: string;
+  notes?: string;
 }
 
 export interface MealCombo {
   id: number;
   name: string;
+  ingredients: Array<{
+    id: number;
+    name: string;
+    quantity: number;
+  }>;
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
   notes?: string;
   instructions?: string;
-  ingredients?: { id: number; quantity: number }[];
+}
+
+export interface MealComboInput {
+  name: string;
+  ingredients: Array<{
+    id: number;
+    quantity: number;
+  }>;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  notes?: string;
+  instructions?: string;
+}
+
+export interface Meal {
+  id: number;
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  timestamp: string;
+  ingredients: Array<{
+    id: number;
+    name: string;
+    quantity: number;
+  }>;
 }
 
 const API_BASE_URL = '/api';
@@ -78,7 +113,7 @@ export async function addMealCombo(combo: Omit<MealCombo, 'id'>): Promise<MealCo
 }
 
 export async function updateMealCombo(mealCombo: MealCombo): Promise<MealCombo> {
-  return fetchApi<MealCombo>(`${API_BASE_URL}/meal-combos`, {
+  return fetchApi<MealCombo>(`${API_BASE_URL}/meal-combos?id=${mealCombo.id}`, {
     method: 'PUT',
     body: JSON.stringify(mealCombo),
   });

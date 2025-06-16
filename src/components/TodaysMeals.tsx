@@ -1,9 +1,13 @@
-
-import { Trash2, Clock, Edit } from "lucide-react";
+import { Trash2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const TodaysMeals = ({ meals, onRemoveMeal, onDeleteMeal }) => {
+interface TodaysMealsProps {
+  meals: any[];
+  onRemoveMeal: (id: any) => void;
+}
+
+const TodaysMeals = ({ meals, onRemoveMeal }: TodaysMealsProps) => {
   if (meals.length === 0) {
     return (
       <Card className="mb-6 sm:mb-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
@@ -26,10 +30,23 @@ const TodaysMeals = ({ meals, onRemoveMeal, onDeleteMeal }) => {
   return (
     <Card className="mb-6 sm:mb-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-          <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
-          Today's Meals ({meals.length})
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
+            Today's Meals ({meals.length})
+          </CardTitle>
+          {meals.length >= 2 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onRemoveMeal("all")}
+              className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Clear All
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -46,7 +63,7 @@ const TodaysMeals = ({ meals, onRemoveMeal, onDeleteMeal }) => {
                         </span>
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
-                        {meal.ingredients.join(", ")}
+                        {meal.ingredients.map(i => i.name).join(", ")}
                       </p>
                     </div>
                     <div className="text-center flex-shrink-0">
