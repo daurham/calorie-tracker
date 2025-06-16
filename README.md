@@ -1,21 +1,110 @@
-# React + TypeScript + Vite
+# 🥗 Caloric Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, intuitive calorie and macro tracking application built with Vite and TypeScript. Track your daily nutrition goals with ease and precision.
 
-While this project uses React, Vite supports many popular JS frameworks. [See all the supported frameworks](https://vitejs.dev/guide/#scaffolding-your-first-vite-project).
+## ✨ Features
 
-## Deploy Your Own
+- **Smart Meal Tracking**
+  - Log individual meals and track daily calorie intake
+  - Monitor macronutrients (protein, carbs, fat)
+  - Create and save custom meal combinations
+  - Beautiful progress visualization
 
-Deploy your own Vite project with Vercel.
+- **Ingredient Management**
+  - Add custom ingredients with nutritional information
+  - Create a personal ingredient database
+  - Automatic macro calculations
+  - Easy ingredient search and selection
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/vercel/tree/main/examples/vite-react&template=vite-react)
+- **Meal Combinations**
+  - Create and save meal combinations
+  - Reuse favorite meal combinations
+  - Automatic nutritional calculations
+  - Flexible ingredient quantities
 
-_Live Example: https://vite-react-example.vercel.app_
+- **User Experience**
+  - Clean, modern UI with dark mode support
+  - Responsive design for all devices
+  - Intuitive navigation
+  - Real-time progress tracking
 
-### Deploying From Your Terminal
+## 🛠️ Tech Stack
 
-You can deploy your new Vite project with a single command from your terminal using [Vercel CLI](https://vercel.com/download):
+- **Frontend**
+  - Vite
+  - TypeScript
+  - Tailwind CSS
+  - Shadcn UI Components
+  - Lucide Icons
 
-```shell
-$ vercel
+- **Backend**
+  - Vercel Postgres
+  - PostgreSQL for data management
+  - RESTful API endpoints
+
+## 🚀 Getting Started
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/calorie-tracker.git
+   cd calorie-tracker
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```env
+   DATABASE_URL=your_database_url
+   ```
+
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open [http://localhost:3000](http://localhost:3000) in your browser**
+
+## 📁 Project Structure
+
 ```
+calorie-tracker/
+├── api/                # API endpoints
+├── src/
+│   ├── components/     # React components
+│   ├── lib/           # Utility functions and data handling
+│   ├── pages/         # Next.js pages
+│   └── styles/        # Global styles
+├── public/            # Static assets
+└── package.json       # Project dependencies
+```
+
+## 🔧 Configuration
+
+The application uses several configuration files:
+
+- `settings.config.ts` - Default nutritional goals
+- `tailwind.config.js` - Tailwind CSS configuration
+- `tsconfig.json` - TypeScript configuration
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Vercel](https://vercel.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Lovable](https://lovable.com/)
