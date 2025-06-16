@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,52 +12,19 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { getMealCombos } from "@/lib/api-client";
-import { MealCombo } from "@/lib/api-client";
 
-interface MealLogDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onAddMeal: (meal: MealCombo) => void;
-}
-
-const MealLogDialog = ({ open, onOpenChange, onAddMeal }: MealLogDialogProps) => {
+const MealLogDialog = ({ open, onOpenChange, onAddMeal, mealCombos }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [meals, setMeals] = useState<MealCombo[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (open) {
-      loadMeals();
-    }
-  }, [open]);
-
-  const loadMeals = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getMealCombos();
-      setMeals(data);
-    } catch (error) {
-      console.error('Error loading meals:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load meals. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const filteredMeals = meals.filter(meal =>
+  const filteredMeals = mealCombos.filter(meal =>
     meal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     meal.ingredients.some(ingredient => 
       ingredient.toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  const handleAddMeal = (meal: MealCombo) => {
+  const handleAddMeal = (meal) => {
     onAddMeal(meal);
     toast({
       title: "Meal logged!",
@@ -71,7 +38,7 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal }: MealLogDialogProps) =>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+          <DialogTitle className="text-xl sm:text-2xl bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
             Log a Meal
           </DialogTitle>
           <DialogDescription>
@@ -95,17 +62,13 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal }: MealLogDialogProps) =>
           </div>
 
           <div className="space-y-3 max-h-96 overflow-y-auto">
-            {isLoading ? (
-              <p className="text-center text-muted-foreground py-8">
-                Loading meals...
-              </p>
-            ) : filteredMeals.length === 0 ? (
+            {filteredMeals.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
                 {searchTerm ? "No meals found matching your search." : "No meal combos available."}
               </p>
             ) : (
               filteredMeals.map((meal) => (
-                <Card key={meal.id} className="hover:shadow-md transition-all duration-200">
+                <Card key={meal.id} className="hover:shadow-md transition-all duration-200 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
@@ -120,7 +83,7 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal }: MealLogDialogProps) =>
                         </div>
                       </div>
                       <div className="text-right ml-4">
-                        <div className="text-2xl font-bold text-emerald-600 mb-2">
+                        <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">
                           {meal.calories}
                         </div>
                         <div className="text-sm text-muted-foreground mb-3">calories</div>

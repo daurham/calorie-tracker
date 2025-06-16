@@ -15,18 +15,23 @@ export interface Ingredient {
 export interface MealCombo {
   id: number;
   name: string;
-  ingredients: string[];
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
   notes?: string;
   instructions?: string;
+  ingredients?: { id: number; quantity: number }[];
 }
 
 // Schema creation
 export async function createTables() {
   try {
+    // Drop the ingredients column if it exists
+    await sql.query(`
+      ALTER TABLE meal_combos DROP COLUMN IF EXISTS ingredients;
+    `);
+
     // Create ingredients table
     await sql.query(`
       CREATE TABLE IF NOT EXISTS ingredients (
@@ -198,10 +203,10 @@ export async function addIngredient(ingredient: Omit<Ingredient, 'id'>): Promise
 }
 
 export async function addMealCombo(mealCombo: Omit<MealCombo, 'id'>): Promise<MealCombo> {
-  const { name, ingredients, calories, protein, carbs, fat, notes, instructions } = mealCombo;
+  const { name, calories, protein, carbs, fat, notes, instructions } = mealCombo;
   const result = await query(
-    'INSERT INTO meal_combos (name, ingredients, calories, protein, carbs, fat, notes, instructions) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-    [name, ingredients, calories, protein, carbs, fat, notes, instructions]
+    'INSERT INTO meal_combos (name, calories, protein, carbs, fat, notes, instructions) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+    [name, calories, protein, carbs, fat, notes, instructions]
   );
   return result.rows[0] as MealCombo;
 } 

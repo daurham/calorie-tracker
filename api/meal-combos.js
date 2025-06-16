@@ -28,6 +28,14 @@ export default async function handler(req, res) {
         // Start a transaction
         await sql`BEGIN`;
         
+        // Try to drop the ingredients column if it exists
+        try {
+          await sql`ALTER TABLE meal_combos DROP COLUMN IF EXISTS ingredients`;
+        } catch (error) {
+          console.log('Error dropping ingredients column:', error);
+          // Continue anyway as the column might not exist
+        }
+        
         // Insert the meal combo
         const result = await sql`
           INSERT INTO meal_combos (name, calories, protein, carbs, fat, notes, instructions)
@@ -38,11 +46,13 @@ export default async function handler(req, res) {
         const mealCombo = result.rows[0];
         
         // Insert the ingredients
-        for (const ingredient of ingredients) {
-          await sql`
-            INSERT INTO meal_combo_ingredients (meal_combo_id, ingredient_id, quantity)
-            VALUES (${mealCombo.id}, ${ingredient.id}, ${ingredient.quantity})
-          `;
+        if (ingredients && Array.isArray(ingredients)) {
+          for (const ingredient of ingredients) {
+            await sql`
+              INSERT INTO meal_combo_ingredients (meal_combo_id, ingredient_id, quantity)
+              VALUES (${mealCombo.id}, ${ingredient.id}, ${ingredient.quantity})
+            `;
+          }
         }
         
         await sql`COMMIT`;
@@ -61,6 +71,7 @@ export default async function handler(req, res) {
         res.status(201).json(finalResult.rows[0]);
       } catch (error) {
         await sql`ROLLBACK`;
+        console.log("req.body", req.body);
         console.error('Error adding meal combo:', error);
         res.status(500).json({ error: 'Failed to add meal combo' });
       }
@@ -100,11 +111,13 @@ export default async function handler(req, res) {
         `;
         
         // Insert the new ingredients
-        for (const ingredient of ingredients) {
-          await sql`
-            INSERT INTO meal_combo_ingredients (meal_combo_id, ingredient_id, quantity)
-            VALUES (${id}, ${ingredient.id}, ${ingredient.quantity})
-          `;
+        if (ingredients && Array.isArray(ingredients)) {
+          for (const ingredient of ingredients) {
+            await sql`
+              INSERT INTO meal_combo_ingredients (meal_combo_id, ingredient_id, quantity)
+              VALUES (${id}, ${ingredient.id}, ${ingredient.quantity})
+            `;
+          }
         }
         
         await sql`COMMIT`;

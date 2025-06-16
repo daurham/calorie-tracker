@@ -11,13 +11,13 @@ export interface Ingredient {
 export interface MealCombo {
   id: number;
   name: string;
-  ingredients: string[];
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
   notes?: string;
   instructions?: string;
+  ingredients?: { id: number; quantity: number }[];
 }
 
 const API_BASE_URL = '/api';

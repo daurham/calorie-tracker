@@ -12,7 +12,9 @@ export async function getIngredientsData(): Promise<Ingredient[]> {
     return availableIngredients;
   }
   console.log('Getting ingredients from database');
-  return getIngredients();
+  const ingredients = await getIngredients();
+  console.log("ingredients", ingredients);
+  return ingredients;
 }
 
 export async function addIngredientData(ingredient: Omit<Ingredient, 'id'>): Promise<Ingredient> {
@@ -51,7 +53,9 @@ export async function getMealCombosData(): Promise<MealCombo[]> {
     return sampleMealCombos;
   }
   console.log('Getting meal combos from database');
-  return getMealCombos();
+  const combos = await getMealCombos();
+  console.log("combos", combos);
+  return combos;
 }
 
 export async function addMealComboData(combo: Omit<MealCombo, 'id'>): Promise<MealCombo> {
@@ -60,7 +64,10 @@ export async function addMealComboData(combo: Omit<MealCombo, 'id'>): Promise<Me
     sampleMealCombos.push(newCombo);
     return newCombo;
   }
-  return apiAddMealCombo(combo);
+  console.log("adding meal combo", combo);
+  const newCombo = await apiAddMealCombo(combo);
+  console.log("newCombo", newCombo);
+  return newCombo;
 }
 
 export async function updateMealComboData(combo: MealCombo): Promise<MealCombo> {
@@ -70,7 +77,9 @@ export async function updateMealComboData(combo: MealCombo): Promise<MealCombo> 
     sampleMealCombos[index] = combo;
     return combo;
   }
-  return apiUpdateMealCombo(combo);
+  const updatedCombo = await apiUpdateMealCombo(combo);
+  console.log("updatedCombo", updatedCombo);
+  return updatedCombo;
 }
 
 export async function deleteMealComboData(id: number): Promise<MealCombo> {
@@ -81,5 +90,7 @@ export async function deleteMealComboData(id: number): Promise<MealCombo> {
     sampleMealCombos.splice(index, 1);
     return deleted;
   }
-  return apiDeleteMealCombo(id);
+  const deletedCombo = await apiDeleteMealCombo(id);
+  console.log("deletedCombo", deletedCombo);
+  return deletedCombo;
 } 
