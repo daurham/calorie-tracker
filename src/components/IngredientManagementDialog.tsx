@@ -50,8 +50,7 @@ const IngredientsManagementDialog = ({
     e.preventDefault();
     
     // Validate form
-    if (!formData.name || !formData.calories || !formData.protein || 
-        !formData.carbs || !formData.fat || !formData.unit) {
+    if (!formData.name || !formData.calories || !formData.unit) {
       toast({
         title: "Missing information",
         description: "Please fill in all fields.",
@@ -63,9 +62,9 @@ const IngredientsManagementDialog = ({
     const ingredientData = {
       ...formData,
       calories: parseInt(formData.calories),
-      protein: parseFloat(formData.protein),
-      carbs: parseFloat(formData.carbs),
-      fat: parseFloat(formData.fat)
+      protein: parseFloat(formData.protein) || 0,
+      carbs: parseFloat(formData.carbs) || 0,
+      fat: parseFloat(formData.fat) || 0
     };
 
     try {

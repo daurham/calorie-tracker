@@ -89,10 +89,20 @@ const MealComboDialog = ({ open, onOpenChange, onAddMealCombo, availableIngredie
     onOpenChange(false);
   };
 
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setSelectedIngredients([]);
+      setComboName("");
+      setNotes("");
+      setInstructions("");
+    }
+    onOpenChange(open);
+  };
+
   const totals = calculateTotals();
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
@@ -123,7 +133,7 @@ const MealComboDialog = ({ open, onOpenChange, onAddMealCombo, availableIngredie
                 {availableIngredients.map((ingredient) => (
                   <Card 
                     key={ingredient.id} 
-                    className="cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors"
+                    className="cursor-pointer hover:bg-emerald-50 bg-emerald-50 dark:hover:bg-emerald-950 dark:bg-emerald-900 transition-all duration-200 active:scale-95 active:bg-emerald-100 dark:active:bg-emerald-800"
                     onClick={() => addIngredient(ingredient)}
                   >
                     <CardContent className="p-3">
@@ -244,7 +254,7 @@ const MealComboDialog = ({ open, onOpenChange, onAddMealCombo, availableIngredie
           <Button onClick={handleSave} className="bg-emerald-500 hover:bg-emerald-600">
             Save Combo
           </Button>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => handleDialogClose(false)}>
             Cancel
           </Button>
         </div>
