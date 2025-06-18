@@ -10,7 +10,7 @@ export const formatMacros = (current: number | string, goal: number | string) =>
   const currentNum = typeof current === 'string' ? parseFloat(current) : current;
   const goalNum = typeof goal === 'string' ? parseFloat(goal) : goal;
 
-  if (currentNum == 0 || goalNum == 0) {
+  if (currentNum == 0 && goalNum == 0) {
     return {
       protein: "0g / 0g",
       carbs: "0g / 0g",
