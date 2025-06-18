@@ -51,3 +51,15 @@ export const mapComboMealsWithIngredients = (
     })
   }));
 };
+
+const uniqueIdCache = new Map<number, number>();
+export const generateUniqueId = () => {
+  const randomId = Math.floor(Math.random() * 1000000);
+  if (uniqueIdCache.has(randomId)) {
+    return generateUniqueId(); // Recursively try again if ID exists
+  }
+  uniqueIdCache.set(randomId, randomId);
+  return randomId;
+
+  return uniqueIdCache.get(randomId);
+};

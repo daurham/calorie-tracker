@@ -47,7 +47,8 @@ import { MealCombo, MealComboInput } from '@/lib/api-client';
 import { 
   formatMacros, 
   formatMacroProgress, 
-  mapComboMealsWithIngredients
+  mapComboMealsWithIngredients,
+  generateUniqueId
 } from "@/lib/utils";
 import { 
   caloricGoal, 
@@ -250,7 +251,12 @@ const Index = () => {
   };
 
   const addMealToToday = (meal) => {
-    const mealWithId = { ...meal, id: meal.id, timestamp: new Date().toLocaleTimeString() };
+    const mealWithId = { 
+      ...meal, 
+      id: meal.id, 
+      uniqueMealId: generateUniqueId(), 
+      timestamp: new Date().toLocaleTimeString()
+    };
     setTodaysMeals(prev => [...prev, mealWithId]);
     setDailyCalories(prev => prev + meal.calories);
     setDailyMacros(prev => ({
@@ -262,7 +268,7 @@ const Index = () => {
 
   const removeMealFromToday = (mealId) => {
     if (mealId === "all") {
-      console.log("removing all meals")
+      // console.log("removing all meals")
       todaysMeals.length = 0;
       setTodaysMeals([]);
       setDailyCalories(0);
@@ -273,9 +279,9 @@ const Index = () => {
       })
       return;
     }
-    const meal = todaysMeals.find(m => m.id === mealId);
+    const meal = todaysMeals.find(m => m.uniqueMealId === mealId);
     if (meal) {
-      setTodaysMeals(prev => prev.filter(m => m.id !== mealId));
+      setTodaysMeals(prev => prev.filter(m => m.uniqueMealId !== mealId));
       setDailyCalories(prev => prev - meal.calories);
       setDailyMacros(prev => ({
         protein: Number(prev.protein) - Number(meal.protein),
