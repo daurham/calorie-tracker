@@ -1,4 +1,4 @@
-// api/get-data.js
+// This is for testing purposes only.
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
 dotenv.config();

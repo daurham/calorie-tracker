@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Target, TrendingUp, Calendar, Settings, Eye, EyeOff, ChevronDown, Pencil, Trash2, ChefHat, MoreVertical, Search } from "lucide-react";
+import { Plus, Target, TrendingUp, Calendar, Settings, Eye, EyeOff, ChevronDown, Pencil, Trash2, ChefHat, MoreVertical, Search, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -9,7 +9,7 @@ import MealLogDialog from "@/components/MealLogDialog";
 import TodaysMeals from "@/components/TodaysMeals";
 import SettingsMenu from "@/components/SettingsMenu";
 import { addIngredientData, addMealComboData, deleteIngredientData, deleteMealComboData, getIngredientsData, getMealCombosData, updateIngredientData, updateMealComboData } from "@/lib/data-source";
-import { caloricGoal, carbsGoal, fatGoal, proteinGoal } from "@/settings.config";
+import { caloricGoal, carbsGoal, fatGoal, proteinGoal, testMode } from "@/settings.config";
 import { deleteMealCombo } from "@/lib/api-client";
 import { toast } from "@/components/ui/use-toast";
 import IngredientManagementDialog from "@/components/IngredientManagementDialog";
@@ -314,6 +314,25 @@ const Index = () => {
     combo.ingredients.some(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  const handleBackup = () => {
+    const backupData = {
+      ingredients: allIngredients,
+      mealCombos: mealCombos,
+      dailyMeals: todaysMeals,
+      timestamp: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `calorie-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
@@ -368,6 +387,18 @@ const Index = () => {
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline ml-2">Log Meal</span>
               </Button>
+              {/* Backup Button */}
+              {testMode && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={handleBackup}
+              >
+                <Download className="h-4 w-4" />
+                Backup Data
+              </Button>
+              )}
             </div>
           </div>
         </div>
