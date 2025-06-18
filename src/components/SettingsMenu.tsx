@@ -1,15 +1,15 @@
 import { Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import {
+  Button, 
+  Label, 
+  Input, 
+  Switch,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui";
 
 interface MacroSettingsProps {
   open: boolean;

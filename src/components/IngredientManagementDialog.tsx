@@ -1,17 +1,18 @@
 import { useState } from "react";
-import { Plus, X, Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Plus, X, Pencil, Trash2 } from "lucide-react";
+import { 
+  Button, 
+  Input, 
+  Label, 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle, 
+  Card, 
+  CardContent,
+} from "@/components/ui";
 
 const IngredientsManagementDialog = ({ 
   open, 
@@ -112,11 +113,39 @@ const IngredientsManagementDialog = ({
         description: `${ingredient.name} has been removed.`,
       });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete ingredient. Please try again.",
-        variant: "destructive",
-      });
+      // Check if it's the specific error about ingredient being in use
+      console.log("error", error);
+      if (error.status === 409) {
+        const errorData = error.data;
+        toast({
+          title: "Cannot delete ingredient",
+          description: errorData.message,
+          variant: "destructive",
+        });
+        
+        // Show additional suggestions in a separate toast
+        if (errorData.suggestions) {
+          setTimeout(() => {
+            toast({
+              title: "Suggestions",
+              description: (
+                <ul className="list-disc list-inside space-y-1">
+                  {errorData.suggestions.map((suggestion, index) => (
+                    <li key={index}>{suggestion}</li>
+                  ))}
+                </ul>
+              ),
+              variant: "default",
+            });
+          }, 3000);
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to delete ingredient. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -257,6 +286,7 @@ const IngredientsManagementDialog = ({
                           </div>
                         </div>
                         <div className="flex gap-1">
+                          {/* Edit */}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -264,6 +294,7 @@ const IngredientsManagementDialog = ({
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
+                          {/* Delete */}
                           <Button
                             variant="ghost"
                             size="sm"

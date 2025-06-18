@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { Ingredient, MealCombo } from "./api-client";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -28,4 +29,25 @@ export const formatMacroProgress = (progress: number | string) => {
   // console.log("progress", progress);
   const progressNum = typeof progress === 'string' ? parseFloat(progress) : progress;
   return `${Math.round(progressNum)}%`;
+};
+
+export const mapComboMealsWithIngredients = (
+  comboMeals: MealCombo[],
+  allIngredients: Ingredient[]
+) => {
+  return comboMeals.map(combo => ({
+    ...combo,
+    ingredients: combo.ingredients.map(item => {
+      const ingredient = allIngredients.find(ing => ing.id === item.id);
+      if (!ingredient) {
+        console.warn(`Ingredient with id ${item.id} not found`);
+        return item;
+      }
+      return {
+        ...item,
+        ...ingredient,
+        quantity: item.quantity
+      };
+    })
+  }));
 };

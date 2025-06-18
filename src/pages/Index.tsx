@@ -1,29 +1,61 @@
 import { useState, useEffect } from "react";
-import { Plus, Target, TrendingUp, Calendar, Settings, Eye, EyeOff, ChevronDown, Pencil, Trash2, ChefHat, MoreVertical, Search, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import MealComboDialog from "@/components/MealComboDialog";
-import MealLogDialog from "@/components/MealLogDialog";
-import TodaysMeals from "@/components/TodaysMeals";
-import SettingsMenu from "@/components/SettingsMenu";
-import { addIngredientData, addMealComboData, deleteIngredientData, deleteMealComboData, getIngredientsData, getMealCombosData, updateIngredientData, updateMealComboData } from "@/lib/data-source";
-import { caloricGoal, carbsGoal, fatGoal, proteinGoal, testMode } from "@/settings.config";
-import { deleteMealCombo } from "@/lib/api-client";
-import { toast } from "@/components/ui/use-toast";
-import IngredientManagementDialog from "@/components/IngredientManagementDialog";
-import { MealComboManagementDialog } from '@/components/MealComboManagementDialog';
-import ThemeToggle from "@/components/ThemeToggle";
-import { formatMacros, formatMacroProgress } from "@/lib/utils";
+import { 
+  Plus, 
+  Target, 
+  TrendingUp, 
+  Settings, 
+  Eye, 
+  EyeOff, 
+  Pencil, 
+  Trash2, 
+  ChefHat, 
+  MoreVertical, 
+  Search, 
+  Download,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Button, 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  Progress, 
+  Input,
+} from "@/components/ui";
+import { 
+  MealComboDialog, 
+  MealLogDialog, 
+  TodaysMeals, 
+  QuickStats, 
+  SettingsMenu, 
+  IngredientManagementDialog, 
+  MealComboManagementDialog, 
+  ThemeToggle,
+} from "@/components";
+import { 
+  addIngredientData, 
+  deleteIngredientData, 
+  getIngredientsData,
+  getMealCombosData, 
+  updateIngredientData,
+} from "@/lib/data-source";
 import { MealCombo, MealComboInput } from '@/lib/api-client';
-import { Input } from "@/components/ui/input";
+import { 
+  formatMacros, 
+  formatMacroProgress, 
+  mapComboMealsWithIngredients
+} from "@/lib/utils";
+import { 
+  caloricGoal, 
+  carbsGoal, 
+  fatGoal, 
+  proteinGoal, 
+  testMode,
+} from "@/settings.config";
 
 // Local storage keys
 const STORAGE_KEYS = {
@@ -47,11 +79,11 @@ const Index = () => {
   const [showMacros, setShowMacros] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  // const [mealCombos, setMealCombos] = useState([]);
+  // const [mealCombos, setMealCombosData] = useState([]);
   
   const [isIngredientsDialogOpen, setIsIngredientsDialogOpen] = useState(false);
-  const [allIngredients, setAllIngredients] = useState([]);
-  const [mealCombos, setMealCombos] = useState([]);
+  const [allIngredientsData, setAllIngredientsData] = useState([]);
+  const [mealCombosData, setMealCombosData] = useState([]);
 
   // Collapsible states
   const [isQuickStatsOpen, setIsQuickStatsOpen] = useState(true);
@@ -83,12 +115,12 @@ const Index = () => {
         getIngredientsData(),
         getMealCombosData()
       ]);
-      console.log("ingredients", ingredients);
-      console.log("combos", combos);
+      const mappedCombos = mapComboMealsWithIngredients(combos, ingredients);
       const sortedIngredients = ingredients.sort((a, b) => a.name.localeCompare(b.name));
-      const sortedCombos = combos.sort((a, b) => a.name.localeCompare(b.name));
-      setMealCombos(sortedCombos);
-      setAllIngredients(sortedIngredients);
+      const sortedCombos = mappedCombos.sort((a, b) => a.name.localeCompare(b.name));
+      setMealCombosData(sortedCombos);
+      setAllIngredientsData(sortedIngredients);
+      loadLocalMealData(sortedCombos);
       // You might want to store ingredients in state if needed
     } catch (error) {
       console.error('Error loading data:', error);
@@ -96,6 +128,36 @@ const Index = () => {
       setIsLoading(false);
     }
   };
+
+  const loadLocalMealData = (mealCombosData: MealCombo[]) => {
+    // Load today's meals
+    const savedTodaysMeals = localStorage.getItem(STORAGE_KEYS.TODAYS_MEALS);
+    if (savedTodaysMeals) {
+      const oldSavedMeals = JSON.parse(savedTodaysMeals);
+      // Map the old comboId to the combo data, in case of updates 
+      const updatedMeals = oldSavedMeals.map(oldMeal => {
+        const updatedMeal = mealCombosData.find(combo => combo.id === oldMeal.id);
+        if (updatedMeal) {
+          return {
+            ...updatedMeal,
+            timestamp: oldMeal?.timestamp || ""
+          }
+        }
+        return oldMeal;
+      });
+      setTodaysMeals(updatedMeals);
+
+      // Recalculate daily calories and macros
+      const totalCalories = updatedMeals.reduce((sum, meal) => sum + meal.calories, 0);
+      const totalMacros = updatedMeals.reduce((acc, meal) => ({
+        protein: Number(acc.protein) + Number(meal.protein),
+        carbs: Number(acc.carbs) + Number(meal.carbs),
+        fat: Number(acc.fat) + Number(meal.fat)
+      }), { protein: 0, carbs: 0, fat: 0 });
+      setDailyCalories(totalCalories);
+      setDailyMacros(totalMacros);
+    }
+  }
 
   useEffect(() => {
     loadData();
@@ -116,23 +178,7 @@ const Index = () => {
     }
 
     // Load today's meals
-    const savedTodaysMeals = localStorage.getItem(STORAGE_KEYS.TODAYS_MEALS);
-    if (savedTodaysMeals) {
-      const meals = JSON.parse(savedTodaysMeals);
-      setTodaysMeals(meals);
-      // meals.forEach((meal) =>{
-      //   console.log("meal", meal);
-      // })
-      // Recalculate daily calories and macros
-      const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
-      const totalMacros = meals.reduce((acc, meal) => ({
-        protein: Number(acc.protein) + Number(meal.protein),
-        carbs: Number(acc.carbs) + Number(meal.carbs),
-        fat: Number(acc.fat) + Number(meal.fat)
-      }), { protein: 0, carbs: 0, fat: 0 });
-      setDailyCalories(totalCalories);
-      setDailyMacros(totalMacros);
-    }
+    loadLocalMealData([]);
 
     // Load visible macros
     const savedVisibleMacros = localStorage.getItem(STORAGE_KEYS.VISIBLE_MACROS);
@@ -203,10 +249,8 @@ const Index = () => {
     fat: Math.min((dailyMacros.fat / macroGoals.fat) * 100, 100)
   };
 
-  // console.log("dailyMacros", dailyMacros);
-
   const addMealToToday = (meal) => {
-    const mealWithId = { ...meal, id: Date.now(), timestamp: new Date().toLocaleTimeString() };
+    const mealWithId = { ...meal, id: meal.id, timestamp: new Date().toLocaleTimeString() };
     setTodaysMeals(prev => [...prev, mealWithId]);
     setDailyCalories(prev => prev + meal.calories);
     setDailyMacros(prev => ({
@@ -244,20 +288,25 @@ const Index = () => {
   const addIngredient = async (ingredient) => {
     // console.log("adding ingredient", ingredient);
     const newIngredientResult = await addIngredientData(ingredient);
-    setAllIngredients(prev => [...prev, newIngredientResult].sort((a, b) => a.name.localeCompare(b.name)));
+    setAllIngredientsData(prev => [...prev, newIngredientResult].sort((a, b) => a.name.localeCompare(b.name)));
   };
 
   const updateIngredient = async (ingredient) => {
     // console.log("updating ingredient", ingredient);
     const updatedIngredientResult = await updateIngredientData(ingredient);
-    setAllIngredients(prev => prev.map(i => i.id === ingredient.id ? updatedIngredientResult : i).sort((a, b) => a.name.localeCompare(b.name)));
+    loadData();
+    // setAllIngredientsData(prev => prev.map(i => i.id === ingredient.id ? updatedIngredientResult : i).sort((a, b) => a.name.localeCompare(b.name)));
   };
 
   const deleteIngredient = async (ingredientId) => {
     // console.log("deleting ingredient", ingredientId);
     const deletedIngredientResult = await deleteIngredientData(ingredientId);
-    setAllIngredients(prev => prev.filter(ingredient => ingredient.id !== ingredientId).sort((a, b) => a.name.localeCompare(b.name)));
+    setAllIngredientsData(prev => prev.filter(ingredient => ingredient.id !== ingredientId).sort((a, b) => a.name.localeCompare(b.name)));
   };
+
+  const ingredientInUse = (ingredientId) => {
+    return mealCombosData.some(mealCombo => mealCombo.ingredients.some(i => i.id === ingredientId));
+  }
 
   const handleAddMealCombo = async (mealCombo: MealComboInput) => {
     try {
@@ -268,7 +317,7 @@ const Index = () => {
       });
       if (!response.ok) throw new Error('Failed to add meal combo');
       const newMealCombo = await response.json();
-      setMealCombos(prev => [...prev, newMealCombo].sort((a, b) => a.name.localeCompare(b.name)));
+      setMealCombosData(prev => [...prev, newMealCombo].sort((a, b) => a.name.localeCompare(b.name)));
     } catch (error) {
       console.error('Error adding meal combo:', error);
       throw error;
@@ -283,8 +332,7 @@ const Index = () => {
         body: JSON.stringify(mealCombo),
       });
       if (!response.ok) throw new Error('Failed to update meal combo');
-      const updatedMealCombo = await response.json();
-      setMealCombos(prev => prev.map(mc => mc.id === id ? updatedMealCombo : mc));
+      loadData();
     } catch (error) {
       console.error('Error updating meal combo:', error);
       throw error;
@@ -293,11 +341,11 @@ const Index = () => {
 
   const handleDeleteMealCombo = async (id: number) => {
     try {
+      setMealCombosData(prev => prev.filter(mc => mc.id !== id));
       const response = await fetch(`/api/meal-combos?id=${id}`, {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Failed to delete meal combo');
-      setMealCombos(prev => prev.filter(mc => mc.id !== id));
     } catch (error) {
       console.error('Error deleting meal combo:', error);
       throw error;
@@ -309,29 +357,10 @@ const Index = () => {
     setIsMealComboManagementOpen(true);
   };  
 
-  const filteredMealCombos = mealCombos.filter(combo => 
+  const filteredMealCombos = mealCombosData.filter(combo => 
     combo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     combo.ingredients.some(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
-
-  const handleBackup = () => {
-    const backupData = {
-      ingredients: allIngredients,
-      mealCombos: mealCombos,
-      dailyMeals: todaysMeals,
-      timestamp: new Date().toISOString()
-    };
-
-    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `calorie-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
@@ -393,10 +422,15 @@ const Index = () => {
                 variant="outline"
                 size="sm"
                 className="gap-2"
-                onClick={handleBackup}
+                onClick={() => fetch("/api/get-data", {
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                })}
               >
                 <Download className="h-4 w-4" />
-                Backup Data
+                Fetch Data
               </Button>
               )}
             </div>
@@ -486,68 +520,16 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-            <CardHeader className="pb-3 sm:pb-6">
-              <CardTitle className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 text-lg sm:text-xl">
-                <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-                Quick Stats
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs sm:text-sm text-muted-foreground">Avg. per meal</span>
-                  <span className="font-semibold text-sm sm:text-base">
-                    {todaysMeals.length > 0 ? Math.round(dailyCalories / todaysMeals.length) : 0} cal
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs sm:text-sm text-muted-foreground">Progress</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm sm:text-base">
-                    {Math.round(progressPercentage)}%
-                  </span>
-                </div>
-                {showMacros && (
-                  <>
-                    {visibleMacros.protein && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs sm:text-sm text-muted-foreground">Protein</span>
-                        <span className="font-semibold text-blue-600 dark:text-blue-400 text-sm sm:text-base">
-                          {formatMacroProgress(macroProgress.protein)}
-                        </span>
-                      </div>
-                    )}
-                    {visibleMacros.carbs && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs sm:text-sm text-muted-foreground">Carbs</span>
-                        <span className="font-semibold text-orange-600 dark:text-orange-400 text-sm sm:text-base">
-                          {formatMacroProgress(macroProgress.carbs)}
-                        </span>
-                      </div>
-                    )}
-                    {visibleMacros.fat && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs sm:text-sm text-muted-foreground">Fat</span>
-                        <span className="font-semibold text-purple-600 dark:text-purple-400 text-sm sm:text-base">
-                          {formatMacroProgress(macroProgress.fat)}
-                        </span>
-                      </div>
-                    )}
-                  </>
-                )}
-                <div className="flex justify-between items-center">
-                  <span className="text-xs sm:text-sm text-muted-foreground">Goal status</span>
-                  <span className={`text-xs sm:text-sm font-semibold ${
-                    progressPercentage >= 100 ? 'text-emerald-600 dark:text-emerald-400' : 
-                    progressPercentage >= 75 ? 'text-yellow-600 dark:text-yellow-400' : 'text-blue-600 dark:text-blue-400'
-                  }`}>
-                    {progressPercentage >= 100 ? 'Complete!' : 
-                     progressPercentage >= 75 ? 'Almost there' : 'On track'}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Quick Stats */}
+          <QuickStats
+            todaysMeals={todaysMeals}
+            dailyCalories={dailyCalories}
+            progressPercentage={progressPercentage}
+            showMacros={showMacros}
+            visibleMacros={visibleMacros}
+            macroProgress={macroProgress}
+            formatMacroProgress={formatMacroProgress}
+          />
         </div>
 
         {/* Today's Meals */}
@@ -645,13 +627,13 @@ const Index = () => {
         open={isComboDialogOpen} 
         onOpenChange={setIsComboDialogOpen}
         onAddMealCombo={handleAddMealCombo}
-        availableIngredients={allIngredients}
+        availableIngredients={allIngredientsData}
       />
       <MealLogDialog 
         open={isLogDialogOpen} 
         onOpenChange={setIsLogDialogOpen}
         onAddMeal={addMealToToday}
-        mealCombos={mealCombos}
+        mealCombos={mealCombosData}
       />
       <SettingsMenu
         open={isSettingsOpen}
@@ -666,7 +648,7 @@ const Index = () => {
       <IngredientManagementDialog
         open={isIngredientsDialogOpen}
         onOpenChange={setIsIngredientsDialogOpen}
-        ingredients={allIngredients}
+        ingredients={allIngredientsData}
         onAddIngredient={addIngredient}
         onUpdateIngredient={updateIngredient}
         onDeleteIngredient={deleteIngredient}
@@ -674,8 +656,8 @@ const Index = () => {
       <MealComboManagementDialog
         open={isMealComboManagementOpen}
         onOpenChange={setIsMealComboManagementOpen}
-        mealCombos={mealCombos}
-        availableIngredients={allIngredients}
+        mealCombos={mealCombosData}
+        availableIngredients={allIngredientsData}
         onAddMealCombo={handleAddMealCombo}
         onUpdateMealCombo={handleUpdateMealCombo}
         onDeleteMealCombo={handleDeleteMealCombo}

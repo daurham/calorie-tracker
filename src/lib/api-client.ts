@@ -55,6 +55,19 @@ export interface Meal {
   }>;
 }
 
+// Custom error type for API responses
+class ApiError extends Error {
+  status: number;
+  data: any;
+  
+  constructor(message: string, status: number, data?: any) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
+  }
+}
+
 const API_BASE_URL = '/api';
 
 async function fetchApi<T>(url: string, options?: RequestInit): Promise<T> {
@@ -67,7 +80,21 @@ async function fetchApi<T>(url: string, options?: RequestInit): Promise<T> {
   });
   
   if (!response.ok) {
-    throw new Error(`API error: ${response.statusText}`);
+    // Try to parse the error response as JSON
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch {
+      errorData = { error: response.statusText };
+    }
+    
+    // Create a custom error that preserves the response data
+    const error = new ApiError(
+      errorData.message || errorData.error || `API error: ${response.statusText}`,
+      response.status,
+      errorData
+    );
+    throw error;
   }
   
   return response.json();

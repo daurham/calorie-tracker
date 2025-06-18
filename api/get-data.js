@@ -14,6 +14,7 @@ export default async function handler(req, res) {
   console.log("fetching data");
   try {
     const result = await pool.query('SELECT * FROM ingredients ORDER BY name');
+    console.log(result.rows);
     res.status(200).json(result.rows);
   } catch (error) {
     console.error('DB error:', error);

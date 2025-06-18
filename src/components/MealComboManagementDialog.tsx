@@ -1,25 +1,33 @@
 import { useState, useEffect } from "react";
-import { Plus, X, Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { 
+  Plus, 
+  X, 
+  Pencil, 
+  Trash2, 
+  ChevronDown, 
+  ChevronRight
+} from "lucide-react";
 import {
+  Button,
+  Input,
+  Label,
+  Textarea,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
+  Card, CardContent, 
+  Collapsible, 
+  CollapsibleContent, 
+  CollapsibleTrigger, 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui";
 import { MealCombo, MealComboInput, Ingredient } from '@/lib/api-client';
 import { formatMacros } from '@/lib/utils';
 
@@ -39,7 +47,7 @@ interface MealComboManagementDialogProps {
   mealId: number | null;
 }
 
-export function MealComboManagementDialog({
+const MealComboManagementDialog = ({
   open,
   onOpenChange,
   mealCombos,
@@ -49,10 +57,12 @@ export function MealComboManagementDialog({
   onDeleteMealCombo,
   macroGoals,
   mealId
-}: MealComboManagementDialogProps) {
+}: MealComboManagementDialogProps) => {
   const { toast } = useToast();
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [notesCollapsed, setNotesCollapsed] = useState(true);
+  const [instructionsCollapsed, setInstructionsCollapsed] = useState(true);
   const [formData, setFormData] = useState<{
     name: string;
     ingredients: Array<{ id: number; name: string; quantity: number }>;
@@ -72,10 +82,10 @@ export function MealComboManagementDialog({
       if (mealCombo) {
         setFormData({
           name: mealCombo.name,
-          ingredients: mealCombo.ingredients.map(i => ({ 
-            id: i.id, 
-            name: i.name, 
-            quantity: i.quantity 
+          ingredients: mealCombo.ingredients.map(i => ({
+            id: i.id,
+            name: i.name,
+            quantity: i.quantity
           })),
           notes: mealCombo.notes || '',
           instructions: mealCombo.instructions || '',
@@ -90,10 +100,10 @@ export function MealComboManagementDialog({
     if (firstIngredient) {
       setFormData(prev => ({
         ...prev,
-        ingredients: [...prev.ingredients, { 
-          id: firstIngredient.id, 
-          name: firstIngredient.name, 
-          quantity: 1 
+        ingredients: [...prev.ingredients, {
+          id: firstIngredient.id,
+          name: firstIngredient.name,
+          quantity: 1
         }],
       }));
     }
@@ -113,10 +123,10 @@ export function MealComboManagementDialog({
         if (i === index) {
           if (field === 'id') {
             const ingredient = availableIngredients.find(ing => ing.id === value);
-            return { 
-              id: value, 
-              name: ingredient?.name || '', 
-              quantity: ing.quantity 
+            return {
+              id: value,
+              name: ingredient?.name || '',
+              quantity: ing.quantity
             };
           }
           return { ...ing, [field]: value };
@@ -185,10 +195,10 @@ export function MealComboManagementDialog({
     setEditingId(mealCombo.id);
     setFormData({
       name: mealCombo.name,
-      ingredients: mealCombo.ingredients.map(i => ({ 
-        id: i.id, 
-        name: i.name, 
-        quantity: i.quantity 
+      ingredients: mealCombo.ingredients.map(i => ({
+        id: i.id,
+        name: i.name,
+        quantity: i.quantity
       })),
       notes: mealCombo.notes || '',
       instructions: mealCombo.instructions || '',
@@ -306,25 +316,55 @@ export function MealComboManagementDialog({
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="notes">Notes (optional)</Label>
-                  <Textarea
-                    id="notes"
-                    value={formData.notes}
-                    onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                    placeholder="Any additional notes about this combo..."
-                  />
-                </div>
+                <Collapsible open={!notesCollapsed} onOpenChange={(open) => setNotesCollapsed(!open)}>
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full justify-between p-1 h-auto font-normal"
+                    >
+                      <Label htmlFor="notes" className="cursor-pointer">Notes (optional)</Label>
+                      {notesCollapsed ? (
+                        <ChevronRight className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2">
+                    <Textarea
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                      placeholder="Any additional notes about this combo..."
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
 
-                <div>
-                  <Label htmlFor="instructions">Instructions (optional)</Label>
-                  <Textarea
-                    id="instructions"
-                    value={formData.instructions}
-                    onChange={(e) => setFormData(prev => ({ ...prev, instructions: e.target.value }))}
-                    placeholder="Preparation instructions..."
-                  />
-                </div>
+                <Collapsible open={!instructionsCollapsed} onOpenChange={(open) => setInstructionsCollapsed(!open)}>
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full justify-between p-1 h-auto font-normal"
+                    >
+                      <Label htmlFor="instructions" className="cursor-pointer">Instructions (optional)</Label>
+                      {instructionsCollapsed ? (
+                        <ChevronRight className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2">
+                    <Textarea
+                      id="instructions"
+                      value={formData.instructions}
+                      onChange={(e) => setFormData(prev => ({ ...prev, instructions: e.target.value }))}
+                      placeholder="Preparation instructions..."
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
 
                 {formData.ingredients.length > 0 && (
                   <Card className="bg-gradient-to-br from-emerald-500 to-blue-600 text-white">

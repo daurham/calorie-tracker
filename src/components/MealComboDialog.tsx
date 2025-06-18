@@ -1,18 +1,19 @@
 import { useState } from "react";
-import { Plus, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Plus, X } from "lucide-react";
+import { 
+  Button, 
+  Input, 
+  Label, 
+  Textarea, 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle, 
+  Card, 
+  CardContent,
+} from "@/components/ui";
 
 const MealComboDialog = ({ open, onOpenChange, onAddMealCombo, availableIngredients }) => {
   const [comboName, setComboName] = useState("");
