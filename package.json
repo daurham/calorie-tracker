@@ -50,6 +50,7 @@
     "@types/express": "^5.0.3",
     "@vercel/node": "^5.2.2",
     "@vercel/postgres": "^0.10.0",
+    "@zxing/browser": "^0.1.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",

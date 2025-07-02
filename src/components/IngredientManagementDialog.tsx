@@ -13,6 +13,9 @@ import {
   Card, 
   CardContent,
 } from "@/components/ui";
+import BarcodeScanner from "./BarcodeScanner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import ModalScanner from "./ModalScanner";
 
 const IngredientsManagementDialog = ({ 
   open, 
@@ -24,6 +27,8 @@ const IngredientsManagementDialog = ({
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [barcode, setBarcode] = useState("");
+  const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     calories: "",
@@ -32,7 +37,10 @@ const IngredientsManagementDialog = ({
     fat: "",
     unit: ""
   });
+  const [showScanner, setShowScanner] = useState(false);
+  const [productData, setProductData] = useState(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const resetForm = () => {
     setFormData({
@@ -149,6 +157,21 @@ const IngredientsManagementDialog = ({
     }
   };
 
+  const handleDetected = (product) => {
+    console.log("Product data:", product);
+    setProductData(product);
+    setShowScanner(false);
+    // Here you can also populate your form automatically.
+    setFormData({
+      name: product.product_name,
+      calories: product.nutriments.energy_100g,
+      protein: product.nutriments.proteins_100g,
+      carbs: product.nutriments.carbohydrates_100g,
+      fat: product.nutriments.fat_100g,
+      unit: product.unit
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -176,6 +199,37 @@ const IngredientsManagementDialog = ({
             </div>
 
             {isAdding ? (
+              <div>{isMobile ? "Mobile" : "Desktop"}
+                {isMobile &&
+                <div>
+      <button
+        onClick={() => setShowScanner(true)}
+        style={{
+          padding: "0.5rem 1rem",
+          fontSize: "1rem",
+          marginBottom: "1rem",
+        }}
+      >
+        Scan Barcode
+      </button>
+
+      {productData && (
+        <div style={{ marginTop: "1rem" }}>
+          <h3>Scanned Product:</h3>
+          <p><strong>{productData.product_name || "Unknown name"}</strong></p>
+          <p>Brand: {productData.brands}</p>
+          <p>Calories per 100g: {productData.nutriments["energy-kcal_100g"]}</p>
+        </div>
+      )}
+
+      {showScanner && (
+        <ModalScanner
+          onDetected={handleDetected}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
+                </div>
+                }
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="name">Name</Label>
@@ -253,6 +307,7 @@ const IngredientsManagementDialog = ({
                   </Button>
                 </div>
               </form>
+              </div>
             ) : (
               <Button onClick={() => setIsAdding(true)} className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
