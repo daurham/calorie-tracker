@@ -16,6 +16,7 @@ import {
 import BarcodeScanner from "./BarcodeScanner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ModalScanner from "./ModalScanner";
+import { fetchData } from "@/hooks/useTestFetch";
 
 const IngredientsManagementDialog = ({ 
   open, 
@@ -164,11 +165,11 @@ const IngredientsManagementDialog = ({
     // Here you can also populate your form automatically.
     setFormData({
       name: product.product_name,
-      calories: product.nutriments.energy_100g,
-      protein: product.nutriments.proteins_100g,
-      carbs: product.nutriments.carbohydrates_100g,
-      fat: product.nutriments.fat_100g,
-      unit: product.unit
+      calories: product.nutriments["energy-kcal_serving"],
+      protein: product.nutriments.proteins_serving,
+      carbs: product.nutriments.carbohydrates_serving,
+      fat: product.nutriments.fat_serving,
+      unit: product.serving_size
     });
   };
 
@@ -199,37 +200,34 @@ const IngredientsManagementDialog = ({
             </div>
 
             {isAdding ? (
-              <div>{isMobile ? "Mobile" : "Desktop"}
+              <div>
+                {/* {isMobile ? "Mobile" : "Desktop"} */}
                 {isMobile &&
-                <div>
-      <button
-        onClick={() => setShowScanner(true)}
-        style={{
-          padding: "0.5rem 1rem",
-          fontSize: "1rem",
-          marginBottom: "1rem",
-        }}
-      >
-        Scan Barcode
-      </button>
+                  (<div>
+                    <Button onClick={() => setShowScanner(true)} className="bg-emerald-500 hover:bg-emerald-600" variant="outline">
+                      Scan Barcode
+                    </Button>
+                  </div>
+                )}
 
-      {productData && (
-        <div style={{ marginTop: "1rem" }}>
-          <h3>Scanned Product:</h3>
-          <p><strong>{productData.product_name || "Unknown name"}</strong></p>
-          <p>Brand: {productData.brands}</p>
-          <p>Calories per 100g: {productData.nutriments["energy-kcal_100g"]}</p>
-        </div>
-      )}
+                {/* {productData && isMobile && (
+                  <div style={{ marginTop: "1rem" }}>
+                    <h3>Scanned Product:</h3>
+                    <p><strong>{productData.product_name || "Unknown name"}</strong></p>
+                    <p>Brand: {productData.brands}</p>
+                    <p>Calories per 100g: {productData.nutriments["energy-kcal_100g"]}</p>
+                  </div>
+                )} */}
 
-      {showScanner && (
-        <ModalScanner
-          onDetected={handleDetected}
-          onClose={() => setShowScanner(false)}
-        />
-      )}
-                </div>
-                }
+                {showScanner && isMobile && (
+                  <ModalScanner
+                    onDetected={handleDetected}
+                    onClose={() => setShowScanner(false)}
+                  />
+                  // <Button onClick={() => fetchData(handleDetected)}>Test Fetch</Button>
+                )}
+              {/* </div> */}
+            {/* )} */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="name">Name</Label>
