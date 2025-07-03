@@ -97,7 +97,7 @@ const QuickStats = ({
 
   return (
     <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-      <CardHeader className="pb-3 sm:pb-6">
+      <CardHeader className="pb-6">
         {/* Mobile: Collapsible */}
         <div className="block sm:hidden">
           <Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed(!open)}>

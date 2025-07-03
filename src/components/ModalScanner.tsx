@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
+import { Button } from "./ui";
 // import { BrowserMultiFormatReader, NotFoundException } from "@zxing/browser";
 
 export default function ModalScanner({ onDetected, onClose }) {
@@ -33,9 +34,15 @@ export default function ModalScanner({ onDetected, onClose }) {
               const data = await response.json();
 
               if (data.status === 1) {
+                stopScanner();
+
+                navigator.vibrate?.(200);
+                // play a sound
+                const audio = new Audio("/assets/beep.wav");
+                audio.play().catch(err => console.error("Error playing audio:", err));
+
                 // Found
                 onDetected(data.product);
-                stopScanner();
               } else {
                 setError("Barcode not found. Try again.");
               }
@@ -69,6 +76,7 @@ export default function ModalScanner({ onDetected, onClose }) {
   useEffect(() => {
     startScanner();
     return () => {
+      console.log("Cleanup: stopping scanner");
       stopScanner();
       // codeReader.current.reset();
     };
@@ -76,66 +84,45 @@ export default function ModalScanner({ onDetected, onClose }) {
   }, []);
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(0,0,0,0.8)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-        padding: "1rem",
-      }}
-    >
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: "8px",
-          padding: "1rem",
-          maxWidth: "500px",
-          width: "100%",
-          textAlign: "center",
-        }}
-      >
+    <div className="fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50 p-4">
+      <div className="bg-slate-900 rounded-lg p-4 max-w-md w-full text-center">
         <h3>Scan Barcode</h3>
         {loading && <p>Initializing camera...</p>}
-        <video
-          ref={videoRef}
-          className="w-full border-1 border-gray-300 rounded-md"
-        />
+
+        <div className="relative w-full">
+          <video
+            ref={videoRef}
+            className="w-full border border-gray-300 rounded-lg"
+          />
+          {/* Overlay Box */}
+          {!loading && <div className="absolute top-[40%] left-[10%] w-4/5 h-2/5 border-2 border-dashed border-red-800 rounded pointer-events-none" />}
+        </div>
+
         {error && (
-          <p style={{ color: "red", marginTop: "0.5rem" }}>{error}</p>
+          <p className="text-red-500 mt-2">{error}</p>
         )}
         {!loading && (
-          <div style={{ marginTop: "0.75rem" }}>
-            <button
+          <div className="mt-3">
+            <Button
               onClick={() => {
                 setError(null);
                 startScanner();
               }}
-              style={{
-                marginRight: "0.5rem",
-                padding: "0.5rem 1rem",
-              }}
+              className="mr-2 px-4 py-2"
+              variant="default"
             >
               Retry
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 stopScanner();
                 onClose();
               }}
-              style={{
-                padding: "0.5rem 1rem",
-              }}
+              className="px-4 py-2"
+              variant="secondary"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         )}
       </div>

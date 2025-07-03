@@ -3,6 +3,8 @@
         const response = await fetch('https://world.openfoodfacts.org/api/v0/product/3017620422003.json');
         const data = await response.json();
         if (data.status === 1) {
+          const audio = new Audio("/assets/beep.wav");
+          audio.play();
           // Found
           onDetected(data.product);
         }

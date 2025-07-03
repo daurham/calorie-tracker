@@ -44,6 +44,7 @@ const IngredientsManagementDialog = ({
   const isMobile = useIsMobile();
 
   const resetForm = () => {
+    console.log("resetForm");
     setFormData({
       name: "",
       calories: "",
@@ -164,7 +165,7 @@ const IngredientsManagementDialog = ({
     setShowScanner(false);
     // Here you can also populate your form automatically.
     setFormData({
-      name: product.product_name,
+      name: `${product.product_name} (${product.brands})`,
       calories: product.nutriments["energy-kcal_serving"],
       protein: product.nutriments.proteins_serving,
       carbs: product.nutriments.carbohydrates_serving,
@@ -201,33 +202,22 @@ const IngredientsManagementDialog = ({
 
             {isAdding ? (
               <div>
-                {/* {isMobile ? "Mobile" : "Desktop"} */}
                 {isMobile &&
                   (<div>
-                    <Button onClick={() => setShowScanner(true)} className="bg-emerald-500 hover:bg-emerald-600" variant="outline">
+                    <Button onClick={() => setShowScanner(true)} className="bg-emerald-500 text-black hover:bg-emerald-600" variant="outline">
                       Scan Barcode
                     </Button>
-                  </div>
-                )}
 
-                {/* {productData && isMobile && (
-                  <div style={{ marginTop: "1rem" }}>
-                    <h3>Scanned Product:</h3>
-                    <p><strong>{productData.product_name || "Unknown name"}</strong></p>
-                    <p>Brand: {productData.brands}</p>
-                    <p>Calories per 100g: {productData.nutriments["energy-kcal_100g"]}</p>
-                  </div>
-                )} */}
+                    <Button onClick={() => fetchData(handleDetected)}>Test Fetch</Button> 
 
-                {showScanner && isMobile && (
-                  <ModalScanner
-                    onDetected={handleDetected}
-                    onClose={() => setShowScanner(false)}
-                  />
-                  // <Button onClick={() => fetchData(handleDetected)}>Test Fetch</Button>
+                    {showScanner && (
+                      <ModalScanner
+                        onDetected={handleDetected}
+                        onClose={() => setShowScanner(false)}
+                      />
+                    )}
+                  </div> 
                 )}
-              {/* </div> */}
-            {/* )} */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="name">Name</Label>
