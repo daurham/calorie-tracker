@@ -9,6 +9,7 @@ import {
   MoreVertical, 
   Search, 
   Download,
+  Sparkles,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -40,6 +41,7 @@ import {
   getMealCombosData, 
   updateIngredientData,
 } from "@/lib/data-source";
+import { useNavigate } from "react-router-dom";
 import { MealCombo, MealComboInput } from '@/lib/api-client';
 import { 
   formatMacroProgress, 
@@ -67,6 +69,7 @@ const STORAGE_KEYS = {
 };
 
 const Index = () => {
+  const navigate = useNavigate();
   const [isComboDialogOpen, setIsComboDialogOpen] = useState(false);
   const [isLogDialogOpen, setIsLogDialogOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -417,6 +420,16 @@ const Index = () => {
               >
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline ml-2">Log Meal</span>
+              </Button>
+              {/* AI Meal Plan Generator Button */}
+              <Button
+                onClick={() => navigate('/meal-plan-generator')}
+                variant="outline"
+                size="sm"
+                className="border-purple-200 hover:bg-purple-50 dark:border-purple-700 dark:hover:bg-purple-950 px-2 sm:px-3"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span className="hidden sm:inline ml-2">AI Meal Plan</span>
               </Button>
               {/* Backup Button */}
               {testMode && (

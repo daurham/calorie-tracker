@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "init-db": "tsx scripts/init-db.ts",
-    "backup-db": "tsx scripts/backup-db.ts"
+    "backup-db": "tsx scripts/backup-db.ts",
+    "generate-meal-prompt": "tsx scripts/generate-meal-plan-prompt.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
