@@ -412,7 +412,7 @@ const Index = () => {
                 <span className="hidden sm:inline ml-2">Create Combo</span>
               </Button>
               {/* Log Meal Button */}
-              <Button 
+              {/* <Button 
                 onClick={() => setIsLogDialogOpen(true)}
                 variant="outline"
                 size="sm"
@@ -420,7 +420,7 @@ const Index = () => {
               >
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline ml-2">Log Meal</span>
-              </Button>
+              </Button> */}
               {/* AI Meal Plan Generator Button */}
               <Button
                 onClick={() => navigate('/meal-plan-generator')}
