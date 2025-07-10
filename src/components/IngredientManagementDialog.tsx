@@ -16,7 +16,7 @@ import {
 import BarcodeScanner from "./BarcodeScanner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ModalScanner from "./ModalScanner";
-import { fetchData } from "@/hooks/useTestFetch";
+// import { fetchData } from "@/hooks/useTestFetch";
 
 const IngredientsManagementDialog = ({ 
   open, 
@@ -208,7 +208,7 @@ const IngredientsManagementDialog = ({
                       Scan Barcode
                     </Button>
 
-                    <Button onClick={() => fetchData(handleDetected)}>Test Fetch</Button> 
+                    {/* <Button onClick={() => fetchData(handleDetected)}>Test Fetch</Button>  */}
 
                     {showScanner && (
                       <ModalScanner
