@@ -203,9 +203,9 @@ const IngredientsManagementDialog = ({
             {isAdding ? (
               <div>
                 {isMobile &&
-                  (<div>
+                  (<div className="flex justify-center">
                     <Button onClick={() => setShowScanner(true)} className="bg-emerald-500 text-black hover:bg-emerald-600" variant="outline">
-                      Scan Barcode
+                      Barcode Lookup
                     </Button>
 
                     {/* <Button onClick={() => fetchData(handleDetected)}>Test Fetch</Button>  */}
