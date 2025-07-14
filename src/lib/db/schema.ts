@@ -20,6 +20,7 @@ export async function createTables() {
         carbs DECIMAL(5,2) NOT NULL,
         fat DECIMAL(5,2) NOT NULL,
         unit VARCHAR(50) NOT NULL,
+        is_staple BOOLEAN DEFAULT false,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -172,10 +173,10 @@ export async function getMealCombos(): Promise<MealCombo[]> {
 }
 
 export async function addIngredient(ingredient: Omit<Ingredient, 'id'>): Promise<Ingredient> {
-  const { name, calories, protein, carbs, fat, unit } = ingredient;
+  const { name, calories, protein, carbs, fat, unit, is_staple = false } = ingredient;
   const result = await query(
-    'INSERT INTO ingredients (name, calories, protein, carbs, fat, unit) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-    [name, calories, protein, carbs, fat, unit]
+    'INSERT INTO ingredients (name, calories, protein, carbs, fat, unit, is_staple) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+    [name, calories, protein, carbs, fat, unit, is_staple]
   );
   return result.rows[0] as Ingredient;
 }

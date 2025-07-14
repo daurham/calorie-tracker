@@ -9,6 +9,7 @@ export interface Ingredient {
   serving_unit: string;
   unit: string;
   notes?: string;
+  is_staple?: boolean;
 }
 
 export interface MealComboInput {
@@ -62,6 +63,7 @@ export interface CondensedIngredient {
   name: string;
   macros: string;
   unit: string;
+  is_staple: boolean;
 }
 
 export interface CondensedMeal {

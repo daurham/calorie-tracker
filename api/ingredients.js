@@ -22,10 +22,10 @@ async function getIngredients(req, res) {
 
 async function createIngredient(req, res) {
   try {
-    const { name, calories, protein, carbs, fat, unit } = req.body;
+    const { name, calories, protein, carbs, fat, unit, is_staple = false } = req.body;
     const result = await sql.query(
-      'INSERT INTO ingredients (name, calories, protein, carbs, fat, unit) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [name, calories, protein, carbs, fat, unit]
+      'INSERT INTO ingredients (name, calories, protein, carbs, fat, unit, is_staple) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [name, calories, protein, carbs, fat, unit, is_staple]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -46,10 +46,10 @@ async function createIngredient(req, res) {
 
 async function updateIngredient(req, res) {
   try {
-    const { id, name, calories, protein, carbs, fat, unit } = req.body;
+    const { id, name, calories, protein, carbs, fat, unit, is_staple } = req.body;
     const result = await sql.query(
-      'UPDATE ingredients SET name = $1, calories = $2, protein = $3, carbs = $4, fat = $5, unit = $6 WHERE id = $7 RETURNING *',
-      [name, calories, protein, carbs, fat, unit, id]
+      'UPDATE ingredients SET name = $1, calories = $2, protein = $3, carbs = $4, fat = $5, unit = $6, is_staple = $7 WHERE id = $8 RETURNING *',
+      [name, calories, protein, carbs, fat, unit, is_staple, id]
     );
     if (result.rows.length === 0) {
       res.status(404).json({ error: 'Ingredient not found' });

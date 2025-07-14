@@ -28,7 +28,8 @@ export class MealPlanPromptGenerator {
     const condensedIngredients = ingredients.map(ing => ({
       name: ing.name,
       macros: `${ing.calories} cal, ${ing.protein}g protein, ${ing.carbs}g carbs, ${ing.fat}g fat`,
-      unit: ing.unit
+      unit: ing.unit,
+      is_staple: ing.is_staple || false
     }));
     
     // Condense meal combos information

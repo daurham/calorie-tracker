@@ -8,8 +8,9 @@ import {
   Card, 
   CardContent,
   Skeleton,
+  SearchBar,
 } from "@/components/ui";
-import { ScannerModal, DataManagementModal } from "@/components/modals";
+import { ScannerModal, DataManagementModal, AlertModal } from "@/components/modals";
 import { Ingredient } from "@/types";
 
 interface IngredientManagementModalProps {
@@ -39,12 +40,19 @@ const IngredientsManagementModal = ({
     protein: "",
     carbs: "",
     fat: "",
-    unit: ""
+    unit: "",
+    is_staple: false
   });
   const [showScanner, setShowScanner] = useState(false);
   const [productData, setProductData] = useState(null);
+  const [deleteIngredientId, setDeleteIngredientId] = useState<number | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredIngredients = ingredients.filter(ingredient => 
+    ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const resetForm = () => {
     setFormData({
@@ -53,7 +61,8 @@ const IngredientsManagementModal = ({
       protein: "",
       carbs: "",
       fat: "",
-      unit: ""
+      unit: "",
+      is_staple: false
     });
     setIsAdding(false);
     setEditingId(null);
@@ -61,6 +70,10 @@ const IngredientsManagementModal = ({
 
   const handleSubmit = async (e: React.FormEvent, addAsNew: boolean = false) => {
     e.preventDefault();
+    if (editingId === null) {
+      addAsNew = true;
+    }
+    // console.log("adding as new: ", addAsNew);
     
     // Validate form
     if(ingredients.find(ingredient => ingredient.name === formData.name) && addAsNew === true) {
@@ -88,7 +101,8 @@ const IngredientsManagementModal = ({
         ingredient.protein == parseFloat(formData.protein) &&
         ingredient.carbs == parseFloat(formData.carbs) &&
         ingredient.fat == parseFloat(formData.fat) &&
-        ingredient.unit === formData.unit
+        ingredient.unit === formData.unit &&
+        ingredient.is_staple === formData.is_staple
       ) {
         toast({
           title: "Nothing changed",
@@ -105,17 +119,20 @@ const IngredientsManagementModal = ({
       calories: parseInt(formData.calories),
       protein: parseFloat(formData.protein) || 0,
       carbs: parseFloat(formData.carbs) || 0,
-      fat: parseFloat(formData.fat) || 0
+      fat: parseFloat(formData.fat) || 0,
+      is_staple: formData.is_staple
     };
 
     try {
       if (addAsNew === false) {
+        // console.log("updating ingredient", ingredientData);
         await onUpdateIngredient({ ...ingredientData, id: editingId } as Ingredient);
         toast({
           title: "Ingredient updated!",
           description: `${formData.name} has been updated.`,
         });
       } else {
+        // console.log("adding ingredient", ingredientData);
         await onAddIngredient(ingredientData as Ingredient);
         toast({
           title: "Ingredient added!",
@@ -140,17 +157,25 @@ const IngredientsManagementModal = ({
       protein: ingredient.protein.toString(),
       carbs: ingredient.carbs.toString(),
       fat: ingredient.fat.toString(),
-      unit: ingredient.unit
+      unit: ingredient.unit,
+      is_staple: ingredient.is_staple || false
     });
     setIsAdding(true);
   };
 
-  const handleDelete = async (ingredient) => {
+  const handleDeleteClick = (ingredient) => {
+    setDeleteIngredientId(ingredient.id);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteIngredientId) return;
+    
     try {
-      await onDeleteIngredient(ingredient.id);
+      await onDeleteIngredient(deleteIngredientId);
       toast({
         title: "Ingredient deleted!",
-        description: `${ingredient.name} has been removed.`,
+        description: "The ingredient has been removed successfully.",
       });
       resetForm();
     } catch (error) {
@@ -187,11 +212,14 @@ const IngredientsManagementModal = ({
           variant: "destructive",
         });
       }
+    } finally {
+      setShowDeleteDialog(false);
+      setDeleteIngredientId(null);
     }
   };
 
   const handleDetected = (product) => {
-    console.log("Product data:", product);
+    // console.log("Product data:", product);
     setProductData(product);
     setShowScanner(false);
     // Here you can also populate your form automatically.
@@ -201,13 +229,14 @@ const IngredientsManagementModal = ({
       protein: product.nutriments.proteins_serving,
       carbs: product.nutriments.carbohydrates_serving,
       fat: product.nutriments.fat_serving,
-      unit: product.serving_size
+      unit: product.serving_size,
+      is_staple: false
     });
   };
 
   // Shows add / edit form
   const leftColumn = (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-[65vh] overflow-y-auto">
     <div className="flex justify-between items-center">
       <h3 className="text-lg font-semibold">
         {editingId ? "Edit Ingredient" : "Add New Ingredient"}
@@ -235,7 +264,7 @@ const IngredientsManagementModal = ({
             )}
           </div> 
         )}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
         <div>
           <Label htmlFor="name">Name</Label>
           <Input
@@ -309,6 +338,20 @@ const IngredientsManagementModal = ({
           />
         </div>
 
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="is_staple"
+            checked={formData.is_staple}
+            onChange={(e) => setFormData(prev => ({ ...prev, is_staple: e.target.checked }))}
+            disabled={isLoading}
+            className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+          />
+          <Label htmlFor="is_staple" className="text-sm font-normal">
+            Common household staple
+          </Label>
+        </div>
+
         <div className="flex gap-2">
           <Button type="submit" className="bg-emerald-500 hover:bg-emerald-600" disabled={isLoading}>
             {editingId ? "Update" : "Add"}
@@ -361,23 +404,38 @@ const IngredientsManagementModal = ({
   const rightColumn = (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Your Ingredients</h3>
-            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+            <div className="max-h-[60vh] overflow-y-auto">
               {isLoading ? (
                 // Show loading skeletons
                 Array.from({ length: 6 }).map((_, index) => (
                   <IngredientSkeleton key={index} />
                 ))
-              ) : ingredients.length === 0 ? (
+              ) : filteredIngredients.length === 0 ? (
                 <p className="text-center text-muted-foreground py-4">
                   No ingredients added yet
                 </p>
               ) : (
-                ingredients.map((ingredient) => (
+                <>
+                {/* Search Bar - Sticky */}
+                <div className="sticky top-0 z-10 bg-background pb-2">
+                  <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+                </div>
+
+                {/* Ingredients List */}
+                <div className="space-y-2">
+                {filteredIngredients.map((ingredient) => (
                   <Card key={ingredient.id}>
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h4 className="font-medium">{ingredient.name}</h4>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium">{ingredient.name}</h4>
+                            {ingredient.is_staple && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                                Staple
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground">
                             {ingredient.calories} cal per {ingredient.unit}
                           </p>
@@ -401,7 +459,7 @@ const IngredientsManagementModal = ({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(ingredient)}
+                            onClick={() => handleDeleteClick(ingredient)}
                             className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
                             disabled={isLoading}
                           >
@@ -411,24 +469,36 @@ const IngredientsManagementModal = ({
                       </div>
                     </CardContent>
                   </Card>
-                ))
+                ))}
+                </div>
+                </>
               )}
             </div>
           </div>
   )
 
   return (
-    <DataManagementModal
-      open={open}
-      onOpenChange={(val) => {
-        onOpenChange(val)
-        setTimeout(() => resetForm(), 500)
-      }}
-      title="Manage Ingredients"
-      description="Add, edit, or remove ingredients from your database."
-      leftColumn={leftColumn}
-      rightColumn={rightColumn}
-    />
+    <>
+      <DataManagementModal
+        open={open}
+        onOpenChange={(val) => {
+          onOpenChange(val)
+          setTimeout(() => resetForm(), 500)
+        }}
+        title="Manage Ingredients"
+        description="Add, edit, or remove ingredients from your database."
+        leftColumn={leftColumn}
+        rightColumn={rightColumn}
+      />
+      
+      <AlertModal
+        showDeleteDialog={showDeleteDialog}
+        setShowDeleteDialog={setShowDeleteDialog}
+        handleDeleteConfirm={handleDeleteConfirm}
+        title="Delete Ingredient"
+        description="Are you sure you want to delete this ingredient? This action cannot be undone."
+      />
+    </>
   );
 };
 

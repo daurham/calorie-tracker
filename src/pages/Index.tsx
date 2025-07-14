@@ -267,7 +267,7 @@ const Index = () => {
   };
 
   const addIngredient = async (ingredient) => {
-    // console.log("adding ingredient", ingredient);
+    console.log("adding ingredient", ingredient);
     const newIngredientResult = await addIngredientData(ingredient);
     setAllIngredientsData(prev => [...prev, newIngredientResult].sort((a, b) => a.name.localeCompare(b.name)));
   };

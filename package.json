@@ -3,7 +3,7 @@
   "description": "A calorie tracker app",
   "author": "Jacob Daurham",
   "private": true,
-  "version": "2.2.0",
+  "version": "2.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "init-db": "tsx scripts/init-db.ts",
     "backup-db": "tsx scripts/backup-db.ts",
-    "generate-meal-prompt": "tsx scripts/generate-meal-plan-prompt.ts"
+    "generate-meal-prompt": "tsx scripts/generate-meal-plan-prompt.ts",
+    "add-staple-column": "tsx scripts/add-staple-column.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

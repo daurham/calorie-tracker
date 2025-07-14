@@ -6,7 +6,6 @@ import {
   Trash2,
   ChevronDown,
   ChevronRight,
-  Search
 } from "lucide-react";
 import { useToast } from "@/hooks";
 import {
@@ -14,20 +13,20 @@ import {
   Input,
   Label,
   Textarea,
-  Card, CardContent,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
+  Card, CardContent, 
+  Collapsible, 
+  CollapsibleContent, 
+  CollapsibleTrigger, 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
   SelectValue,
   NutritionalSummaryCard,
   Skeleton,
   SearchBar,
 } from "@/components/ui";
-import { DataManagementModal } from "@/components/modals";
+import { DataManagementModal, AlertModal } from "@/components/modals";
 import { MealCombo, MealComboInput, Ingredient } from '@/types';
 
 interface MealManagementModalProps {
@@ -87,11 +86,13 @@ const MealManagementModal = ({
   });
 
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredMealCombos = mealCombos.filter(combo =>
+  const [deleteMealId, setDeleteMealId] = useState<number | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const filteredMealCombos = mealCombos.filter(combo => 
     combo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     combo.ingredients.some(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
-  const filteredIngredients = availableIngredients.filter(ingredient =>
+  const filteredIngredients = availableIngredients.filter(ingredient => 
     ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -236,13 +237,16 @@ const MealManagementModal = ({
         ...totals,
       };
 
+      console.log("addAsNew: ", addAsNew);
       if (addAsNew === false) {
+        console.log("updating meal", mealComboData);
         await onUpdateMealCombo(editingId, mealComboData);
         toast({
           title: 'Success',
           description: 'Meal updated successfully',
         });
       } else {
+        console.log("adding meal", mealComboData);
         await onAddMealCombo(mealComboData);
         toast({
           title: 'Success',
@@ -275,9 +279,16 @@ const MealManagementModal = ({
     // setIsAdding(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDeleteClick = (id: number) => {
+    setDeleteMealId(id);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteMealId) return;
+    
     try {
-      await onDeleteMealCombo(id);
+      await onDeleteMealCombo(deleteMealId);
       toast({
         title: 'Success',
         description: 'Meal deleted successfully',
@@ -288,6 +299,9 @@ const MealManagementModal = ({
         description: 'Failed to delete meal',
         variant: 'destructive',
       });
+    } finally {
+      setShowDeleteDialog(false);
+      setDeleteMealId(null);
     }
   };
 
@@ -778,14 +792,14 @@ const MealManagementModal = ({
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(meal.id)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                                                  <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteClick(meal.id)}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -855,17 +869,27 @@ const MealManagementModal = ({
   )
 
   return (
-    <DataManagementModal
-      open={open}
-      onOpenChange={(val) => {
-        onOpenChange(val)
-        setTimeout(() => resetForm(), 500)
-      }}
-      title="Manage Meals"
-      description="Add, edit, or remove meals from your database."
-      leftColumn={isAdding ? leftColumnAdd : (editingId ? leftColumnEdit : leftColumnNeutral)}
-      rightColumn={isAdding ? rightColumnAdd : rightColumnEdit}
-    />
+    <>
+      <DataManagementModal
+        open={open}
+        onOpenChange={(val) => {
+          onOpenChange(val)
+          setTimeout(() => resetForm(), 500)
+        }}
+        title="Manage Meals"
+        description="Add, edit, or remove meals from your database."
+        leftColumn={isAdding ? leftColumnAdd : (editingId ? leftColumnEdit : leftColumnNeutral)}
+        rightColumn={isAdding ? rightColumnAdd : rightColumnEdit}
+      />
+
+      <AlertModal
+        showDeleteDialog={showDeleteDialog}
+        setShowDeleteDialog={setShowDeleteDialog}
+        handleDeleteConfirm={handleDeleteConfirm}
+        title="Delete Meal"
+        description="Are you sure you want to delete this meal? This action cannot be undone."
+      />
+    </>
   );
 }
 

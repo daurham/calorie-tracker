@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { TrendingUp, Search, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { 
   Card, 
@@ -12,6 +13,7 @@ import {
   DropdownMenuItem,
   SearchBar,
  } from "./ui";
+import { AlertModal } from "./modals";
 
 const AvailableMeals = ({
   searchQuery,
@@ -21,8 +23,27 @@ const AvailableMeals = ({
   handleDeleteMealCombo,
   filteredMealCombos,
 }) => {
+  const [deleteMealId, setDeleteMealId] = useState<number | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const handleDeleteClick = (id: number) => {
+    setDeleteMealId(id);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteMealId) return;
+    
+    try {
+      await handleDeleteMealCombo(deleteMealId);
+    } finally {
+      setShowDeleteDialog(false);
+      setDeleteMealId(null);
+    }
+  };
   return (
-    <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
+    <>
+      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
       <CardHeader>
         <div className="space-y-4">
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
@@ -80,7 +101,7 @@ const AvailableMeals = ({
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDeleteMealCombo(combo.id)}
+                          onClick={() => handleDeleteClick(combo.id)}
                           className="text-red-500 focus:text-red-500"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
@@ -96,6 +117,15 @@ const AvailableMeals = ({
         </div>
       </CardContent>
     </Card>
+    
+      <AlertModal
+        showDeleteDialog={showDeleteDialog}
+        setShowDeleteDialog={setShowDeleteDialog}
+        handleDeleteConfirm={handleDeleteConfirm}
+        title="Delete Meal"
+        description="Are you sure you want to delete this meal? This action cannot be undone."
+      />
+    </>
   );
 };
 
