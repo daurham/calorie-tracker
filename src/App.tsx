@@ -1,9 +1,9 @@
-import { Toaster } from "@/components/ui/toaster";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MealPlanGeneratorPage from "./pages/MealPlanGenerator";

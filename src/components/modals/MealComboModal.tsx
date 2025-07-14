@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { Plus, X } from "lucide-react";
 import { 
   Button, 
@@ -14,6 +13,7 @@ import {
   Card, 
   CardContent,
 } from "@/components/ui";
+import { useToast } from "@/hooks";
 
 const MealComboDialog = ({ open, onOpenChange, onAddMealCombo, availableIngredients }) => {
   const [comboName, setComboName] = useState("");

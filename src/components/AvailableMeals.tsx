@@ -1,0 +1,108 @@
+import { TrendingUp, Search, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  Input, 
+  CardContent, 
+  Button, 
+  DropdownMenu, 
+  DropdownMenuTrigger, 
+  DropdownMenuContent, 
+  DropdownMenuItem,
+ } from "./ui";
+
+const AvailableMeals = ({
+  searchQuery,
+  setSearchQuery,
+  addMealToToday,
+  openMealEditManagement,
+  handleDeleteMealCombo,
+  filteredMealCombos,
+}) => {
+  return (
+    <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
+      <CardHeader>
+        <div className="space-y-4">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
+            Available Meals
+          </CardTitle>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search meals or ingredients..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-white/50 dark:bg-slate-700/50"
+            />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredMealCombos.map((combo) => (
+            <Card key={combo.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer group border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex justify-between items-start mb-2 sm:mb-3">
+                  <h3 className="font-semibold group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors text-sm sm:text-base line-clamp-2">
+                    {combo.name}
+                  </h3>
+                  <span className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400 ml-2 flex-shrink-0">
+                    {combo.calories}
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
+                  {combo.ingredients.map(i => i.quantity > 1 ? `${i.name} (${i.quantity})` : i.name).join(", ")}
+                </p>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <div className="text-xs text-muted-foreground">
+                    P: {combo.protein}g | C: {combo.carbs}g | F: {combo.fat}g
+                  </div>
+                  <div className="flex gap-1 w-full sm:w-auto">
+                    <Button
+                      size="sm"
+                      onClick={() => addMealToToday(combo)}
+                      className="bg-emerald-500 hover:bg-emerald-600 flex-1 sm:flex-none transition-all duration-150 hover:scale-105 active:scale-95"
+                    >
+                      Add
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="px-2"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => {
+                          openMealEditManagement(combo.id);
+                          // We'll handle the edit in the management modal
+                        }}>
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteMealCombo(combo.id)}
+                          className="text-red-500 focus:text-red-500"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default AvailableMeals;

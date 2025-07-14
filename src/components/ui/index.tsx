@@ -1,6 +1,6 @@
 // Export all components from the ui folder
 export { Button } from "./button";
-export { Card, CardContent, CardHeader, CardTitle } from "./card";
+export { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./card";
 export { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible";
 export { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
 export { Input } from "./input";
@@ -34,4 +34,4 @@ export { Toast } from "./toast";
 export { Toggle } from "./toggle";
 export { ToggleGroup, ToggleGroupItem } from "./toggle-group";
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
-
+export { default as NutritionalSummaryCard } from "./NutritionalSummaryCard";

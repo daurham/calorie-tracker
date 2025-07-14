@@ -10,11 +10,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@/components/ui";
 
 interface SettingsMenuProps {

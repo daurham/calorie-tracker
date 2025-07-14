@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
-import { Button } from "./ui";
-// import { BrowserMultiFormatReader, NotFoundException } from "@zxing/browser";
+import { Button } from "@/components/ui";
 
-export default function ModalScanner({ onDetected, onClose }) {
+const ScannerModal = ({ onDetected, onClose }) => {
   const videoRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
@@ -258,4 +257,6 @@ export default function ModalScanner({ onDetected, onClose }) {
       </div>
     </div>
   );
-}
+};
+
+export default ScannerModal;

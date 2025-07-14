@@ -1,6 +1,4 @@
 import { 
-  Ingredient, 
-  MealCombo, 
   getIngredients,
    getMealCombos, 
    addIngredient as apiAddIngredient, 
@@ -10,6 +8,8 @@ import {
    updateMealCombo as apiUpdateMealCombo,
   deleteMealCombo as apiDeleteMealCombo 
 } from './api-client';
+
+import { Ingredient, MealCombo } from '@/types';
 
 // Ingredients
 export async function getIngredientsData(): Promise<Ingredient[]> {

@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useMealPlanGenerator } from '../hooks/useMealPlanGenerator';
-import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Alert, AlertDescription } from './ui/alert';
+import { useState, useEffect } from 'react';
+import { useMealPlanGenerator, useToast } from '@/hooks';
 import { Loader2, Copy, Download, Sparkles, Info } from 'lucide-react';
-import { toast } from 'sonner';
+import { 
+  Button, 
+  Textarea, 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle, 
+  Alert, 
+  AlertDescription,
+ } from './ui';
 
-export function MealPlanGenerator() {
+const MealPlanGenerator = () => {
+  const { toast } = useToast();
   const [userGoals, setUserGoals] = useState('');
   const [showPrompt, setShowPrompt] = useState(false);
   const [hasLoadedFromStorage, setHasLoadedFromStorage] = useState(false);
@@ -44,7 +51,8 @@ export function MealPlanGenerator() {
           setHasLoadedFromStorage(true);
           
           // Show notification
-          toast.success('Macro goals loaded from your settings!', {
+          toast({
+            title: 'Macro goals loaded from your settings!',
             description: 'Your daily calorie and macro goals have been automatically filled in.'
           });
         } else if (userGoals && hasLoadedFromStorage) {
@@ -61,7 +69,9 @@ export function MealPlanGenerator() {
     const result = await generatePrompt(userGoals);
     if (result) {
       setShowPrompt(true);
-      toast.success('Meal plan prompt generated successfully!');
+      toast({
+        title: 'Meal plan prompt generated successfully!',
+      });
     }
   };
 
@@ -69,9 +79,13 @@ export function MealPlanGenerator() {
     if (lastGeneratedPrompt) {
       try {
         await navigator.clipboard.writeText(lastGeneratedPrompt);
-        toast.success('Prompt copied to clipboard!');
+        toast({
+          title: 'Prompt copied to clipboard!',
+        });
       } catch (err) {
-        toast.error('Failed to copy prompt');
+        toast({
+          title: 'Failed to copy prompt',
+        });
       }
     }
   };
@@ -87,7 +101,9 @@ export function MealPlanGenerator() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success('Prompt downloaded!');
+      toast({
+        title: 'Prompt downloaded!',
+      });
     }
   };
 
@@ -212,3 +228,5 @@ export function MealPlanGenerator() {
     </div>
   );
 } 
+
+export default MealPlanGenerator;

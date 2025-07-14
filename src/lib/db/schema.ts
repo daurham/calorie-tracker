@@ -1,28 +1,6 @@
 import { query } from './client';
 import { sql } from '@vercel/postgres';
-
-// Types
-export interface Ingredient {
-  id: number;
-  name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  unit: string;
-}
-
-export interface MealCombo {
-  id: number;
-  name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  notes?: string;
-  instructions?: string;
-  ingredients?: { id: number; quantity: number }[];
-}
+import { Ingredient, MealCombo } from '@/types';
 
 // Schema creation
 export async function createTables() {

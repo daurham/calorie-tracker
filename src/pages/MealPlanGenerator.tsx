@@ -1,9 +1,9 @@
-import { MealPlanGenerator } from '../components/MealPlanGenerator';
-import { Button } from '../components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { MealPlanGenerator } from '@/components';
+import { Button } from '@/components/ui/button';
 
-export function MealPlanGeneratorPage() {
+const MealPlanGeneratorPage = () => {
   const navigate = useNavigate();
 
   return (

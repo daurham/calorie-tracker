@@ -1,51 +1,5 @@
 import { getRows } from "../db/client";
-
-export interface Ingredient {
-  id: number;
-  name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  unit: string;
-}
-
-export interface MealCombo {
-  id: number;
-  name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  notes?: string;
-  instructions?: string;
-  ingredients: Array<{
-    id: number;
-    name: string;
-    quantity: number;
-  }>;
-}
-
-export interface CondensedIngredient {
-  name: string;
-  macros: string;
-  unit: string;
-}
-
-export interface CondensedMeal {
-  name: string;
-  macros: string;
-  ingredients: string;
-  notes: string;
-  instructions: string;
-}
-
-export interface MealPlanData {
-  ingredients: CondensedIngredient[];
-  meals: CondensedMeal[];
-  totalIngredients: number;
-  totalMeals: number;
-}
+import { Ingredient, MealCombo, MealPlanData } from '@/types';
 
 export class MealPlanPromptGenerator {
   /**

@@ -1,5 +1,12 @@
 import { Target, Eye, EyeOff } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Progress } from "@/components/ui";
+import { 
+  Button, 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  Progress,
+} from "@/components/ui";
 import { formatMacros } from "@/lib/utils";
 
 interface TodaysProgressProps {
