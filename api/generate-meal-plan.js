@@ -2,14 +2,14 @@ import { MealPlanPromptGenerator } from '../src/lib/meal-planning/prompt-generat
 
 async function generateMealPlanPrompt(req, res) {
   try {
-    const { userGoals } = req.body;
+    const { userGoals, staplesOnly = false } = req.body;
     
-    console.log('Generating meal plan prompt...');
+    console.log('Generating meal plan prompt...', { staplesOnly });
     
     // Use the modular prompt generator
-    const { prompt, data } = await MealPlanPromptGenerator.generateCompletePrompt(userGoals);
+    const { prompt, data } = await MealPlanPromptGenerator.generateCompletePrompt(userGoals, staplesOnly);
     
-    console.log(`Generated prompt with ${data.totalIngredients} ingredients and ${data.totalMeals} meals`);
+    console.log(`Generated prompt with ${data.totalIngredients} ingredients and ${data.totalMeals} meals (staples only: ${staplesOnly})`);
     
     res.status(200).json({
       prompt,
@@ -17,7 +17,8 @@ async function generateMealPlanPrompt(req, res) {
         totalIngredients: data.totalIngredients,
         totalMeals: data.totalMeals,
         ingredients: data.ingredients,
-        meals: data.meals
+        meals: data.meals,
+        staplesOnly
       }
     });
   } catch (error) {

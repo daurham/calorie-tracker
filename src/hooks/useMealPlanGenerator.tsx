@@ -17,11 +17,12 @@ export interface MealPlanPromptResponse {
       notes: string;
       instructions: string;
     }>;
+    staplesOnly?: boolean;
   };
 }
 
 export interface UseMealPlanGeneratorReturn {
-  generatePrompt: (userGoals?: string) => Promise<MealPlanPromptResponse | null>;
+  generatePrompt: (userGoals?: string, staplesOnly?: boolean) => Promise<MealPlanPromptResponse | null>;
   isLoading: boolean;
   error: string | null;
   lastGeneratedPrompt: string | null;
@@ -34,7 +35,7 @@ export function useMealPlanGenerator(): UseMealPlanGeneratorReturn {
   const [lastGeneratedPrompt, setLastGeneratedPrompt] = useState<string | null>(null);
   const [lastSummary, setLastSummary] = useState<MealPlanPromptResponse['summary'] | null>(null);
 
-  const generatePrompt = async (userGoals?: string): Promise<MealPlanPromptResponse | null> => {
+  const generatePrompt = async (userGoals?: string, staplesOnly: boolean = false): Promise<MealPlanPromptResponse | null> => {
     setIsLoading(true);
     setError(null);
 
@@ -44,7 +45,7 @@ export function useMealPlanGenerator(): UseMealPlanGeneratorReturn {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userGoals }),
+        body: JSON.stringify({ userGoals, staplesOnly }),
       });
 
       if (!response.ok) {

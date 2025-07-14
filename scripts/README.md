@@ -27,7 +27,11 @@ Fetches all ingredients and meals from the database, condenses the information, 
 
 **Usage:**
 ```bash
+# Generate prompt with all ingredients and meals
 npm run generate-meal-prompt
+
+# Generate prompt with only staple ingredients and meals
+npm run generate-meal-prompt -- --staples-only
 ```
 
 **Output:** Creates a timestamped text file in the `output/` directory containing:
@@ -40,6 +44,7 @@ npm run generate-meal-prompt
 - Existing meals with their ingredient lists and macros
 - Instructions for the AI to help create meal plans
 - Suggestions for new meal combinations and modifications
+- When using `--staples-only`: Only staple ingredients and meals made with staples
 
 **Example use case:**
 1. Run the script to generate the prompt

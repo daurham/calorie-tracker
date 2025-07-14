@@ -16,6 +16,7 @@ import {
 const MealPlanGenerator = () => {
   const { toast } = useToast();
   const [userGoals, setUserGoals] = useState('');
+  const [staplesOnly, setStaplesOnly] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
   const [hasLoadedFromStorage, setHasLoadedFromStorage] = useState(false);
   const [storedMacros, setStoredMacros] = useState({
@@ -66,7 +67,7 @@ const MealPlanGenerator = () => {
   }, [userGoals]);
 
   const handleGeneratePrompt = async () => {
-    const result = await generatePrompt(userGoals);
+    const result = await generatePrompt(userGoals, staplesOnly);
     if (result) {
       setShowPrompt(true);
       toast({
@@ -148,6 +149,24 @@ const MealPlanGenerator = () => {
             )}
           </div>
 
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="staples-only"
+                checked={staplesOnly}
+                onChange={(e) => setStaplesOnly(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="staples-only" className="text-sm font-medium">
+                Use only staple ingredients
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              When enabled, the prompt will only include staple ingredients and meals made with staples. This creates more practical meal plans using common household items.
+            </p>
+          </div>
+
           <Button 
             onClick={handleGeneratePrompt} 
             disabled={isLoading}
@@ -180,6 +199,11 @@ const MealPlanGenerator = () => {
             <CardTitle>Summary</CardTitle>
             <CardDescription>
               Your available ingredients and meals
+              {lastSummary.staplesOnly && (
+                <span className="ml-2 text-blue-600 dark:text-blue-400">
+                  (Staples only)
+                </span>
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -191,6 +215,13 @@ const MealPlanGenerator = () => {
                 <span className="font-medium">Meals:</span> {lastSummary.totalMeals}
               </div>
             </div>
+            {lastSummary.staplesOnly && (
+              <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                <p className="text-xs text-blue-700 dark:text-blue-300">
+                  <span className="font-medium">Staples-only mode:</span> Only staple ingredients and meals made with staples are included in this prompt.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

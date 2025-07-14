@@ -3,13 +3,14 @@ import { MealPlanPromptGenerator } from './prompt-generator';
 /**
  * Example 1: Generate a basic prompt without user goals
  */
-export async function generateBasicPrompt() {
+export async function generateBasicPrompt(staplesOnly: boolean = false) {
   try {
-    const { prompt, data } = await MealPlanPromptGenerator.generateCompletePrompt();
+    const { prompt, data } = await MealPlanPromptGenerator.generateCompletePrompt(undefined, staplesOnly);
     
     console.log('Generated prompt with:', {
       ingredients: data.totalIngredients,
-      meals: data.totalMeals
+      meals: data.totalMeals,
+      staplesOnly
     });
     
     return prompt;
@@ -22,14 +23,15 @@ export async function generateBasicPrompt() {
 /**
  * Example 2: Generate a prompt with specific user goals
  */
-export async function generatePromptWithGoals(userGoals: string) {
+export async function generatePromptWithGoals(userGoals: string, staplesOnly: boolean = false) {
   try {
-    const { prompt, data } = await MealPlanPromptGenerator.generateCompletePrompt(userGoals);
+    const { prompt, data } = await MealPlanPromptGenerator.generateCompletePrompt(userGoals, staplesOnly);
     
     console.log('Generated personalized prompt with:', {
       ingredients: data.totalIngredients,
       meals: data.totalMeals,
-      hasGoals: !!userGoals
+      hasGoals: !!userGoals,
+      staplesOnly
     });
     
     return { prompt, data };
@@ -88,7 +90,7 @@ export async function generateMultiplePrompts() {
 
   for (const scenario of scenarios) {
     try {
-      const { prompt, data } = await MealPlanPromptGenerator.generateCompletePrompt(scenario.goals);
+      const { prompt, data } = await MealPlanPromptGenerator.generateCompletePrompt(scenario.goals, false);
       results.push({
         scenario: scenario.name,
         prompt,
