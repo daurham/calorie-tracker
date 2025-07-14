@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger, 
   DropdownMenuContent, 
   DropdownMenuItem,
+  SearchBar,
  } from "./ui";
 
 const AvailableMeals = ({
@@ -28,15 +29,8 @@ const AvailableMeals = ({
             <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
             Available Meals
           </CardTitle>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search meals or ingredients..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-white/50 dark:bg-slate-700/50"
-            />
-          </div>
+          {/* Search Bar */}
+          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
       </CardHeader>
       <CardContent>

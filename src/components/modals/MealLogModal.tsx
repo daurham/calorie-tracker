@@ -12,16 +12,25 @@ import {
   DialogTitle,
   Card, 
   CardContent,
+  SearchBar,
 } from "@/components/ui";
+import { MealCombo } from "@/types";
 
-const MealLogDialog = ({ open, onOpenChange, onAddMeal, mealCombos }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+interface MealLogDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onAddMeal: (meal: MealCombo) => void;
+  mealCombos: MealCombo[];
+}
+
+const MealLogDialog = ({ open, onOpenChange, onAddMeal, mealCombos }: MealLogDialogProps) => {
   const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const filteredMeals = mealCombos.filter(meal =>
-    meal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    meal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     meal.ingredients.some(ingredient => 
-      ingredient.toLowerCase().includes(searchTerm.toLowerCase())
+      ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
@@ -32,7 +41,7 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, mealCombos }) => {
       description: `${meal.name} (${meal.calories} cal) added to today's meals.`,
     });
     onOpenChange(false);
-    setSearchTerm("");
+    setSearchQuery("");
   };
 
   return (
@@ -50,7 +59,8 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, mealCombos }) => {
         <div className="space-y-4">
           <div>
             <Label htmlFor="search">Search meals</Label>
-            <div className="relative mt-1">
+            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder="Search by name or ingredients.." />
+            {/* <div className="relative mt-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="search"
@@ -59,13 +69,13 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, mealCombos }) => {
                 placeholder="Search by name or ingredient..."
                 className="pl-10"
               />
-            </div>
+            </div> */}
           </div>
 
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {filteredMeals.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                {searchTerm ? "No meals found matching your search." : "No meal combos available."}
+                {searchQuery ? "No meals found matching your search." : "No meal combos available."}
               </p>
             ) : (
               filteredMeals.map((meal) => (
@@ -75,7 +85,7 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, mealCombos }) => {
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg">{meal.name}</h3>
                         <p className="text-sm text-muted-foreground mb-2">
-                          {meal.ingredients.join(", ")}
+                          {meal.ingredients.map(i => i.name).join(", ")}
                         </p>
                         <div className="flex gap-4 text-xs text-muted-foreground">
                           <span>Protein: {meal.protein}g</span>

@@ -347,6 +347,7 @@ const Index = () => {
         setIsIngredientsModalOpen={setIsIngredientsManagementOpen}
         setIsComboModalOpen={setIsComboModalOpen}
         setIsMealsModalOpen={setIsMealManagementOpen}
+        setIsLogModalOpen={setIsLogModalOpen}
       />
 
       <main className="container mx-auto px-4 py-4 sm:py-8">

@@ -9,6 +9,7 @@ const Navbar = ({
   setIsMealsModalOpen,
   setIsIngredientsModalOpen,
   setIsComboModalOpen,
+  setIsLogModalOpen,
 }) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -38,10 +39,17 @@ const Navbar = ({
         className: "border-emerald-200 hover:bg-emerald-50 dark:border-emerald-700 dark:hover:bg-emerald-950 px-2 sm:px-3",
         variant: "outline"
       },
+      // {
+      //   icon: <Plus className="h-4 w-4" />,
+      //   onClick: () => setIsComboModalOpen(true),
+      //   label: "Create Meal",
+      //   className: "border-emerald-200 hover:bg-emerald-50 dark:border-emerald-700 dark:hover:bg-emerald-950 px-2 sm:px-3",
+      //   variant: "outline"
+      // },
       {
         icon: <Plus className="h-4 w-4" />,
-        onClick: () => setIsComboModalOpen(true),
-        label: "Create Meal",
+        onClick: () => setIsLogModalOpen(true),
+        label: "Log Meal",
         className: "border-emerald-200 hover:bg-emerald-50 dark:border-emerald-700 dark:hover:bg-emerald-950 px-2 sm:px-3",
         variant: "outline"
       },

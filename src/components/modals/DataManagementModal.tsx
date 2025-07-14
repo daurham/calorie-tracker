@@ -31,7 +31,7 @@ const DataManagementModal = ({
         {/* Left Column - Form */}
         {leftColumn}
 
-        {/* Right Column - Ingredients List */}
+        {/* Right Column - Ingredients / Meals List */}
         {rightColumn}
       </div>
     </DialogContent>

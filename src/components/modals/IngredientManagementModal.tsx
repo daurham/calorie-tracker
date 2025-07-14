@@ -204,6 +204,8 @@ const IngredientsManagementModal = ({
       unit: product.serving_size
     });
   };
+
+  // Shows add / edit form
   const leftColumn = (
     <div className="space-y-6">
     <div className="flex justify-between items-center">
@@ -309,10 +311,10 @@ const IngredientsManagementModal = ({
 
         <div className="flex gap-2">
           <Button type="submit" className="bg-emerald-500 hover:bg-emerald-600" disabled={isLoading}>
-            {editingId ? "Update" : "Add"} Ingredient
+            {editingId ? "Update" : "Add"}
           </Button>
           {editingId && (
-            <Button type="button" className="bg-purple-300 hover:bg-purple-400"
+            <Button type="button" className="bg-blue-500 hover:bg-blue-600"
               onClick={(e) => handleSubmit(e, true)} disabled={isLoading}>
               Add as New
             </Button>
@@ -355,6 +357,7 @@ const IngredientsManagementModal = ({
     </Card>
   );
 
+  // Shows ingredients list
   const rightColumn = (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Your Ingredients</h3>
@@ -417,7 +420,10 @@ const IngredientsManagementModal = ({
   return (
     <DataManagementModal
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(val) => {
+        onOpenChange(val)
+        setTimeout(() => resetForm(), 500)
+      }}
       title="Manage Ingredients"
       description="Add, edit, or remove ingredients from your database."
       leftColumn={leftColumn}
