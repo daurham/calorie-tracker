@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, X, Pencil, Trash2 } from "lucide-react";
 import { useToast, useIsMobile } from "@/hooks";
 import { 
@@ -32,6 +32,7 @@ const IngredientsManagementModal = ({
   onDeleteIngredient,
   isLoading = false
 }: IngredientManagementModalProps) => {
+  const { toast } = useToast();
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -47,14 +48,38 @@ const IngredientsManagementModal = ({
   const [productData, setProductData] = useState(null);
   const [deleteIngredientId, setDeleteIngredientId] = useState<number | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const { toast } = useToast();
   const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
+  const scrollPositionRef = useRef(0);
+  const modalContentRef = useRef<HTMLDivElement>(null);
+
   const filteredIngredients = ingredients.filter(ingredient => 
     ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // useEffect(() => {
+  //   console.log("filteredIngredients", filteredIngredients);
+  // }, [filteredIngredients]);
+
+  // onMount logger
+  // useEffect(() => {
+  //   console.log("IngredientManagementModal mounted");
+  // }, []);
+
+  // Restore scroll position after ingredients update
+  useEffect(() => {
+    if (modalContentRef.current && scrollPositionRef.current > 0) {
+      // Use setTimeout to ensure the DOM has updated
+      setTimeout(() => {
+        if (modalContentRef.current) {
+          modalContentRef.current.scrollTop = scrollPositionRef.current;
+        }
+      }, 0);
+    }
+  }, [ingredients]);
+
   const resetForm = () => {
+    // console.log("resetting form from resetForm");
     setFormData({
       name: "",
       calories: "",
@@ -73,7 +98,11 @@ const IngredientsManagementModal = ({
     if (editingId === null) {
       addAsNew = true;
     }
-    // console.log("adding as new: ", addAsNew);
+    
+    // Save current scroll position before update
+    if (modalContentRef.current) {
+      scrollPositionRef.current = modalContentRef.current.scrollTop;
+    }
     
     // Validate form
     if(ingredients.find(ingredient => ingredient.name === formData.name) && addAsNew === true) {
@@ -113,7 +142,6 @@ const IngredientsManagementModal = ({
       }
     }
     
-
     const ingredientData = {
       ...formData,
       calories: parseInt(formData.calories),
@@ -139,7 +167,10 @@ const IngredientsManagementModal = ({
           description: `${formData.name} has been added to your ingredients.`,
         });
       }
-      resetForm();
+      if (addAsNew === true) {
+        console.log("resetting form from handleSubmit");
+        resetForm();
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -234,9 +265,11 @@ const IngredientsManagementModal = ({
     });
   };
 
+  const DesktopStyling = "max-h-[60vh] overflow-y-auto";
+
   // Shows add / edit form
   const leftColumn = (
-    <div className="space-y-6 min-h-[65vh] overflow-y-auto">
+    <div className={`space-y-6 ${ !isMobile && DesktopStyling}`}>
     <div className="flex justify-between items-center">
       <h3 className="text-lg font-semibold">
         {editingId ? "Edit Ingredient" : "Add New Ingredient"}
@@ -250,7 +283,7 @@ const IngredientsManagementModal = ({
 
     {isAdding ? (
       <div>
-        {isMobile &&
+        {(isMobile && editingId === null) &&
           (<div className="flex justify-center">
             <Button onClick={() => setShowScanner(true)} className="bg-emerald-500 text-black hover:bg-emerald-600" variant="outline">
               Barcode Lookup
@@ -404,7 +437,7 @@ const IngredientsManagementModal = ({
   const rightColumn = (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Your Ingredients</h3>
-            <div className="max-h-[60vh] overflow-y-auto">
+            <div ref={modalContentRef} className="max-h-[60vh] overflow-y-auto">
               {isLoading ? (
                 // Show loading skeletons
                 Array.from({ length: 6 }).map((_, index) => (
