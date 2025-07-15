@@ -14,6 +14,13 @@ const Navbar = ({
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  interface ButtonConfig {
+    icon: React.ReactNode;
+    onClick: () => void;
+    label: string;
+    className: string;
+    variant: "outline" | "link" | "default" | "destructive" | "secondary" | "ghost";
+  }
   const config = {
     title: "Caloric Tracker",
     subtitle: "Smart calorie tracking made simple",
@@ -50,18 +57,19 @@ const Navbar = ({
         icon: <Plus className="h-4 w-4" />,
         onClick: () => setIsLogModalOpen(true),
         label: "Log Meal",
-        className: "border-emerald-200 hover:bg-emerald-50 dark:border-emerald-700 dark:hover:bg-emerald-950 px-2 sm:px-3",
+        className: "border-blue-200 hover:bg-blue-50 dark:border-blue-500 dark:hover:bg-blue-950 px-2 sm:px-3",
         variant: "outline"
+
       },
       {
         icon: <Sparkles className="h-4 w-4" />,
         onClick: () => navigate('/meal-plan-generator'),
         label: "AI Meal Plan",
-        className: "border-purple-200 hover:bg-purple-50 dark:border-purple-700 dark:hover:bg-purple-950 px-2 sm:px-3",
+        className: "border-purple-200 hover:bg-purple-50 dark:border-purple-700 dark:hover:bg-purple-700 px-2 sm:px-3",
         variant: "outline"
       },
       
-    ]
+    ] as ButtonConfig[]
   };
 
   const handleMobileMenuClick = (onClick) => {
@@ -122,20 +130,22 @@ const Navbar = ({
 
         {/* Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-slate-200 dark:border-slate-700">
-            <div className="flex flex-col gap-2 pt-4">
-              {config.buttons.map((button) => (
-                <Button
-                  key={button.label}
-                  onClick={() => handleMobileMenuClick(button.onClick)}
-                  variant={button.variant as "outline" | "link" | "default" | "destructive" | "secondary" | "ghost"}
-                  size="sm"
-                  className={`justify-start ${button.className}`}
-                >
-                  {button.icon}
-                  <span className="ml-3">{button.label}</span>
-                </Button>
-              ))}
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 shadow-lg z-50">
+            <div className="container mx-auto px-4 py-4">
+              <div className="flex flex-col gap-2">
+                {config.buttons.map((button) => (
+                  <Button
+                    key={button.label}
+                    onClick={() => handleMobileMenuClick(button.onClick)}
+                    variant={button.variant as "outline" | "link" | "default" | "destructive" | "secondary" | "ghost"}
+                    size="sm"
+                    className={`justify-start ${button.className}`}
+                  >
+                    {button.icon}
+                    <span className="ml-3">{button.label}</span>
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
         )}

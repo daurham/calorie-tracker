@@ -324,9 +324,12 @@ const MealManagementModal = ({
 
   // Add Functionality:
   const addIngredient = (ingredient) => {
-    if (!selectedIngredients.find(i => i.id === ingredient.id)) {
+    const isFound = selectedIngredients.find(i => i.id === ingredient.id);
+    if (isFound) {
+      updateQuantity(ingredient.id, isFound.quantity + 1);
+    } else {
       setSelectedIngredients([...selectedIngredients, { ...ingredient, quantity: 1 }]);
-      calculateTotals
+      calculateTotals();
     }
   };
 
@@ -664,16 +667,6 @@ const MealManagementModal = ({
       </div>
 
       {/* Notes */}
-      {/* <div>
-              <Label htmlFor="notes">Notes (optional)</Label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Any additional notes about this meal..."
-                className="mt-1"
-              />
-            </div> */}
       <Collapsible open={!notesCollapsed} onOpenChange={(open) => setNotesCollapsed(!open)}>
         <CollapsibleTrigger asChild>
           <Button
@@ -700,16 +693,6 @@ const MealManagementModal = ({
       </Collapsible>
 
       {/* Instructions */}
-      {/* <div>
-              <Label htmlFor="instructions">Instructions (optional)</Label>
-              <Textarea
-                id="instructions"
-                value={instructions}
-                onChange={(e) => setInstructions(e.target.value)}
-                placeholder="Preparation instructions..."
-                className="mt-1"
-              />
-            </div> */}
       <Collapsible open={!instructionsCollapsed} onOpenChange={(open) => setInstructionsCollapsed(!open)}>
         <CollapsibleTrigger asChild>
           <Button

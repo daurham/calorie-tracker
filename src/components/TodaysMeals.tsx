@@ -164,7 +164,7 @@ const TodaysMeals = ({ meals, onRemoveMeal }: TodaysMealsProps) => {
                 variant="ghost"
                 size="sm"
                 onClick={() => onRemoveMeal("all")}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-2 h-0 py-0"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Clear All
@@ -211,9 +211,9 @@ const TodaysMeals = ({ meals, onRemoveMeal }: TodaysMealsProps) => {
                               variant="ghost"
                               size="sm"
                               onClick={() => onRemoveMeal(meal.uniqueMealId)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-2 h-8"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-2 h-0 py-0"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-0 w-4" />
                             </Button>
                           </div>
                         </div>
