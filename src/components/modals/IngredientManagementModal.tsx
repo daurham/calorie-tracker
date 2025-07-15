@@ -69,6 +69,11 @@ const IngredientsManagementModal = ({
     });
     setIsAdding(false);
     setEditingId(null);
+    // setProductData(null);
+    // setShowScanner(false);
+    // setDeleteIngredientId(null);
+    // setShowDeleteDialog(false);
+    setSearchQuery("");
   };
 
   const handleSubmit = async (e: React.FormEvent, addAsNew: boolean = false) => {

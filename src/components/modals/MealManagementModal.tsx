@@ -59,7 +59,6 @@ const MealManagementModal = ({
   isLoading = false
 }: MealManagementModalProps) => {
   const { toast } = useToast();
-  const [comboName, setComboName] = useState("");
   const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [notes, setNotes] = useState("");
   const [totals, setTotals] = useState({
@@ -75,12 +74,22 @@ const MealManagementModal = ({
   const [instructionsCollapsed, setInstructionsCollapsed] = useState(true);
   const [formData, setFormData] = useState<{
     name: string;
+    meal_type: 'composed' | 'standalone';
     ingredients: Array<{ id: number; name: string; quantity: number }>;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
     notes: string;
     instructions: string;
   }>({
     name: '',
+    meal_type: 'composed',
     ingredients: [],
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
     notes: '',
     instructions: '',
   });
@@ -103,11 +112,16 @@ const MealManagementModal = ({
       if (mealCombo) {
         setFormData({
           name: mealCombo.name,
+          meal_type: mealCombo.meal_type,
           ingredients: mealCombo.ingredients.map(i => ({
             id: i.id,
             name: i.name,
             quantity: i.quantity
           })),
+          calories: mealCombo.calories,
+          protein: mealCombo.protein,
+          carbs: mealCombo.carbs,
+          fat: mealCombo.fat,
           notes: mealCombo.notes || '',
           instructions: mealCombo.instructions || '',
         });
@@ -186,7 +200,13 @@ const MealManagementModal = ({
   };
 
   const handleSubmit = async (e: React.FormEvent, addAsNew: boolean = false) => {
+    // console.log("#### Running handleSubmit ####");
     e.preventDefault();
+
+    // if (formData.ingredients.length === 1 && formData.ingredients[0].id === null) {
+    //   formData.ingredients = []
+    // }
+    
     if (mealCombos.find(mc => mc.name === formData.name) && addAsNew === true) {
       toast({
         title: "Meal already exists",
@@ -195,10 +215,28 @@ const MealManagementModal = ({
       });
       return;
     }
-    if (formData.name === "" || formData.ingredients.length === 0) {
+    if (formData.name === "") {
       toast({
         title: "Missing information",
-        description: "Please add a name and at least one ingredient.",
+        description: "Please add a meal name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.meal_type === 'composed' && formData.ingredients.length === 0) {
+      toast({
+        title: "Missing information",
+        description: "Please add at least one ingredient for composed meals.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.meal_type === 'standalone' && (formData.calories === 0 && formData.protein === 0 && formData.carbs === 0 && formData.fat === 0)) {
+      toast({
+        title: "Missing information",
+        description: "Please add nutritional information for standalone meals.",
         variant: "destructive",
       });
       return;
@@ -207,17 +245,21 @@ const MealManagementModal = ({
     const totals = calculateTotalsForm();
     // Check if nothings changed
     if (addAsNew === false) {
+      // console.log("addAsNew is false");
       const mealCombo = mealCombos.find(mc => mc.name === formData.name);
+      // console.log("mealCombo", mealCombo);
+      // console.log("formData", formData);
+      // console.log("totals", totals);
       if (
         mealCombo &&
         mealCombo.ingredients.length === formData.ingredients.length &&
-        mealCombo.ingredients.every((ing, index) => ing.id === formData.ingredients[index].id) &&
+        // mealCombo.ingredients.every((ing, index) => ing.id === formData.ingredients[index].id) &&
         mealCombo.notes === formData.notes &&
         mealCombo.instructions === formData.instructions &&
-        mealCombo.calories == totals.calories &&
-        mealCombo.protein == totals.protein &&
-        mealCombo.carbs == totals.carbs &&
-        mealCombo.fat == totals.fat
+        mealCombo.calories == formData.calories &&
+        mealCombo.protein == formData.protein &&
+        mealCombo.carbs == formData.carbs &&
+        mealCombo.fat == formData.fat
       ) {
         toast({
           title: "Nothing changed",
@@ -227,30 +269,41 @@ const MealManagementModal = ({
         return;
       }
     }
+    // if (formData.meal_type === 'standalone' && formData.name === "" && formData.calories === 0) {
+    // const mealCombo = mealCombos.find(mc => mc.name === formData.name);
+
+    // console.log("formData", formData);
+    // console.log("mealCombos", mealCombo);
 
     try {
       const mealComboData: MealComboInput = {
         name: formData.name,
-        ingredients: formData.ingredients.map(({ id, quantity }) => ({ id, quantity })),
+        meal_type: formData.meal_type,
+        ingredients: formData.meal_type === 'composed' ? formData.ingredients.map(({ id, quantity }) => ({ id, quantity })) : [],
         notes: formData.notes,
         instructions: formData.instructions,
-        ...totals,
+        calories: formData.meal_type === 'standalone' ? formData.calories : totals.calories,
+        protein: formData.meal_type === 'standalone' ? formData.protein : totals.protein,
+        carbs: formData.meal_type === 'standalone' ? formData.carbs : totals.carbs,
+        fat: formData.meal_type === 'standalone' ? formData.fat : totals.fat,
       };
 
-      console.log("addAsNew: ", addAsNew);
+      // console.log("addAsNew: ", addAsNew);
       if (addAsNew === false) {
-        console.log("updating meal", mealComboData);
+        // console.log("updating meal", mealComboData);
         await onUpdateMealCombo(editingId, mealComboData);
         toast({
           title: 'Success',
           description: 'Meal updated successfully',
+          variant: 'default',
         });
       } else {
-        console.log("adding meal", mealComboData);
+        // console.log("adding meal", mealComboData);
         await onAddMealCombo(mealComboData);
         toast({
           title: 'Success',
           description: 'Meal added successfully',
+          variant: 'default',
         });
       }
       resetForm();
@@ -268,11 +321,16 @@ const MealManagementModal = ({
     setEditingId(mealCombo.id);
     setFormData({
       name: mealCombo.name,
+      meal_type: mealCombo.meal_type,
       ingredients: mealCombo.ingredients.map(i => ({
         id: i.id,
         name: i.name,
         quantity: i.quantity
       })),
+      calories: mealCombo.calories,
+      protein: mealCombo.protein,
+      carbs: mealCombo.carbs,
+      fat: mealCombo.fat,
       notes: mealCombo.notes || '',
       instructions: mealCombo.instructions || '',
     });
@@ -308,7 +366,12 @@ const MealManagementModal = ({
   const resetForm = () => {
     setFormData({
       name: '',
+      meal_type: 'composed',
       ingredients: [],
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fat: 0,
       notes: '',
       instructions: '',
     });
@@ -320,9 +383,6 @@ const MealManagementModal = ({
     setSearchQuery("");
   };
 
-  // const totals = calculateTotalsForm(); // used on edit
-
-  // Add Functionality:
   const addIngredient = (ingredient) => {
     const isFound = selectedIngredients.find(i => i.id === ingredient.id);
     if (isFound) {
@@ -355,43 +415,82 @@ const MealManagementModal = ({
     }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
   };
 
+  // Used when Adding New Meal
   const handleSave = () => {
-    if (!comboName || selectedIngredients.length === 0) {
-      toast({
-        title: "Missing information",
-        description: "Please add a name and at least one ingredient.",
-        variant: "destructive",
-      });
-      return;
+    // console.log("#### Running handleSave ####");
+    // TODO: Add validation for standalone meals
+    // console.log("formData", formData);
+    const isComposedMeal = !(formData.meal_type === "standalone")
+
+    if (isComposedMeal) {
+      // console.log("composed meal", formData);
+      // console.log("selectedIngredients", selectedIngredients);
+      // console.log("formData.name", formData.name);
+      if (!formData.name || selectedIngredients.length === 0) {
+        toast({
+          title: "Missing information",
+          description: "Please add a name and at least one ingredient.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const totals = calculateTotals();
+      const newCombo = {
+        name: formData.name,
+        meal_type: 'composed' as const,
+        ingredients: selectedIngredients.map(ing => ({
+          id: ing.id,
+          quantity: ing.quantity
+        })),
+        calories: Math.round(totals.calories),
+        protein: Math.round(totals.protein),
+        carbs: Math.round(totals.carbs),
+        fat: Math.round(totals.fat),
+        notes,
+        instructions
+      };
+      onAddMealCombo(newCombo);
     }
 
-    const totals = calculateTotals();
-    const newCombo = {
-      name: comboName,
-      ingredients: selectedIngredients.map(ing => ({
-        id: ing.id,
-        quantity: ing.quantity
-      })),
-      calories: Math.round(totals.calories),
-      protein: Math.round(totals.protein),
-      carbs: Math.round(totals.carbs),
-      fat: Math.round(totals.fat),
-      notes,
-      instructions
-    };
-    onAddMealCombo(newCombo);
+    if (!isComposedMeal) {
+      // console.log("standalone meal", formData);
+      if (formData.meal_type === 'standalone' && formData.name === "" && formData.calories === 0) {
+        toast({
+          title: "Missing information",
+          description: "Please add a name and calories for standalone meals.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const mealComboData: MealComboInput = {
+        name: formData.name,
+        meal_type: formData.meal_type,
+        ingredients: [],
+        notes: formData.notes,
+        instructions: formData.instructions,
+        calories: formData.calories,
+        protein: formData.protein,
+        carbs: formData.carbs,
+        fat: formData.fat,
+      };
+      onAddMealCombo(mealComboData);
+    }
 
-    toast({
+      
+      toast({
       title: "Meal created!",
-      description: `${comboName} has been saved to your meals.`,
+      description: `${formData.name} has been saved to your meals.`,
+      variant: "default",
     });
 
     // Reset form
-    setComboName("");
-    setSelectedIngredients([]);
-    setNotes("");
-    setInstructions("");
-    onOpenChange(false);
+    // setComboName("");
+    // setSelectedIngredients([]);
+    // setNotes("");
+    // setInstructions("");
+    // onOpenChange(false);
+    resetForm();
   };
 
   const handleDialogClose = (open: boolean) => {
@@ -462,112 +561,217 @@ const MealManagementModal = ({
           />
         </div>
 
-        {/* Ingredients List */}
+        {/* Meal Type */}
         <div>
-          <Label>Ingredients</Label>
-          <div className="space-y-2">
-            {formData.ingredients.map((ingredient, index) => (
-              <div key={index} className="flex gap-2">
-                <Select
-                  value={ingredient.id.toString()}
-                  onValueChange={value => handleIngredientChange(index, 'id', parseInt(value))}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger className="flex-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {isLoading ? (
-                      <SelectItem value="" disabled>
-                        Loading ingredients...
-                      </SelectItem>
-                    ) : (
-                      availableIngredients.map(ing => (
-                        <SelectItem key={ing.id} value={ing.id.toString()}>
-                          {ing.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-                <Input
-                  type="number"
-                  value={ingredient.quantity}
-                  onChange={e => handleIngredientChange(index, 'quantity', parseFloat(e.target.value))}
-                  min="0"
-                  step="0.1"
-                  className="w-24"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => handleRemoveIngredient(index)}
-                >
-                  Remove
-                </Button>
-              </div>
-            ))}
-            <Button type="button" onClick={handleAddIngredient} disabled={isLoading}>
-              Add Ingredient
-            </Button>
-          </div>
+          <Label htmlFor="meal-type">Meal Type</Label>
+          <Select
+            value={formData.meal_type}
+            onValueChange={(value) => setFormData(prev => ({ ...prev, meal_type: value as 'composed' | 'standalone' }))}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a meal type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="composed">Composed</SelectItem>
+              <SelectItem value="standalone">Standalone</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Notes */}
-        <Collapsible open={!notesCollapsed} onOpenChange={(open) => setNotesCollapsed(!open)}>
-          <CollapsibleTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full justify-between p-1 h-auto font-normal"
-            >
-              <Label htmlFor="notes" className="cursor-pointer">Notes (optional)</Label>
-              {notesCollapsed ? (
-                <ChevronRight className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-2">
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder="Any additional notes about this meal..."
-            />
-          </CollapsibleContent>
-        </Collapsible>
+        {/* Ingredients List - Only for Composed Meals */}
+        {formData.meal_type === 'composed' && (
+          <div>
+            <Label>Ingredients</Label>
+            <div className="space-y-2">
+              {formData.ingredients.map((ingredient, index) => (
+                ingredient.id && (
+                <div key={index} className="flex gap-2">
+                  <Select
+                    value={ingredient?.id?.toString()}
+                    onValueChange={value => handleIngredientChange(index, 'id', parseInt(value))}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {isLoading ? (
+                        <SelectItem value="" disabled>
+                          Loading ingredients...
+                        </SelectItem>
+                      ) : (
+                        availableIngredients.map(ing => (
+                          <SelectItem key={ing?.id} value={ing?.id?.toString()}>
+                            {ing?.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number"
+                    value={ingredient.quantity}
+                    onChange={e => handleIngredientChange(index, 'quantity', parseFloat(e.target.value))}
+                    min="0"
+                    step="0.1"
+                    className="w-24"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => handleRemoveIngredient(index)}
+                  >
+                    Remove
+                  </Button>
+                </div>
+                )
+              ))}
+              <Button type="button" onClick={handleAddIngredient} disabled={isLoading}>
+                Add Ingredient
+              </Button>
+            </div>
+          </div>
+        )}
 
-        {/* Instructions */}
-        <Collapsible open={!instructionsCollapsed} onOpenChange={(open) => setInstructionsCollapsed(!open)}>
-          <CollapsibleTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full justify-between p-1 h-auto font-normal"
-            >
-              <Label htmlFor="instructions" className="cursor-pointer">Instructions (optional)</Label>
-              {instructionsCollapsed ? (
-                <ChevronRight className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-2">
-            <Textarea
-              id="instructions"
-              value={formData.instructions}
-              onChange={(e) => setFormData(prev => ({ ...prev, instructions: e.target.value }))}
-              placeholder="Preparation instructions..."
-            />
-          </CollapsibleContent>
-        </Collapsible>
+        {/* Macro Inputs - Only for Standalone Meals */}
+        {formData.meal_type === 'standalone' && (
+          <div className="space-y-4">
+            <Label>Nutritional Information</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="calories">Calories</Label>
+                <Input
+                  id="calories"
+                  type="number"
+                  value={formData.calories}
+                  onChange={(e) => setFormData(prev => ({ ...prev, calories: parseInt(e.target.value) || 0 }))}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label htmlFor="protein">Protein (g)</Label>
+                <Input
+                  id="protein"
+                  type="number"
+                  value={formData.protein}
+                  onChange={(e) => setFormData(prev => ({ ...prev, protein: parseFloat(e.target.value) || 0 }))}
+                  placeholder="0"
+                  step="0.1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="carbs">Carbs (g)</Label>
+                <Input
+                  id="carbs"
+                  type="number"
+                  value={formData.carbs}
+                  onChange={(e) => setFormData(prev => ({ ...prev, carbs: parseFloat(e.target.value) || 0 }))}
+                  placeholder="0"
+                  step="0.1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="fat">Fat (g)</Label>
+                <Input
+                  id="fat"
+                  type="number"
+                  value={formData.fat}
+                  onChange={(e) => setFormData(prev => ({ ...prev, fat: parseFloat(e.target.value) || 0 }))}
+                  placeholder="0"
+                  step="0.1"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+              {/* Notes */}
+      <Collapsible open={!notesCollapsed} onOpenChange={(open) => setNotesCollapsed(!open)}>
+        <CollapsibleTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full justify-between p-1 h-auto font-normal"
+          >
+            <Label htmlFor="notes" className="cursor-pointer">Notes (optional)</Label>
+            {notesCollapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-2">
+          <Textarea
+            id="notes"
+            value={formData.notes}
+            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+            placeholder="Any additional notes about this meal..."
+          />
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Instructions */}
+      <Collapsible open={!instructionsCollapsed} onOpenChange={(open) => setInstructionsCollapsed(!open)}>
+        <CollapsibleTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full justify-between p-1 h-auto font-normal"
+          >
+            <Label htmlFor="instructions" className="cursor-pointer">Instructions (optional)</Label>
+            {instructionsCollapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-2">
+          <Textarea
+            id="instructions"
+            value={formData.instructions}
+            onChange={(e) => setFormData(prev => ({ ...prev, instructions: e.target.value }))}
+            placeholder="Preparation instructions..."
+          />
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Nutritional Summary */}
+      {/* {formData.meal_type === 'composed' && formData.ingredients.length > 0 && (
+        <NutritionalSummaryCard totals={calculateTotalsForm()} />
+      )}
+      {formData.meal_type === 'standalone' && (
+        <NutritionalSummaryCard totals={{
+          calories: formData.calories,
+          protein: formData.protein,
+          carbs: formData.carbs,
+          fat: formData.fat,
+        }} />
+      )} */}
+
+      {/* Buttons */}
+      {/* <div className="flex gap-2">
+        <Button type="submit" className="bg-emerald-500 hover:bg-emerald-600" disabled={isLoading}>
+          Add Meal
+        </Button>
+        <Button type="button" variant="outline" onClick={resetForm} disabled={isLoading}>
+          Cancel
+        </Button>
+      </div>
+    </form> */}
 
         {/* Nutritional Summary */}
-        {formData.ingredients.length > 0 && (
+        {formData.meal_type === 'composed' && formData.ingredients.length > 0 && (
           <NutritionalSummaryCard totals={calculateTotalsForm()} />
+        )}
+        {formData.meal_type === 'standalone' && (
+          <NutritionalSummaryCard totals={{
+            calories: formData.calories,
+            protein: formData.protein,
+            carbs: formData.carbs,
+            fat: formData.fat,
+          }} />
         )}
 
         {/* Buttons */}
@@ -584,7 +788,6 @@ const MealManagementModal = ({
           </Button>
         </div>
       </form>
-
     </div>
   )
 
@@ -619,52 +822,123 @@ const MealManagementModal = ({
         <Label htmlFor="meal-name">Meal Name</Label>
         <Input
           id="meal-name"
-          value={comboName}
-          onChange={(e) => setComboName(e.target.value)}
+          value={formData.name}
+          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
           placeholder="e.g., Protein Power Bowl"
           className="mt-1"
         />
       </div>
 
-      {/* Ingredients */}
+      {/* Meal Type */}
       <div>
-        <Label>Available Ingredients</Label>
-        <div className="mt-2 max-h-60 overflow-y-auto">
-          {/* Search Bar - Sticky */}
-          <div className="sticky top-0 z-10 bg-background pb-2">
-            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-          </div>
+        <Label htmlFor="meal-type">Meal Type</Label>
+        <Select
+          value={formData.meal_type}
+          onValueChange={(value) => setFormData(prev => ({ ...prev, meal_type: value as 'composed' | 'standalone' }))}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select a meal type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="composed">Composed</SelectItem>
+            <SelectItem value="standalone">Standalone</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-          <div className="grid gap-2">
-            {isLoading ? (
-              // Show loading skeletons for ingredients
-              Array.from({ length: 6 }).map((_, index) => (
-                <IngredientSkeleton key={index} index={index} />
-              ))
-            ) : (
-              filteredIngredients.map((ingredient) => (
-                <Card
-                  key={ingredient.id}
-                  className="cursor-pointer hover:bg-emerald-50 bg-emerald-50 dark:hover:bg-emerald-950 dark:bg-emerald-900 transition-all duration-200 active:scale-95 active:bg-emerald-100 dark:active:bg-emerald-800"
-                  onClick={() => addIngredient(ingredient)}
-                >
-                  <CardContent className="p-3">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h4 className="font-medium">{ingredient.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {ingredient.calories} cal per {ingredient.unit}
-                        </p>
+      {/* Ingredients - Only for Composed Meals */}
+      {formData.meal_type === 'composed' && (
+        <div>
+          <Label>Available Ingredients</Label>
+          <div className="mt-2 max-h-60 overflow-y-auto">
+            {/* Search Bar - Sticky */}
+            <div className="sticky top-0 z-10 bg-background pb-2">
+              <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            </div>
+
+            <div className="grid gap-2">
+              {isLoading ? (
+                // Show loading skeletons for ingredients
+                Array.from({ length: 6 }).map((_, index) => (
+                  <IngredientSkeleton key={index} index={index} />
+                ))
+              ) : (
+                filteredIngredients.map((ingredient) => (
+                  <Card
+                    key={ingredient.id}
+                    className="cursor-pointer hover:bg-emerald-50 bg-emerald-50 dark:hover:bg-emerald-950 dark:bg-emerald-900 transition-all duration-200 active:scale-95 active:bg-emerald-100 dark:active:bg-emerald-800"
+                    onClick={() => addIngredient(ingredient)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="font-medium">{ingredient.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {ingredient.calories} cal per {ingredient.unit}
+                          </p>
+                        </div>
+                        <Plus className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                       </div>
-                      <Plus className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Macro Inputs - Only for Standalone Meals */}
+      {formData.meal_type === 'standalone' && (
+        <div className="space-y-4">
+          <Label>Nutritional Information</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="calories">Calories</Label>
+              <Input
+                id="calories"
+                type="number"
+                value={formData.calories}
+                onChange={(e) => setFormData(prev => ({ ...prev, calories: parseInt(e.target.value) || 0 }))}
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <Label htmlFor="protein">Protein (g)</Label>
+              <Input
+                id="protein"
+                type="number"
+                value={formData.protein}
+                onChange={(e) => setFormData(prev => ({ ...prev, protein: parseFloat(e.target.value) || 0 }))}
+                placeholder="0"
+                step="0.1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="carbs">Carbs (g)</Label>
+              <Input
+                id="carbs"
+                type="number"
+                value={formData.carbs}
+                onChange={(e) => setFormData(prev => ({ ...prev, carbs: parseFloat(e.target.value) || 0 }))}
+                placeholder="0"
+                step="0.1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="fat">Fat (g)</Label>
+              <Input
+                id="fat"
+                type="number"
+                value={formData.fat}
+                onChange={(e) => setFormData(prev => ({ ...prev, fat: parseFloat(e.target.value) || 0 }))}
+                placeholder="0"
+                step="0.1"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Notes */}
       <Collapsible open={!notesCollapsed} onOpenChange={(open) => setNotesCollapsed(!open)}>
@@ -730,7 +1004,6 @@ const MealManagementModal = ({
     </div>
   )
 
-
   // Shows all meals
   const rightColumnEdit = (
     <div className="space-y-4 min-h-[65vh]">
@@ -762,10 +1035,21 @@ const MealManagementModal = ({
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-medium">{meal.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {meal.ingredients.map(i => `${i.name} (${i.quantity})`).join(', ')}
-                        </p>
+                        <h4 className={`font-medium ${meal.meal_type === 'standalone' ? 'text-yellow-500' : ''}`}>{meal.name}</h4>
+                        {(meal?.ingredients?.length > 0) && (
+                          <p className="text-sm text-muted-foreground">
+                            {meal.meal_type === 'composed' ? 
+                            (meal?.ingredients?.map(i => `${i.name} (${i.quantity})`)).join(', ') || ""
+                            : 
+                            `${meal.calories} cal | ${meal.protein}g P | ${meal.carbs}g C | ${meal.fat}g F`
+                            }
+                          </p>
+                        )}
+                        {(meal?.ingredients?.length === 0 && meal.meal_type === 'composed') && (
+                          <p className="text-sm text-muted-foreground">
+                            No ingredients
+                          </p>
+                        )}
                       </div>
                       <div className="flex gap-1">
                         <Button

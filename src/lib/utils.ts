@@ -38,15 +38,15 @@ export const mapComboMealsWithIngredients = (
   return comboMeals.map(combo => ({
     ...combo,
     ingredients: combo.ingredients.map(item => {
-      const ingredient = allIngredients.find(ing => ing.id === item.id);
+      const ingredient = allIngredients.find(ing => ing?.id === item?.id);
       if (!ingredient) {
-        console.warn(`Ingredient with id ${item.id} not found`);
+        console.warn(`Ingredient with id ${item?.id} not found`);
         return item;
       }
       return {
         ...item,
         ...ingredient,
-        quantity: item.quantity
+        quantity: item?.quantity
       };
     })
   }));

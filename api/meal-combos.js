@@ -23,7 +23,7 @@ async function getMealCombos(req, res) {
 
 async function createMealCombo(req, res) {
   try {
-    const { name, ingredients, calories, protein, carbs, fat, notes, instructions } = req.body;
+    const { name, meal_type = 'composed', ingredients, calories, protein, carbs, fat, notes, instructions } = req.body;
     
     // Start a transaction
     await sql`BEGIN`;
@@ -38,15 +38,15 @@ async function createMealCombo(req, res) {
     
     // Insert the meal combo
     const result = await sql`
-      INSERT INTO meal_combos (name, calories, protein, carbs, fat, notes, instructions)
-      VALUES (${name}, ${calories}, ${protein}, ${carbs}, ${fat}, ${notes}, ${instructions})
+      INSERT INTO meal_combos (name, meal_type, calories, protein, carbs, fat, notes, instructions)
+      VALUES (${name}, ${meal_type}, ${calories}, ${protein}, ${carbs}, ${fat}, ${notes}, ${instructions})
       RETURNING *
     `;
     
     const mealCombo = result.rows[0];
     
-    // Insert the ingredients
-    if (ingredients && Array.isArray(ingredients)) {
+    // Insert the ingredients only for composed meals
+    if (meal_type === 'composed' && ingredients && Array.isArray(ingredients)) {
       for (const ingredient of ingredients) {
         await sql`
           INSERT INTO meal_combo_ingredients (meal_combo_id, ingredient_id, quantity)
@@ -89,7 +89,7 @@ async function updateMealCombo(req, res) {
       return;
     }
 
-    const { name, ingredients, calories, protein, carbs, fat, notes, instructions } = req.body;
+    const { name, meal_type = 'composed', ingredients, calories, protein, carbs, fat, notes, instructions } = req.body;
     
     // Start a transaction
     await sql`BEGIN`;
@@ -98,6 +98,7 @@ async function updateMealCombo(req, res) {
     const result = await sql`
       UPDATE meal_combos 
       SET name = ${name},
+          meal_type = ${meal_type},
           calories = ${calories},
           protein = ${protein},
           carbs = ${carbs},
@@ -120,8 +121,8 @@ async function updateMealCombo(req, res) {
       WHERE meal_combo_id = ${id}
     `;
     
-    // Insert the new ingredients
-    if (ingredients && Array.isArray(ingredients)) {
+    // Insert the new ingredients only for composed meals
+    if (meal_type === 'composed' && ingredients && Array.isArray(ingredients)) {
       for (const ingredient of ingredients) {
         await sql`
           INSERT INTO meal_combo_ingredients (meal_combo_id, ingredient_id, quantity)

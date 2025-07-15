@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { TrendingUp, Search, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { TrendingUp, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { 
   Card, 
   CardHeader, 
   CardTitle, 
-  Input, 
   CardContent, 
   Button, 
   DropdownMenu, 
@@ -56,28 +55,28 @@ const AvailableMeals = ({
       </CardHeader>
       <CardContent>
         <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredMealCombos.map((combo) => (
-            <Card key={combo.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer group border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          {filteredMealCombos.map((meal) => (
+            <Card key={meal.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer group border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
               <CardContent className="p-3 sm:p-4">
                 <div className="flex justify-between items-start mb-2 sm:mb-3">
-                  <h3 className="font-semibold group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors text-sm sm:text-base line-clamp-2">
-                    {combo.name}
+                  <h3 className={`font-semibold ${meal.meal_type === 'standalone' ? 'text-yellow-500' : ''} group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors text-sm sm:text-base line-clamp-2`}>
+                    {meal.name}
                   </h3>
                   <span className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400 ml-2 flex-shrink-0">
-                    {combo.calories}
+                    {meal.calories}
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
-                  {combo.ingredients.map(i => i.quantity > 1 ? `${i.name} (${i.quantity})` : i.name).join(", ")}
+                  {meal.ingredients.map(i => i.quantity > 1 ? `${i.name} (${i.quantity})` : i.name).join(", ")}
                 </p>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                   <div className="text-xs text-muted-foreground">
-                    P: {combo.protein}g | C: {combo.carbs}g | F: {combo.fat}g
+                    P: {meal.protein}g | C: {meal.carbs}g | F: {meal.fat}g
                   </div>
                   <div className="flex gap-1 w-full sm:w-auto">
                     <Button
                       size="sm"
-                      onClick={() => addMealToToday(combo)}
+                      onClick={() => addMealToToday(meal)}
                       className="bg-emerald-500 hover:bg-emerald-600 flex-1 sm:flex-none transition-all duration-150 hover:scale-105 active:scale-95"
                     >
                       Add
@@ -94,14 +93,14 @@ const AvailableMeals = ({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => {
-                          openMealEditManagement(combo.id);
+                          openMealEditManagement(meal.id);
                           // We'll handle the edit in the management modal
                         }}>
                           <Pencil className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDeleteClick(combo.id)}
+                          onClick={() => handleDeleteClick(meal.id)}
                           className="text-red-500 focus:text-red-500"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />

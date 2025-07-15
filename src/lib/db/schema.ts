@@ -30,6 +30,7 @@ export async function createTables() {
       CREATE TABLE IF NOT EXISTS meal_combos (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
+        meal_type VARCHAR(20) NOT NULL DEFAULT 'composed' CHECK (meal_type IN ('composed', 'standalone')),
         calories INTEGER NOT NULL,
         protein DECIMAL(5,2) NOT NULL,
         carbs DECIMAL(5,2) NOT NULL,

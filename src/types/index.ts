@@ -14,6 +14,7 @@ export interface Ingredient {
 
 export interface MealComboInput {
   name: string;
+  meal_type: 'composed' | 'standalone';
   ingredients: Array<{
     id: number;
     quantity: number;
@@ -46,6 +47,7 @@ export interface Meal {
 export interface MealCombo {
   id: number;
   name: string;
+  meal_type: 'composed' | 'standalone';
   calories: number;
   protein: number;
   carbs: number;
