@@ -90,16 +90,16 @@ async function deleteIngredient(req, res) {
     );
 
     if (usageCheck.rows.length > 0) {
-      const mealCombos = usageCheck.rows.map(row => row.name);
+      const meals = usageCheck.rows.map(row => row.name);
       res.status(409).json({ 
         error: 'Cannot delete ingredient while in use',
-        message: `This ingredient is currently used in ${usageCheck.rows.length} meal combo(s): ${mealCombos.join(', ')}`,
+        message: `This ingredient is currently used in ${usageCheck.rows.length} meal combo(s): ${meals.join(', ')}`,
         suggestions: [
           'Update the ingredient instead of deleting it',
           'Update the meal combo(s) to use a different ingredient',
           'Delete the meal combo(s) first, then delete this ingredient'
         ],
-        mealCombos: usageCheck.rows
+        meals: usageCheck.rows
       });
       return;
     }

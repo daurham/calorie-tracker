@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
 import { useToast } from "@/hooks";
 import {
   Button,
-  Input,
   Label,
   Dialog,
   DialogContent,
@@ -14,27 +12,27 @@ import {
   CardContent,
   SearchBar,
 } from "@/components/ui";
-import { MealCombo } from "@/types";
+import { Meal } from "@/types";
 
 interface MealLogDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddMeal: (meal: MealCombo) => void;
-  mealCombos: MealCombo[];
+  onAddMeal: (meal: Meal) => void;
+  meals: Meal[];
 }
 
-const MealLogDialog = ({ open, onOpenChange, onAddMeal, mealCombos }: MealLogDialogProps) => {
+const MealLogDialog = ({ open, onOpenChange, onAddMeal, meals }: MealLogDialogProps) => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredMeals = mealCombos.filter(meal =>
+  const filteredMeals = meals.filter(meal =>
     meal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     meal.ingredients.some(ingredient => 
       ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
-  const handleAddMeal = (meal) => {
+  const handleAddMeal = (meal: Meal) => {
     onAddMeal(meal);
     toast({
       title: "Meal logged!",
@@ -60,16 +58,7 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, mealCombos }: MealLogDia
           <div>
             <Label htmlFor="search">Search meals</Label>
             <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder="Search by name or ingredients.." />
-            {/* <div className="relative mt-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by name or ingredient..."
-                className="pl-10"
-              />
-            </div> */}
+
           </div>
 
           <div className="space-y-3 max-h-96 overflow-y-auto">

@@ -8,7 +8,6 @@ const Navbar = ({
   setIsSettingsOpen,
   setIsMealsModalOpen,
   setIsIngredientsModalOpen,
-  setIsComboModalOpen,
   setIsLogModalOpen,
 }) => {
   const navigate = useNavigate();
@@ -46,13 +45,6 @@ const Navbar = ({
         className: "border-emerald-200 hover:bg-emerald-50 dark:border-emerald-700 dark:hover:bg-emerald-950 px-2 sm:px-3",
         variant: "outline"
       },
-      // {
-      //   icon: <Plus className="h-4 w-4" />,
-      //   onClick: () => setIsComboModalOpen(true),
-      //   label: "Create Meal",
-      //   className: "border-emerald-200 hover:bg-emerald-50 dark:border-emerald-700 dark:hover:bg-emerald-950 px-2 sm:px-3",
-      //   variant: "outline"
-      // },
       {
         icon: <Plus className="h-4 w-4" />,
         onClick: () => setIsLogModalOpen(true),

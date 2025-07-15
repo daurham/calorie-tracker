@@ -1,6 +1,6 @@
 import { query } from './client';
 import { sql } from '@vercel/postgres';
-import { Ingredient, MealCombo } from '@/types';
+import { Ingredient, Meal } from '@/types';
 
 // Schema creation
 export async function createTables() {
@@ -168,9 +168,9 @@ export async function getIngredients(): Promise<Ingredient[]> {
   return result.rows as Ingredient[];
 }
 
-export async function getMealCombos(): Promise<MealCombo[]> {
+export async function getMeals(): Promise<Meal[]> {
   const result = await query('SELECT * FROM meal_combos ORDER BY name');
-  return result.rows as MealCombo[];
+  return result.rows as Meal[];
 }
 
 export async function addIngredient(ingredient: Omit<Ingredient, 'id'>): Promise<Ingredient> {
@@ -182,11 +182,11 @@ export async function addIngredient(ingredient: Omit<Ingredient, 'id'>): Promise
   return result.rows[0] as Ingredient;
 }
 
-export async function addMealCombo(mealCombo: Omit<MealCombo, 'id'>): Promise<MealCombo> {
-  const { name, calories, protein, carbs, fat, notes, instructions } = mealCombo;
+export async function addMeal(meal: Omit<Meal, 'id'>): Promise<Meal> {
+  const { name, calories, protein, carbs, fat, notes, instructions } = meal;
   const result = await query(
     'INSERT INTO meal_combos (name, calories, protein, carbs, fat, notes, instructions) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
     [name, calories, protein, carbs, fat, notes, instructions]
   );
-  return result.rows[0] as MealCombo;
+  return result.rows[0] as Meal;
 } 

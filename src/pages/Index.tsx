@@ -7,7 +7,6 @@ import {
   Navbar,
 } from "@/components";
 import { 
-  MealComboModal,
   MealLogModal,
   IngredientManagementModal,
   MealManagementModal,
@@ -31,7 +30,7 @@ import {
   fatGoal, 
   proteinGoal, 
 } from "@/settings.config";
-import { MealCombo, MealComboInput } from '@/types';
+import { Meal, MealInput } from '@/types';
 
 // Local storage keys
 const STORAGE_KEYS = {
@@ -46,7 +45,6 @@ const STORAGE_KEYS = {
 };
 
 const Index = () => {
-  const [isComboModalOpen, setIsComboModalOpen] = useState(false);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [todaysMeals, setTodaysMeals] = useState([]);
@@ -60,7 +58,7 @@ const Index = () => {
   const [isMealManagementOpen, setIsMealManagementOpen] = useState(false);
 
   const [allIngredientsData, setAllIngredientsData] = useState([]);
-  const [mealCombosData, setMealCombosData] = useState([]);
+  const [mealsData, setMealsData] = useState([]);
 
   // Collapsible states
   const [isQuickStatsOpen, setIsQuickStatsOpen] = useState(true);
@@ -87,16 +85,16 @@ const Index = () => {
   const loadData = async () => {
     try {
       setIsLoading(true);
-      const [ingredients, combos] = await Promise.all([
+      const [ingredients, meals] = await Promise.all([
         getIngredientsData(),
         getMealCombosData()
       ]);
-      const mappedCombos = mapComboMealsWithIngredients(combos, ingredients);
+      const mappedMeals = mapComboMealsWithIngredients(meals, ingredients);
       const sortedIngredients = ingredients.sort((a, b) => a.name.localeCompare(b.name));
-      const sortedCombos = mappedCombos.sort((a, b) => a.name.localeCompare(b.name));
-      setMealCombosData(sortedCombos);
+      const sortedMeals = mappedMeals.sort((a, b) => a.name.localeCompare(b.name));
+      setMealsData(sortedMeals);
       setAllIngredientsData(sortedIngredients);
-      loadLocalMealData(sortedCombos);
+      loadLocalMealData(sortedMeals);
       // You might want to store ingredients in state if needed
     } catch (error) {
       console.error('Error loading data:', error);
@@ -105,14 +103,14 @@ const Index = () => {
     }
   };
 
-  const loadLocalMealData = (mealCombosData: MealCombo[]) => {
+  const loadLocalMealData = (mealsData: Meal[]) => {
     // Load today's meals
     const savedTodaysMeals = localStorage.getItem(STORAGE_KEYS.TODAYS_MEALS);
     if (savedTodaysMeals) {
       const oldSavedMeals = JSON.parse(savedTodaysMeals);
       // Map the old comboId to the combo data, in case of updates 
       const updatedMeals = oldSavedMeals.map(oldMeal => {
-        const updatedMeal = mealCombosData.find(combo => combo.id === oldMeal.id);
+        const updatedMeal = mealsData.find(meal => meal.id === oldMeal.id);
         if (updatedMeal) {
           return {
             ...updatedMeal,
@@ -285,28 +283,28 @@ const Index = () => {
     setAllIngredientsData(prev => prev.filter(ingredient => ingredient.id !== ingredientId).sort((a, b) => a.name.localeCompare(b.name)));
   };
 
-  const handleAddMealCombo = async (mealCombo: MealComboInput) => {
+  const handleAddMealCombo = async (meal: MealInput) => {
     try {
       const response = await fetch('/api/meal-combos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mealCombo),
+        body: JSON.stringify(meal),
       });
       if (!response.ok) throw new Error('Failed to add meal combo');
       const newMealCombo = await response.json();
-      setMealCombosData(prev => [...prev, newMealCombo].sort((a, b) => a.name.localeCompare(b.name)));
+      setMealsData(prev => [...prev, newMealCombo].sort((a, b) => a.name.localeCompare(b.name)));
     } catch (error) {
       console.error('Error adding meal combo:', error);
       throw error;
     }
   };
 
-  const handleUpdateMealCombo = async (id: number, mealCombo: MealComboInput) => {
+  const handleUpdateMealCombo = async (id: number, meal: MealInput) => {
     try {
       const response = await fetch(`/api/meal-combos?id=${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mealCombo),
+        body: JSON.stringify(meal),
       });
       if (!response.ok) throw new Error('Failed to update meal combo');
       loadData();
@@ -318,7 +316,7 @@ const Index = () => {
 
   const handleDeleteMealCombo = async (id: number) => {
     try {
-      setMealCombosData(prev => prev.filter(mc => mc.id !== id));
+      setMealsData(prev => prev.filter(mc => mc.id !== id));
       const response = await fetch(`/api/meal-combos?id=${id}`, {
         method: 'DELETE',
       });
@@ -334,7 +332,7 @@ const Index = () => {
     setIsMealManagementOpen(true);
   };  
 
-  const filteredMealCombos = mealCombosData.filter(combo => 
+  const filteredMealCombos = mealsData.filter(combo => 
     combo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     combo.ingredients.some(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
@@ -345,7 +343,6 @@ const Index = () => {
       <Navbar
         setIsSettingsOpen={setIsSettingsOpen}
         setIsIngredientsModalOpen={setIsIngredientsManagementOpen}
-        setIsComboModalOpen={setIsComboModalOpen}
         setIsMealsModalOpen={setIsMealManagementOpen}
         setIsLogModalOpen={setIsLogModalOpen}
       />
@@ -394,17 +391,11 @@ const Index = () => {
       </main>
 
       {/* Modals */}
-      <MealComboModal 
-        open={isComboModalOpen} 
-        onOpenChange={setIsComboModalOpen}
-        onAddMealCombo={handleAddMealCombo}
-        availableIngredients={allIngredientsData}
-      />
       <MealLogModal 
         open={isLogModalOpen} 
         onOpenChange={setIsLogModalOpen}
         onAddMeal={addMealToToday}
-        mealCombos={mealCombosData}
+        meals={mealsData}
       />
       <SettingsMenuModal
         open={isSettingsOpen}
@@ -428,12 +419,11 @@ const Index = () => {
       <MealManagementModal
         open={isMealManagementOpen}
         onOpenChange={setIsMealManagementOpen}
-        mealCombos={mealCombosData}
+        meals={mealsData}
         availableIngredients={allIngredientsData}
         onAddMealCombo={handleAddMealCombo}
         onUpdateMealCombo={handleUpdateMealCombo}
         onDeleteMealCombo={handleDeleteMealCombo}
-        macroGoals={macroGoals}
         mealId={editingId}
         isLoading={isLoading}
       />

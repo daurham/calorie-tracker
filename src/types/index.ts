@@ -12,7 +12,7 @@ export interface Ingredient {
   is_staple?: boolean;
 }
 
-export interface MealComboInput {
+export interface MealInput {
   name: string;
   meal_type: 'composed' | 'standalone';
   ingredients: Array<{
@@ -30,11 +30,13 @@ export interface MealComboInput {
 export interface Meal {
   id: number;
   name: string;
+  meal_type: 'composed' | 'standalone';
+
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
-  timestamp: string;
+  timestamp?: string;
   notes?: string;
   instructions?: string;
   ingredients: Array<{
