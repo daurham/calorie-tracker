@@ -2,6 +2,13 @@ import { Pencil, Trash2 } from "lucide-react";
 import { SearchBar, Card, CardContent, Button } from "@/components/ui";
 import { MealSkeleton } from "@/components/skeletons";
 import { useMealManagement } from "./MealManagementContext";
+import { Meal } from "@/types";
+import IngredientsSummaryText from "@/components/IngredientsSummaryText";
+import MacroSummaryText from "@/components/MacroSummaryText";
+
+const printMealIngredients = (meal: Meal) => {
+  return meal.ingredients.map(i => i.quantity > 1 ? `${i.name} (${i.quantity}) ${i.unit}` : `${i.name} ${i.unit}`).join(", ");
+}
 
 const RightColumnEdit = () => {
   const { filteredMeals, handleEdit, handleDeleteClick, isLoading, searchQuery, setSearchQuery } = useMealManagement();
@@ -38,13 +45,14 @@ const RightColumnEdit = () => {
                     <div>
                       <h4 className={`font-medium ${meal.meal_type === 'standalone' ? 'text-yellow-500' : ''}`}>{meal.name}</h4>
                       {(meal?.ingredients?.length > 0) && (
-                        <p className="text-sm text-muted-foreground">
-                          {meal.meal_type === 'composed' ? 
-                          (meal?.ingredients?.map(i => `${i.name} (${i.quantity})`)).join(', ') || ""
-                          : 
-                          `${meal.calories} cal | ${meal.protein}g P | ${meal.carbs}g C | ${meal.fat}g F`
-                          }
-                        </p>
+                        meal.meal_type === 'composed' ? (
+                          <>
+                            <IngredientsSummaryText meal={meal} />
+                            <MacroSummaryText meal={meal} />
+                          </>
+                        ) : (
+                          <MacroSummaryText meal={meal} />
+                        )
                       )}
                       {(meal?.ingredients?.length === 0 && meal.meal_type === 'composed') && (
                         <p className="text-sm text-muted-foreground">

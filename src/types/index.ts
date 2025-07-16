@@ -10,6 +10,7 @@ export interface Ingredient {
   unit: string;
   notes?: string;
   is_staple?: boolean;
+  quantity: number;
 }
 
 export interface MealInput {
@@ -39,11 +40,7 @@ export interface Meal {
   timestamp?: string;
   notes?: string;
   instructions?: string;
-  ingredients: Array<{
-    id: number;
-    name: string;
-    quantity: number;
-  }>;
+  ingredients: Array<Ingredient>;
 }
 
 export interface MealCombo {

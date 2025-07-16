@@ -98,7 +98,7 @@ const MealManagementModal = ({
   const filteredMeals = useMemo(() =>
     meals.filter(meal =>
       meal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      meal.ingredients.some(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      meal.ingredients.some(i => i.name?.toLowerCase()?.includes(searchQuery.toLowerCase()))
     ), [meals, searchQuery]
   );
 

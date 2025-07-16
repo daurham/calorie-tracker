@@ -104,7 +104,7 @@ const LeftColumnEdit = () => {
           <Label>Ingredients</Label>
           <div className="space-y-2">
             {formData.ingredients.filter(ingredient => ingredient && ingredient.id).map((ingredient, index) => (
-                              <div key={index} className="flex gap-2 items-center">
+              <div key={index} className="flex gap-2 items-center">
                 <div className="flex-1 min-w-0 relative">
                   <select
                     value={ingredient.id.toString()}

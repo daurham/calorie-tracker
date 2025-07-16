@@ -94,7 +94,7 @@ const Index = () => {
       const sortedMeals = mappedMeals.sort((a, b) => a.name.localeCompare(b.name));
       setMealsData(sortedMeals);
       setAllIngredientsData(sortedIngredients);
-      loadLocalMealData(sortedMeals);
+      loadLocalMealData(sortedMeals as Meal[]);
       // You might want to store ingredients in state if needed
     } catch (error) {
       console.error('Error loading data:', error);
@@ -332,10 +332,11 @@ const Index = () => {
     setIsMealManagementOpen(true);
   };  
 
-  const filteredMealCombos = mealsData.filter(combo => 
-    combo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    combo.ingredients.some(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredMeals = mealsData.filter(meal => 
+    meal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    meal.ingredients.some(i => i.name?.toLowerCase()?.includes(searchQuery.toLowerCase()))
   );
+  // console.log("filteredMeals", filteredMeals);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
@@ -386,7 +387,7 @@ const Index = () => {
           addMealToToday={addMealToToday}
           openMealEditManagement={openMealEditManagement}
           handleDeleteMealCombo={handleDeleteMealCombo}
-          filteredMealCombos={filteredMealCombos}
+          filteredMeals={filteredMeals}
         />
       </main>
 

@@ -13,6 +13,9 @@ import {
   SearchBar,
 } from "./ui";
 import { AlertModal } from "./modals";
+import { Meal } from "@/types";
+import IngredientsSummaryText from "./IngredientsSummaryText";
+import MacroSummaryText from "./MacroSummaryText";
 
 const AvailableMeals = ({
   searchQuery,
@@ -20,7 +23,7 @@ const AvailableMeals = ({
   addMealToToday,
   openMealEditManagement,
   handleDeleteMealCombo,
-  filteredMealCombos,
+  filteredMeals,
 }) => {
   const [deleteMealId, setDeleteMealId] = useState<number | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -40,6 +43,11 @@ const AvailableMeals = ({
       setDeleteMealId(null);
     }
   };
+
+  const printMealIngredients = (meal: Meal) => {
+    return meal.ingredients.map(i => i.quantity > 1 ? `${i.name} (${i.quantity}) ${i.unit}` : `${i.name} ${i.unit}`).join(", ");
+  }
+
   return (
     <>
       <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
@@ -55,7 +63,7 @@ const AvailableMeals = ({
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredMealCombos.map((meal) => (
+            {filteredMeals.map((meal) => (
               <Card key={meal.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer group border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex justify-between items-start mb-2 sm:mb-3">
@@ -67,12 +75,12 @@ const AvailableMeals = ({
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
-                    {meal.ingredients.map(i => i.quantity > 1 ? `${i.name} (${i.quantity})` : i.name).join(", ")}
+                    {meal.meal_type === 'composed' &&
+                      <IngredientsSummaryText meal={meal} />
+                    }
                   </p>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <div className="text-xs text-muted-foreground">
-                      P: {meal.protein}g | C: {meal.carbs}g | F: {meal.fat}g
-                    </div>
+                    <MacroSummaryText meal={meal} />
                     <div className="flex gap-1 w-full sm:w-auto">
                       <Button
                         size="sm"
