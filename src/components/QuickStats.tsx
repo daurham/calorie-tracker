@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Calendar, ChevronDown, ChevronRight } from "lucide-react";
 import { 
   Button, 
@@ -27,6 +26,8 @@ interface QuickStatsProps {
     fat: number;
   };
   formatMacroProgress: (progress: number | string) => string;
+  isCollapsed?: boolean;
+  setIsCollapsed?: (collapsed: boolean) => void;
 }
 
 const QuickStats = ({
@@ -36,10 +37,10 @@ const QuickStats = ({
   showMacros,
   visibleMacros,
   macroProgress,
-  formatMacroProgress
+  formatMacroProgress,
+  isCollapsed = false,
+  setIsCollapsed
 }: QuickStatsProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
   const statsContent = (
     <div className="space-y-3 sm:space-y-4">
       <div className="flex justify-between items-center">
@@ -100,7 +101,7 @@ const QuickStats = ({
       <CardHeader className="pb-6">
         {/* Mobile: Collapsible */}
         <div className="block sm:hidden">
-          <Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed(!open)}>
+          <Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed?.(!open)}>
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"

@@ -8,31 +8,37 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  Card, 
+  Card,
   CardContent,
   SearchBar,
 } from "@/components/ui";
 import { Meal } from "@/types";
 import MacroSummaryText from "../MacroSummaryText";
 import IngredientsSummaryText from "../IngredientsSummaryText";
+import IngredientListSummaryText from "../IngredientListSummaryText";
 
-interface MealLogDialogProps {
+interface MealLogModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddMeal: (meal: Meal) => void;
   meals: Meal[];
 }
 
-const MealLogDialog = ({ open, onOpenChange, onAddMeal, meals }: MealLogDialogProps) => {
+const MealLogModal = ({ open, onOpenChange, onAddMeal, meals }: MealLogModalProps) => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredMeals = meals.filter(meal =>
     meal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    meal.ingredients.some(ingredient => 
+    meal.ingredients.some(ingredient =>
       ingredient.name?.toLowerCase()?.includes(searchQuery.toLowerCase())
     )
   );
+
+  const handleClose = () => {
+    setSearchQuery("");
+    onOpenChange(false);
+  }
 
   const handleAddMeal = (meal: Meal) => {
     onAddMeal(meal);
@@ -40,12 +46,11 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, meals }: MealLogDialogPr
       title: "Meal logged!",
       description: `${meal.name} (${meal.calories} cal) added to today's meals.`,
     });
-    onOpenChange(false);
-    setSearchQuery("");
+    handleClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
@@ -56,14 +61,14 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, meals }: MealLogDialogPr
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="search">Search meals</Label>
-            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder="Search by name or ingredients.." />
+        <div className="space-y-4 min-h-[65vh]">
+          <SearchBar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            placeholder="Search by name or ingredients.."
+          />
 
-          </div>
-
-          <div className="space-y-3 max-h-96 overflow-y-auto">
+          <div className="space-y-3 max-h-[58vh] overflow-y-auto">
             {filteredMeals.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
                 {searchQuery ? "No meals found matching your search." : "No meal combos available."}
@@ -77,7 +82,7 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, meals }: MealLogDialogPr
                         <h3 className="font-semibold text-lg">{meal.name}</h3>
                         <div className="text-sm text-muted-foreground mb-2">
                           {meal.meal_type === 'composed' &&
-                            <IngredientsSummaryText meal={meal} />
+                            <IngredientListSummaryText meal={meal} />
                           }
                         </div>
                         <div className="flex gap-4 text-xs text-muted-foreground">
@@ -89,7 +94,7 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, meals }: MealLogDialogPr
                           {meal.calories}
                         </div>
                         <div className="text-sm text-muted-foreground mb-3">calories</div>
-                        <Button 
+                        <Button
                           onClick={() => handleAddMeal(meal)}
                           className="bg-emerald-500 hover:bg-emerald-600"
                         >
@@ -103,15 +108,9 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, meals }: MealLogDialogPr
             )}
           </div>
         </div>
-
-        <div className="flex justify-end pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-        </div>
       </DialogContent>
     </Dialog>
   );
 };
 
-export default MealLogDialog;
+export default MealLogModal;

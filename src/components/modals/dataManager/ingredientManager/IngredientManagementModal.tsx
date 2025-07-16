@@ -7,12 +7,14 @@ import {
   Label,
   Card,
   CardContent,
-  Skeleton,
   SearchBar,
 } from "@/components/ui";
 import { ScannerModal, DataManagementModal, AlertModal } from "@/components/modals";
 import { Ingredient } from "@/types";
 import MacroSummaryText from "@/components/MacroSummaryText";
+import { LargeIngredientSkeleton } from "@/components/skeletons";
+import IngredientSummaryText from "@/components/IngredientsSummaryText";
+import { delay } from "@/lib/utils";
 
 interface IngredientManagementModalProps {
   open: boolean;
@@ -46,7 +48,6 @@ const IngredientsManagementModal = ({
     is_staple: false
   });
   const [showScanner, setShowScanner] = useState(false);
-  const [productData, setProductData] = useState(null);
   const [deleteIngredientId, setDeleteIngredientId] = useState<number | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const isMobile = useIsMobile();
@@ -70,10 +71,6 @@ const IngredientsManagementModal = ({
     });
     setIsAdding(false);
     setEditingId(null);
-    // setProductData(null);
-    // setShowScanner(false);
-    // setDeleteIngredientId(null);
-    // setShowDeleteDialog(false);
     setSearchQuery("");
   };
 
@@ -201,7 +198,7 @@ const IngredientsManagementModal = ({
 
         // Show additional suggestions in a separate toast
         if (errorData.suggestions) {
-          setTimeout(() => {
+          delay(() => {
             toast({
               title: "Suggestions",
               description: (
@@ -230,7 +227,6 @@ const IngredientsManagementModal = ({
 
   const handleDetected = (product) => {
     // console.log("Product data:", product);
-    setProductData(product);
     setShowScanner(false);
     // Here you can also populate your form automatically.
     setFormData({
@@ -389,49 +385,26 @@ const IngredientsManagementModal = ({
     </div>
   )
 
-  // Loading skeleton for ingredients
-  const IngredientSkeleton = () => (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <Skeleton className="h-5 w-32 mb-2" />
-            <Skeleton className="h-4 w-24 mb-1" />
-            <div className="flex gap-4">
-              <Skeleton className="h-3 w-8" />
-              <Skeleton className="h-3 w-8" />
-              <Skeleton className="h-3 w-8" />
-            </div>
-          </div>
-          <div className="flex gap-1">
-            <Skeleton className="h-8 w-8 rounded-md" />
-            <Skeleton className="h-8 w-8 rounded-md" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
 
   // Shows ingredients list
   const rightColumn = (
-    <div className="space-y-4">
+    <div className="space-y-4 min-h-[65vh]">
       <h3 className="text-lg font-semibold">Your Ingredients</h3>
       <div className="max-h-[60vh] overflow-y-auto">
+        {/* Search Bar - Sticky */}
+        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} isSticky={true} />
+
         {isLoading ? (
           // Show loading skeletons
           Array.from({ length: 6 }).map((_, index) => (
-            <IngredientSkeleton key={index} />
+            <LargeIngredientSkeleton key={index} />
           ))
         ) : filteredIngredients.length === 0 ? (
           <p className="text-center text-muted-foreground py-4">
-            No ingredients added yet
+            {searchQuery ? "No ingredients found matching your search." : "No ingredients added yet."}
           </p>
         ) : (
           <>
-            {/* Search Bar - Sticky */}
-            <div className="sticky top-0 z-10 bg-background pb-2">
-              <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-            </div>
 
             {/* Ingredients List */}
             <div className="space-y-2">
@@ -443,9 +416,9 @@ const IngredientsManagementModal = ({
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium">{ingredient.name}</h4>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {ingredient.calories} cal per {ingredient.unit}
-                        </p>
+                        <div className="text-sm text-muted-foreground">
+                          <IngredientSummaryText ing={ingredient} />
+                        </div>
                         <div className="flex gap-4 text-xs text-muted-foreground mt-1">
                           <MacroSummaryText data={ingredient} />
                         </div>
@@ -493,7 +466,7 @@ const IngredientsManagementModal = ({
         open={open}
         onOpenChange={(val) => {
           onOpenChange(val)
-          setTimeout(() => resetForm(), 500)
+          delay(() => resetForm())
         }}
         title="Manage Ingredients"
         description="Add, edit, or remove ingredients from your database."

@@ -1,6 +1,6 @@
 import { Card, CardContent, Skeleton } from "../ui";
 
-const IngredientSkeleton = (index) => (
+const SmallIngredientSkeleton = (index) => (
   <Card key={index} className="bg-emerald-50 dark:bg-emerald-900">
     <CardContent className="p-3">
       <div className="flex justify-between items-center">
@@ -14,4 +14,5 @@ const IngredientSkeleton = (index) => (
   </Card>
 )
 
-export default IngredientSkeleton;
+export default SmallIngredientSkeleton;
+

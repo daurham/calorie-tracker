@@ -60,6 +60,32 @@ export const generateUniqueId = () => {
   }
   uniqueIdCache.set(randomId, randomId);
   return randomId;
-
-  return uniqueIdCache.get(randomId);
 };
+
+/**
+ * Remove trailing zeros from numbers
+ * @param value - The number to trim
+ * @returns The trimmed number as a string
+ * @example 5.20 -> 5.2
+ * @example 58.80 -> 58.8
+ * @example 9.0 -> 9
+ * @example 1000.00 -> 1000
+ * @example 1000 -> 1000 (unchanged)
+ */
+export const zeroTrimmer = (value: number) => {
+  if (!value) return "0";
+  return value.toString().replace(/\.(\d*?)0+$/, (match, digits) => {
+    return digits ? `.${digits}` : '';
+  });
+}
+
+/**
+ * Delay execution of a callback function
+ * @param callback - The function to execute
+ * @param ms - The delay in milliseconds (default: 500)
+ */
+export const delay = (callback: () => void, ms = 500) => {
+  setTimeout(() => {
+    callback()
+  }, ms)
+}

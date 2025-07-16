@@ -114,10 +114,14 @@ const Index = () => {
         if (updatedMeal) {
           return {
             ...updatedMeal,
+            uniqueMealId: oldMeal?.uniqueMealId || generateUniqueId(),
             timestamp: oldMeal?.timestamp || ""
           }
         }
-        return oldMeal;
+        return {
+          ...oldMeal,
+          uniqueMealId: oldMeal?.uniqueMealId || generateUniqueId()
+        };
       });
       setTodaysMeals(updatedMeals);
 
@@ -241,7 +245,7 @@ const Index = () => {
 
   const removeMealFromToday = (mealId) => {
     if (mealId === "all") {
-      // console.log("removing all meals")
+      // console.log("removing all meals");
       todaysMeals.length = 0;
       setTodaysMeals([]);
       setDailyCalories(0);
@@ -253,6 +257,7 @@ const Index = () => {
       return;
     }
     const meal = todaysMeals.find(m => m.uniqueMealId === mealId);
+    // console.log("Removing one meal: ", meal);
     if (meal) {
       setTodaysMeals(prev => prev.filter(m => m.uniqueMealId !== mealId));
       setDailyCalories(prev => prev - meal.calories);
@@ -265,7 +270,7 @@ const Index = () => {
   };
 
   const addIngredient = async (ingredient) => {
-    console.log("adding ingredient", ingredient);
+    // console.log("adding ingredient", ingredient);
     const newIngredientResult = await addIngredientData(ingredient);
     setAllIngredientsData(prev => [...prev, newIngredientResult].sort((a, b) => a.name.localeCompare(b.name)));
   };
@@ -371,6 +376,8 @@ const Index = () => {
             visibleMacros={visibleMacros}
             macroProgress={macroProgress}
             formatMacroProgress={formatMacroProgress}
+            isCollapsed={!isQuickStatsOpen}
+            setIsCollapsed={(collapsed) => setIsQuickStatsOpen(!collapsed)}
           />
         </div>
 
@@ -378,6 +385,8 @@ const Index = () => {
         <TodaysMeals 
           meals={todaysMeals} 
           onRemoveMeal={removeMealFromToday}
+          isCollapsed={!isTodaysMealsOpen}
+          setIsCollapsed={(collapsed) => setIsTodaysMealsOpen(!collapsed)}
         />
 
         {/* Available Meal Combos */}

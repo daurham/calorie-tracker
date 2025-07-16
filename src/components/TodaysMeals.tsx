@@ -1,27 +1,73 @@
 import { useState } from "react";
 import { Trash2, Clock, ChevronDown, ChevronRight } from "lucide-react";
-import { 
-  Button, 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-  } from "@/components/ui";
+} from "@/components/ui";
 import { generateUniqueId } from "@/lib/utils";
 
 interface TodaysMealsProps {
   meals: any[];
   onRemoveMeal: (id: any) => void;
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
 }
 
-const TodaysMeals = ({ meals, onRemoveMeal }: TodaysMealsProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: TodaysMealsProps) => {
 
-  // console.log("meals", meals);
+  const TodaysMealCard = ({ meal }) => (
+    <Card className="bg-gradient-to-r from-white to-emerald-50 dark:from-slate-800 dark:to-emerald-950 border-emerald-100 dark:border-emerald-800">
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                <h3 className="font-semibold text-sm sm:text-base line-clamp-2">{meal.name}</h3>
+                {meal.timestamp && (
+                  <span className="text-xs sm:text-sm text-muted-foreground bg-white dark:bg-slate-700 px-2 py-1 rounded w-fit">
+                    {meal.timestamp}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
+                {meal.ingredients.map(i => i.name).join(", ")}
+              </p>
+            </div>
+            <div className="text-center flex-shrink-0">
+              <div className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                {meal.calories}
+              </div>
+              <div className="text-xs sm:text-sm text-muted-foreground">calories</div>
+            </div>
+          </div>
 
+          <div className="flex items-center justify-between">
+            <div className="flex gap-3 sm:gap-4 text-xs text-muted-foreground">
+              <span>P: {meal.protein}g</span>
+              <span>C: {meal.carbs}g</span>
+              <span>F: {meal.fat}g</span>
+            </div>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onRemoveMeal(meal.uniqueMealId)}
+                className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-2 h-8"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
   if (meals.length === 0) {
     return (
       <Card className="mb-6 sm:mb-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
@@ -80,57 +126,13 @@ const TodaysMeals = ({ meals, onRemoveMeal }: TodaysMealsProps) => {
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent>
-            <CardContent className="pt-4">
-              <div className="space-y-3">
-                {meals.map((meal) => (
-                  <Card key={generateUniqueId()} className="bg-gradient-to-r from-white to-emerald-50 dark:from-slate-800 dark:to-emerald-950 border-emerald-100 dark:border-emerald-800">
-                    <CardContent className="p-3 sm:p-4">
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                              <h3 className="font-semibold text-sm sm:text-base line-clamp-2">{meal.name}</h3>
-                              {meal.timestamp && (
-                                <span className="text-xs sm:text-sm text-muted-foreground bg-white dark:bg-slate-700 px-2 py-1 rounded w-fit">
-                                  {meal.timestamp}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
-                              {meal.ingredients.map(i => i.name).join(", ")}
-                            </p>
-                          </div>
-                          <div className="text-center flex-shrink-0">
-                            <div className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                              {meal.calories}
-                            </div>
-                            <div className="text-xs sm:text-sm text-muted-foreground">calories</div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex gap-3 sm:gap-4 text-xs text-muted-foreground">
-                            <span>P: {meal.protein}g</span>
-                            <span>C: {meal.carbs}g</span>
-                            <span>F: {meal.fat}g</span>
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onRemoveMeal(meal.uniqueMealId)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-2 h-8"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
+              <CardContent className="pt-4">
+                <div className="space-y-3">
+                  {meals.map((meal) => (
+                    <TodaysMealCard key={generateUniqueId()} meal={meal} />
+                  ))}
+                </div>
+              </CardContent>
             </CollapsibleContent>
           </Collapsible>
         </CardHeader>
@@ -175,51 +177,7 @@ const TodaysMeals = ({ meals, onRemoveMeal }: TodaysMealsProps) => {
             <CardContent className="pt-4">
               <div className="space-y-3">
                 {meals.map((meal) => (
-                  <Card key={generateUniqueId()} className="bg-gradient-to-r from-white to-emerald-50 dark:from-slate-800 dark:to-emerald-950 border-emerald-100 dark:border-emerald-800">
-                    <CardContent className="p-3 sm:p-4">
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                              <h3 className="font-semibold text-sm sm:text-base line-clamp-2">{meal.name}</h3>
-                              {meal.timestamp && (
-                                <span className="text-xs sm:text-sm text-muted-foreground bg-white dark:bg-slate-700 px-2 py-1 rounded w-fit">
-                                  {meal.timestamp}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
-                              {meal.ingredients.map(i => i.name).join(", ")}
-                            </p>
-                          </div>
-                          <div className="text-center flex-shrink-0">
-                            <div className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                              {meal.calories}
-                            </div>
-                            <div className="text-xs sm:text-sm text-muted-foreground">calories</div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex gap-3 sm:gap-4 text-xs text-muted-foreground">
-                            <span>P: {meal.protein}g</span>
-                            <span>C: {meal.carbs}g</span>
-                            <span>F: {meal.fat}g</span>
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onRemoveMeal(meal.uniqueMealId)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-2 h-0 py-0"
-                            >
-                              <Trash2 className="h-0 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <TodaysMealCard key={generateUniqueId()} meal={meal} />
                 ))}
               </div>
             </CardContent>

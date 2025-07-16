@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Settings, Calculator, ArrowLeft } from "lucide-react";
 import {
   Button, 
@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui";
+import { delay } from "@/lib/utils";
 
 interface SettingsMenuProps {
   open: boolean;
@@ -42,7 +43,42 @@ const SettingsMenu = ({
   onVisibleMacrosChange
 }: SettingsMenuProps) => {
   const [showBMICalculator, setShowBMICalculator] = useState(false);
+  
+  // Store original values for reset functionality
+  const [originalValues, setOriginalValues] = useState({
+    dailyGoal: 0,
+    macroGoals: { protein: 0, carbs: 0, fat: 0 },
+    visibleMacros: { protein: true, carbs: true, fat: true }
+  });
 
+  // Initialize original values when modal opens
+  useEffect(() => {
+    if (open) {
+      setOriginalValues({
+        dailyGoal,
+        macroGoals,
+        visibleMacros
+      });
+    }
+  }, [open, dailyGoal, macroGoals, visibleMacros]);
+
+  // Reset settings when closed
+  const handleClose = () => {
+    // Reset to original values
+    onDailyGoalChange(originalValues.dailyGoal);
+    onMacroGoalsChange(originalValues.macroGoals);
+    onVisibleMacrosChange(originalValues.visibleMacros);
+    
+    // delay to allow for the reset to take effect
+    delay(() => {
+      // Reset BMI calculator view
+      setShowBMICalculator(false);
+    })
+    
+    // Close the modal
+    onOpenChange(false);
+  }
+  
   const handleGoalChange = (macro: string, value: string) => {
     onMacroGoalsChange({
       ...macroGoals,
@@ -124,6 +160,8 @@ const SettingsMenu = ({
 
     // Reset to settings view
     setShowBMICalculator(false);
+
+
   };
 
   const BMICalculator = () => {
@@ -364,7 +402,7 @@ const SettingsMenu = ({
               <Button 
                 type="button"
                 variant="outline" 
-                onClick={() => onOpenChange(false)}
+                onClick={handleClose}
               >
                 Cancel
               </Button>
@@ -377,7 +415,13 @@ const SettingsMenu = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      if (!newOpen) {
+        handleClose();
+      } else {
+        onOpenChange(newOpen);
+      }
+    }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

@@ -8,6 +8,7 @@ import LeftColumnAdd from "./LeftColumnAdd";
 import LeftColumnEdit from "./LeftColumnEdit";
 import LeftColumnNeutral from "./LeftColumnNeutral";
 import { MealManagementProvider } from "./MealManagementContext";
+import { delay } from "@/lib/utils";
 
 interface MealManagementModalProps {
   open: boolean;
@@ -117,6 +118,8 @@ const MealManagementModal = ({
     // For standalone meals, use the formData values directly
     if (formData.meal_type === 'standalone') {
       const meal = meals.find(meal => meal.id === editingId);
+        // console.log(formData);
+        // console.log(meal);
       return {
         calories: formData.calories,
         protein: formData.protein,
@@ -158,6 +161,7 @@ const MealManagementModal = ({
   // Reset selectedIngredients when mealType changes
   useEffect(() => {
     setSelectedIngredients([]);
+    // console.log("formData mealType change", formData);
   }, [mealType]);
 
 
@@ -552,7 +556,7 @@ const MealManagementModal = ({
           open={open}
           onOpenChange={(val) => {
             onOpenChange(val)
-            setTimeout(() => resetForm(), 500)
+            delay(resetForm)
           }}
           title="Manage Meals"
           description="Add, edit, or remove meals from your database."

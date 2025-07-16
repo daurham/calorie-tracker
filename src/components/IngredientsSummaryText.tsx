@@ -1,30 +1,22 @@
-import { Meal } from '@/types';
+import { Ingredient, Meal } from '@/types';
 
-const UnitText = ({ unit }: { unit: string }) => {
-  // Remove any whitespace from the unit
-  const trimmedUnit = unit.replace(/\s/g, '');
+const Highlighter = ({ text }: { text: string }) => {
+  // Remove all spaces from the text
+  // const trimmedUnit = text.replace(/\s/g, '');
   return (
-    <span className="text-xs text-muted-foreground text-emerald-500 dark:text-emerald-400">
-      {trimmedUnit}
+    <span className="text-xs text-emerald-600 dark:text-emerald-400">
+      {text}
     </span>
   );
 }
 
-const IngredientsSummaryText = ({ meal }: { meal: Meal }) => {
+
+const IngredientSummaryText = ({ ing }: { ing: Ingredient }) => {
   return (
     <p className="text-sm text-muted-foreground">
-      {meal.ingredients.map((ingredient, index) => (
-        <span key={ingredient.id}>
-          {ingredient.quantity > 1 
-            ? `${ingredient.name} (${ingredient.quantity}) `
-            : `${ingredient.name} `
-          }
-          <UnitText unit={ingredient.unit} />
-          {index < meal.ingredients.length - 1 && ", "}
-        </span>
-      ))}
+      <Highlighter text={`${ing.calories} calories`} /> per <Highlighter text={ing.unit} />
     </p>
   );
 }
 
-export default IngredientsSummaryText;
+export default IngredientSummaryText;
