@@ -1,4 +1,4 @@
-import { Meal } from "@/types";
+import { Ingredient, Meal } from "@/types";
 
 const UnitText = ({ unit }: { unit: string }) => {
   return (
@@ -8,10 +8,14 @@ const UnitText = ({ unit }: { unit: string }) => {
   );
 }
 
-const MacroSummaryText = ({ meal }: { meal: Meal }) => {
+const MacroSummaryText = ({ data, showCalories = false }: { data: Meal | Ingredient, showCalories?: boolean }) => {
   return (
-    <p className="text-sm text-muted-foreground">
-      {meal.calories} <UnitText unit="cal" /> | {meal.protein}g <UnitText unit=" P" /> | {meal.carbs}g <UnitText unit=" C" /> | {meal.fat}g <UnitText unit=" F" />
+    <p className="text-xs text-muted-foreground">
+      {showCalories && <span>Calories: <UnitText unit={`${data.calories}`} /> </span>}
+      <span>Protein: <UnitText unit={`${data.protein}g`} /> </span>
+      <span>Carbs: <UnitText unit={`${data.carbs}g`} /> </span>
+      <span>Fat: <UnitText unit={`${data.fat}g`} /> </span>
+      {/* {meal.calories} <UnitText unit="cal" /> | {meal.protein}g <UnitText unit=" P" /> | {meal.carbs}g <UnitText unit=" C" /> | {meal.fat}g <UnitText unit=" F" /> */}
     </p>
   )
 }

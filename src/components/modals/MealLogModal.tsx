@@ -13,6 +13,8 @@ import {
   SearchBar,
 } from "@/components/ui";
 import { Meal } from "@/types";
+import MacroSummaryText from "../MacroSummaryText";
+import IngredientsSummaryText from "../IngredientsSummaryText";
 
 interface MealLogDialogProps {
   open: boolean;
@@ -28,7 +30,7 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, meals }: MealLogDialogPr
   const filteredMeals = meals.filter(meal =>
     meal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     meal.ingredients.some(ingredient => 
-      ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
+      ingredient.name?.toLowerCase()?.includes(searchQuery.toLowerCase())
     )
   );
 
@@ -73,13 +75,13 @@ const MealLogDialog = ({ open, onOpenChange, onAddMeal, meals }: MealLogDialogPr
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg">{meal.name}</h3>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {meal.ingredients.map(i => i.name).join(", ")}
-                        </p>
+                        <div className="text-sm text-muted-foreground mb-2">
+                          {meal.meal_type === 'composed' &&
+                            <IngredientsSummaryText meal={meal} />
+                          }
+                        </div>
                         <div className="flex gap-4 text-xs text-muted-foreground">
-                          <span>Protein: {meal.protein}g</span>
-                          <span>Carbs: {meal.carbs}g</span>
-                          <span>Fat: {meal.fat}g</span>
+                          <MacroSummaryText data={meal} />
                         </div>
                       </div>
                       <div className="text-right ml-4">

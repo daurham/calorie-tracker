@@ -4,7 +4,7 @@ const UnitText = ({ unit }: { unit: string }) => {
   // Remove any whitespace from the unit
   const trimmedUnit = unit.replace(/\s/g, '');
   return (
-    <span className="text-xs text-muted-foreground text-emerald-600 dark:text-emerald-400">
+    <span className="text-xs text-muted-foreground text-emerald-500 dark:text-emerald-400">
       {trimmedUnit}
     </span>
   );

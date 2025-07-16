@@ -48,10 +48,10 @@ const RightColumnEdit = () => {
                         meal.meal_type === 'composed' ? (
                           <>
                             <IngredientsSummaryText meal={meal} />
-                            <MacroSummaryText meal={meal} />
+                            <MacroSummaryText data={meal} />
                           </>
                         ) : (
-                          <MacroSummaryText meal={meal} />
+                          <MacroSummaryText data={meal} />
                         )
                       )}
                       {(meal?.ingredients?.length === 0 && meal.meal_type === 'composed') && (

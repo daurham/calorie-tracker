@@ -12,6 +12,7 @@ import {
 } from "@/components/ui";
 import { ScannerModal, DataManagementModal, AlertModal } from "@/components/modals";
 import { Ingredient } from "@/types";
+import MacroSummaryText from "@/components/MacroSummaryText";
 
 interface IngredientManagementModalProps {
   open: boolean;
@@ -446,9 +447,7 @@ const IngredientsManagementModal = ({
                           {ingredient.calories} cal per {ingredient.unit}
                         </p>
                         <div className="flex gap-4 text-xs text-muted-foreground mt-1">
-                          <span>P: {ingredient.protein}g</span>
-                          <span>C: {ingredient.carbs}g</span>
-                          <span>F: {ingredient.fat}g</span>
+                          <MacroSummaryText data={ingredient} />
                         </div>
                       </div>
                       <div className="flex gap-1">

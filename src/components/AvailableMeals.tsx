@@ -74,13 +74,13 @@ const AvailableMeals = ({
                       {meal.calories}
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
+                  <div className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
                     {meal.meal_type === 'composed' &&
                       <IngredientsSummaryText meal={meal} />
                     }
-                  </p>
+                  </div>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <MacroSummaryText meal={meal} />
+                    <MacroSummaryText data={meal} />
                     <div className="flex gap-1 w-full sm:w-auto">
                       <Button
                         size="sm"
