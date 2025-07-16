@@ -256,10 +256,10 @@ const MealManagementModal = ({
     const isAdding = mode === 'add' || (mode === 'edit' && addAsNew);
     const isEditing = mode === 'edit' && !addAsNew;
 
-    // console.log("#### Running handleSubmit ####");
-    // console.log('MODE: ', mode);
-    // console.log('IS ADDING: ', isAdding);
-    // console.log('IS EDITING: ', isEditing);
+    console.log("#### Running handleSubmit ####");
+    console.log('MODE: ', mode);
+    console.log('IS ADDING: ', isAdding);
+    console.log('IS EDITING: ', isEditing);
 
     // Validate meal name
     if (!formData.name.trim()) {
@@ -274,7 +274,7 @@ const MealManagementModal = ({
     // Validate for add operations - check if meal already exists
     if (isAdding && meals.find(meal => meal.name === formData.name)) {
       toast({
-        title: "Meal already exists",
+        title: `${formData.name} already exists`,
         description: "Please choose a different name.",
         variant: "destructive",
       });
@@ -312,6 +312,7 @@ const MealManagementModal = ({
       if (mealData) {
         const trimmedMealData = trimGhostData(mealData);
         if (
+          trimmedMealData.name === formData.name &&
           trimmedMealData.ingredients.length === formData.ingredients.length &&
           trimmedMealData.ingredients.every((ing, index) => ing.id === formData.ingredients[index].id) &&
           trimmedMealData.notes === formData.notes &&
