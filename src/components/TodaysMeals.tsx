@@ -11,7 +11,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui";
 import { generateUniqueId } from "@/lib/utils";
-
+import MacroSummaryText from "./MacroSummaryText";
 interface TodaysMealsProps {
   meals: any[];
   onRemoveMeal: (id: any) => void;
@@ -48,11 +48,7 @@ const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: Today
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="flex gap-3 sm:gap-4 text-xs text-muted-foreground">
-              <span>P: {meal.protein}g</span>
-              <span>C: {meal.carbs}g</span>
-              <span>F: {meal.fat}g</span>
-            </div>
+            <MacroSummaryText data={meal} showCalories={false} />
             <div className="flex gap-1">
               <Button
                 variant="ghost"

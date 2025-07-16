@@ -1,4 +1,4 @@
-import { Ingredient, Meal } from '@/types';
+import { Ingredient } from '@/types';
 
 const Highlighter = ({ text }: { text: string }) => {
   // Remove all spaces from the text

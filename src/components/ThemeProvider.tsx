@@ -1,7 +1,7 @@
-import { 
-  createContext, 
-  useContext, 
-  useEffect, 
+import {
+  createContext,
+  useContext,
+  useEffect,
   useState,
 } from "react";
 

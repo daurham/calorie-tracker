@@ -14,7 +14,7 @@ import {
 } from "@/components/ui";
 import { Meal } from "@/types";
 import MacroSummaryText from "../MacroSummaryText";
-import IngredientsSummaryText from "../IngredientsSummaryText";
+import IngredientsSummaryText from "../IngredientSummaryText";
 import IngredientListSummaryText from "../IngredientListSummaryText";
 
 interface MealLogModalProps {

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Settings, Calculator, ArrowLeft } from "lucide-react";
 import {
-  Button, 
-  Label, 
-  Input, 
+  Button,
+  Label,
+  Input,
   Switch,
   Dialog,
   DialogContent,
@@ -32,18 +32,18 @@ interface SettingsMenuProps {
   onVisibleMacrosChange: (visible: { protein: boolean; carbs: boolean; fat: boolean }) => void;
 }
 
-const SettingsMenu = ({ 
-  open, 
-  onOpenChange, 
+const SettingsMenu = ({
+  open,
+  onOpenChange,
   dailyGoal,
   onDailyGoalChange,
-  macroGoals, 
+  macroGoals,
   onMacroGoalsChange,
   visibleMacros,
   onVisibleMacrosChange
 }: SettingsMenuProps) => {
   const [showBMICalculator, setShowBMICalculator] = useState(false);
-  
+
   // Store original values for reset functionality
   const [originalValues, setOriginalValues] = useState({
     dailyGoal: 0,
@@ -68,17 +68,17 @@ const SettingsMenu = ({
     onDailyGoalChange(originalValues.dailyGoal);
     onMacroGoalsChange(originalValues.macroGoals);
     onVisibleMacrosChange(originalValues.visibleMacros);
-    
+
     // delay to allow for the reset to take effect
     delay(() => {
       // Reset BMI calculator view
       setShowBMICalculator(false);
     })
-    
+
     // Close the modal
     onOpenChange(false);
   }
-  
+
   const handleGoalChange = (macro: string, value: string) => {
     onMacroGoalsChange({
       ...macroGoals,
@@ -264,7 +264,7 @@ const SettingsMenu = ({
             </select>
           </div>
 
-          <Button 
+          <Button
             type="submit"
             className="w-full bg-emerald-500 hover:bg-emerald-600"
           >
@@ -281,21 +281,21 @@ const SettingsMenu = ({
       e.preventDefault();
       console.log('Form submitted!');
       const formData = new FormData(e.currentTarget);
-      
+
       const newDailyGoal = parseFloat(formData.get('dailyGoal') as string) || 0;
       const newProtein = parseFloat(formData.get('protein') as string) || 0;
       const newCarbs = parseFloat(formData.get('carbs') as string) || 0;
       const newFat = parseFloat(formData.get('fat') as string) || 0;
-      
+
       console.log('New values:', { newDailyGoal, newProtein, newCarbs, newFat });
-      
+
       onDailyGoalChange(newDailyGoal);
       onMacroGoalsChange({
         protein: newProtein,
         carbs: newCarbs,
         fat: newFat
       });
-      
+
       // Close the dialog after saving
       onOpenChange(false);
     };
@@ -382,26 +382,26 @@ const SettingsMenu = ({
             <p className="text-sm text-muted-foreground mb-3">
               Not sure about your goals? Calculate them based on your BMI and activity level.
             </p>
-            <Button 
+            <Button
               type="button"
-              variant="outline" 
+              variant="outline"
               onClick={() => setShowBMICalculator(true)}
               className="w-full mb-4"
             >
               <Calculator className="h-4 w-4 mr-2" />
               Calculate Goals with BMI
             </Button>
-            
+
             <div className="flex justify-end gap-2">
-            <Button 
+              <Button
                 type="submit"
                 className="bg-emerald-500 hover:bg-emerald-600"
               >
                 Save Changes
               </Button>
-              <Button 
+              <Button
                 type="button"
-                variant="outline" 
+                variant="outline"
                 onClick={handleClose}
               >
                 Cancel
@@ -438,7 +438,7 @@ const SettingsMenu = ({
             )}
           </DialogTitle>
           <DialogDescription>
-            {showBMICalculator 
+            {showBMICalculator
               ? "Enter your details to calculate personalized nutrition goals."
               : "Configure your daily goals and visibility preferences."
             }

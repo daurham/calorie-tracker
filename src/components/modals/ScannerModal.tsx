@@ -135,7 +135,7 @@ const ScannerModal = ({ onDetected, onClose }) => {
     <div className="fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50 p-4">
       <div className="bg-slate-900 rounded-lg p-4 max-w-md w-full text-center">
         <h3>Barcode Lookup</h3>
-        
+
         {/* Mode Toggle */}
         <div className="mb-4">
           <Button
@@ -169,7 +169,7 @@ const ScannerModal = ({ onDetected, onClose }) => {
                 }}
               />
             </div>
-            
+
             <div className="flex gap-2 justify-center">
               <Button
                 onClick={handleManualLookup}
@@ -184,14 +184,14 @@ const ScannerModal = ({ onDetected, onClose }) => {
                 Lookup
               </Button>
               <Button
-              onClick={() => {
-                stopScanner();
-                onClose();
-              }}
-              className="px-4 py-2"
-              variant="secondary"
-            >
-              Cancel
+                onClick={() => {
+                  stopScanner();
+                  onClose();
+                }}
+                className="px-4 py-2"
+                variant="secondary"
+              >
+                Cancel
               </Button>
             </div>
           </div>
@@ -214,7 +214,7 @@ const ScannerModal = ({ onDetected, onClose }) => {
         {error && (
           <p className="text-red-500 mt-2">{error}</p>
         )}
-        
+
         {!loading && !isManualMode && (
           <div className="mt-3">
             <Button
@@ -239,7 +239,7 @@ const ScannerModal = ({ onDetected, onClose }) => {
             </Button>
           </div>
         )}
-        
+
         {/* {isManualMode && (
           <div className="mt-3">
             <Button

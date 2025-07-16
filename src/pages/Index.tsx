@@ -1,34 +1,34 @@
 import { useState, useEffect } from "react";
-import { 
-  TodaysMeals, 
+import {
+  TodaysMeals,
   TodaysProgress,
-  QuickStats, 
+  QuickStats,
   AvailableMeals,
   Navbar,
 } from "@/components";
-import { 
+import {
   MealLogModal,
   IngredientManagementModal,
   MealManagementModal,
   SettingsMenuModal,
 } from "@/components/modals";
-import { 
-  addIngredientData, 
-  deleteIngredientData, 
+import {
+  addIngredientData,
+  deleteIngredientData,
   getIngredientsData,
-  getMealCombosData, 
+  getMealCombosData,
   updateIngredientData,
 } from "@/lib/data-source";
-import { 
-  formatMacroProgress, 
+import {
+  formatMacroProgress,
   mapComboMealsWithIngredients,
   generateUniqueId
 } from "@/lib/utils";
-import { 
-  caloricGoal, 
-  carbsGoal, 
-  fatGoal, 
-  proteinGoal, 
+import {
+  caloricGoal,
+  carbsGoal,
+  fatGoal,
+  proteinGoal,
 } from "@/settings.config";
 import { Meal, MealInput } from '@/types';
 
@@ -53,7 +53,7 @@ const Index = () => {
   const [showMacros, setShowMacros] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [isIngredientsManagementOpen, setIsIngredientsManagementOpen] = useState(false);
   const [isMealManagementOpen, setIsMealManagementOpen] = useState(false);
 
@@ -63,7 +63,7 @@ const Index = () => {
   // Collapsible states
   const [isQuickStatsOpen, setIsQuickStatsOpen] = useState(true);
   const [isTodaysMealsOpen, setIsTodaysMealsOpen] = useState(true);
-  const [isMealCombosOpen, setIsMealCombosOpen] = useState(true);  
+  const [isMealCombosOpen, setIsMealCombosOpen] = useState(true);
   // Configurable goals
   const [dailyGoal, setDailyGoal] = useState(caloricGoal);
   const [macroGoals, setMacroGoals] = useState({
@@ -71,7 +71,7 @@ const Index = () => {
     carbs: carbsGoal,   // grams
     fat: fatGoal       // grams
   });
-  
+
   const [visibleMacros, setVisibleMacros] = useState({
     protein: true,
     carbs: true,
@@ -219,7 +219,7 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.MEAL_COMBOS_OPEN, JSON.stringify(isMealCombosOpen));
   }, [isMealCombosOpen]);
-  
+
   const progressPercentage = Math.min((dailyCalories / dailyGoal) * 100, 100);
   const macroProgress = {
     protein: Math.min((dailyMacros.protein / macroGoals.protein) * 100, 100),
@@ -228,10 +228,10 @@ const Index = () => {
   };
 
   const addMealToToday = (meal) => {
-    const mealWithId = { 
-      ...meal, 
-      id: meal.id, 
-      uniqueMealId: generateUniqueId(), 
+    const mealWithId = {
+      ...meal,
+      id: meal.id,
+      uniqueMealId: generateUniqueId(),
       timestamp: new Date().toLocaleTimeString()
     };
     setTodaysMeals(prev => [...prev, mealWithId]);
@@ -288,7 +288,7 @@ const Index = () => {
     setAllIngredientsData(prev => prev.filter(ingredient => ingredient.id !== ingredientId).sort((a, b) => a.name.localeCompare(b.name)));
   };
 
-  const handleAddMealCombo = async (meal: MealInput) => {
+  const handleAddMeal = async (meal: MealInput) => {
     try {
       const response = await fetch('/api/meal-combos', {
         method: 'POST',
@@ -335,9 +335,9 @@ const Index = () => {
   const openMealEditManagement = (id: number) => {
     setEditingId(id);
     setIsMealManagementOpen(true);
-  };  
+  };
 
-  const filteredMeals = mealsData.filter(meal => 
+  const filteredMeals = mealsData.filter(meal =>
     meal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     meal.ingredients.some(i => i.name?.toLowerCase()?.includes(searchQuery.toLowerCase()))
   );
@@ -367,7 +367,7 @@ const Index = () => {
             todaysMeals={todaysMeals}
           />
 
-        {/* Quick Stats */}
+          {/* Quick Stats */}
           <QuickStats
             todaysMeals={todaysMeals}
             dailyCalories={dailyCalories}
@@ -382,15 +382,15 @@ const Index = () => {
         </div>
 
         {/* Today's Meals */}
-        <TodaysMeals 
-          meals={todaysMeals} 
+        <TodaysMeals
+          meals={todaysMeals}
           onRemoveMeal={removeMealFromToday}
           isCollapsed={!isTodaysMealsOpen}
           setIsCollapsed={(collapsed) => setIsTodaysMealsOpen(!collapsed)}
         />
 
         {/* Available Meal Combos */}
-        <AvailableMeals 
+        <AvailableMeals
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           addMealToToday={addMealToToday}
@@ -401,8 +401,8 @@ const Index = () => {
       </main>
 
       {/* Modals */}
-      <MealLogModal 
-        open={isLogModalOpen} 
+      <MealLogModal
+        open={isLogModalOpen}
         onOpenChange={setIsLogModalOpen}
         onAddMeal={addMealToToday}
         meals={mealsData}
@@ -428,10 +428,16 @@ const Index = () => {
       />
       <MealManagementModal
         open={isMealManagementOpen}
-        onOpenChange={setIsMealManagementOpen}
+        onOpenChange={(open) => {
+          // reset editingId when modal is closed
+          setIsMealManagementOpen(open);
+          if (!open) {
+            setEditingId(null);
+          }
+        }}
         meals={mealsData}
         availableIngredients={allIngredientsData}
-        onAddMealCombo={handleAddMealCombo}
+        onAddMealCombo={handleAddMeal}
         onUpdateMealCombo={handleUpdateMealCombo}
         onDeleteMealCombo={handleDeleteMealCombo}
         mealId={editingId}
@@ -440,6 +446,6 @@ const Index = () => {
     </div>
   );
 };
-   
+
 
 export default Index;

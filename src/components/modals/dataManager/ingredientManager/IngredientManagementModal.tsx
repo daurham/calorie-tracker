@@ -13,7 +13,7 @@ import { ScannerModal, DataManagementModal, AlertModal } from "@/components/moda
 import { Ingredient } from "@/types";
 import MacroSummaryText from "@/components/MacroSummaryText";
 import { LargeIngredientSkeleton } from "@/components/skeletons";
-import IngredientSummaryText from "@/components/IngredientsSummaryText";
+import IngredientSummaryText from "@/components/IngredientSummaryText";
 import { delay } from "@/lib/utils";
 
 interface IngredientManagementModalProps {

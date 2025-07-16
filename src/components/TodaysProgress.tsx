@@ -1,10 +1,10 @@
 import { Target, Eye, EyeOff } from "lucide-react";
-import { 
-  Button, 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   Progress,
 } from "@/components/ui";
 import { formatMacros } from "@/lib/utils";
@@ -76,12 +76,12 @@ const TodaysProgress = ({
             <span className="font-bold text-sm sm:text-base">{dailyCalories} / {dailyGoal}</span>
           </div>
           <Progress value={progressPercentage} className="h-2 sm:h-3 bg-white/20" />
-          
+
           {/* Macro Progress */}
           {showMacros && (
             <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-white/20">
               <div className="text-sm opacity-90 mb-2">Macros</div>
-              
+
               {/* Protein */}
               {visibleMacros.protein && (
                 <div className="space-y-1">
@@ -92,7 +92,7 @@ const TodaysProgress = ({
                   <Progress value={macroProgress.protein} className="h-1.5 sm:h-2 bg-white/20" />
                 </div>
               )}
-              
+
               {/* Carbs */}
               {visibleMacros.carbs && (
                 <div className="space-y-1">
@@ -103,7 +103,7 @@ const TodaysProgress = ({
                   <Progress value={macroProgress.carbs} className="h-1.5 sm:h-2 bg-white/20" />
                 </div>
               )}
-              
+
               {/* Fat */}
               {visibleMacros.fat && (
                 <div className="space-y-1">
@@ -116,7 +116,7 @@ const TodaysProgress = ({
               )}
             </div>
           )}
-          
+
           <div className="grid grid-cols-2 gap-2 sm:gap-4 pt-3 sm:pt-4">
             <div className="text-center">
               <div className="text-xl sm:text-2xl font-bold">{Math.max(0, dailyGoal - dailyCalories)}</div>

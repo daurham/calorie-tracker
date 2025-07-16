@@ -45,12 +45,12 @@ const RightColumnEdit = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className={`font-medium ${meal.meal_type === 'standalone' ? 'text-yellow-500' : ''}`}>{meal.name}</h4>
-                        {/* {(meal?.ingredients?.length > 0) && ( */}
-                          {meal.meal_type === 'composed' && <IngredientListSummaryText meal={meal} />}
-
-<div className="mt-2">
-                            <MacroSummaryText data={meal} showCalories={true} />
-</div>
+                        {meal.meal_type === 'composed' &&
+                          <IngredientListSummaryText meal={meal} />
+                        }
+                        <div className="mt-2">
+                          <MacroSummaryText data={meal} showCalories={true} />
+                        </div>
                         {(meal?.ingredients?.length === 0 && meal.meal_type === 'composed') && (
                           <p className="text-sm text-muted-foreground">
                             No ingredients

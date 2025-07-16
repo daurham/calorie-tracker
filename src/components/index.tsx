@@ -5,3 +5,6 @@ export { default as ThemeToggle } from "./ThemeToggle";
 export { default as Navbar } from "./Navbar";
 export { default as AvailableMeals } from "./AvailableMeals";
 export { default as MealPlanGenerator } from "./MealPlanGenerator";
+export { default as IngredientListSummaryText } from "./IngredientListSummaryText";
+export { default as MacroSummaryText } from "./MacroSummaryText";
+export { default as IngredientSummaryText } from "./IngredientSummaryText";

@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useMealPlanGenerator, useToast } from '@/hooks';
 import { Loader2, Copy, Download, Sparkles, Info } from 'lucide-react';
-import { 
-  Button, 
-  Textarea, 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle, 
-  Alert, 
+import {
+  Button,
+  Textarea,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Alert,
   AlertDescription,
- } from './ui';
+} from './ui';
 
 const MealPlanGenerator = () => {
   const { toast } = useToast();
@@ -25,7 +25,7 @@ const MealPlanGenerator = () => {
     carbs: 0,
     fat: 0
   });
-  
+
   const { generatePrompt, isLoading, error, lastGeneratedPrompt, lastSummary } = useMealPlanGenerator();
 
   // Load macro goals from localStorage on component mount
@@ -33,24 +33,24 @@ const MealPlanGenerator = () => {
     const loadStoredMacros = () => {
       const storedDailyGoal = localStorage.getItem('nutritrack_daily_goal');
       const storedMacroGoals = localStorage.getItem('nutritrack_macro_goals');
-      
+
       if (storedDailyGoal || storedMacroGoals) {
         const dailyGoal = storedDailyGoal ? parseInt(storedDailyGoal) : 0;
         const macroGoals = storedMacroGoals ? JSON.parse(storedMacroGoals) : { protein: 0, carbs: 0, fat: 0 };
-        
+
         setStoredMacros({
           dailyGoal,
           protein: macroGoals.protein || 0,
           carbs: macroGoals.carbs || 0,
           fat: macroGoals.fat || 0
         });
-        
+
         // Auto-populate user goals if they haven't been set yet
         if (!userGoals && (dailyGoal > 0 || macroGoals.protein > 0 || macroGoals.carbs > 0 || macroGoals.fat > 0)) {
           const goalsText = `I want to eat ${dailyGoal} calories per day with ${macroGoals.protein}g protein, ${macroGoals.carbs}g carbs, and ${macroGoals.fat}g fat.`;
           setUserGoals(goalsText);
           setHasLoadedFromStorage(true);
-          
+
           // Show notification
           toast({
             title: 'Macro goals loaded from your settings!',
@@ -62,7 +62,7 @@ const MealPlanGenerator = () => {
         }
       }
     };
-    
+
     loadStoredMacros();
   }, [userGoals]);
 
@@ -135,7 +135,7 @@ const MealPlanGenerator = () => {
             <p className="text-xs text-muted-foreground">
               Add your specific macro goals, dietary restrictions, or preferences to get more personalized suggestions. Preset macros are provided.
             </p>
-            
+
             {/* Show loaded macro goals if available */}
             {hasLoadedFromStorage && storedMacros.dailyGoal > 0 && (
               <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-md">
@@ -167,8 +167,8 @@ const MealPlanGenerator = () => {
             </p>
           </div>
 
-          <Button 
-            onClick={handleGeneratePrompt} 
+          <Button
+            onClick={handleGeneratePrompt}
             disabled={isLoading}
             className="w-full"
           >
@@ -258,6 +258,6 @@ const MealPlanGenerator = () => {
       )}
     </div>
   );
-} 
+}
 
 export default MealPlanGenerator;

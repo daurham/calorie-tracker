@@ -15,29 +15,29 @@ interface MealManagementContextType {
     instructions: string;
   };
   setFormData: (data: any) => void;
-  
+
   // Mode state
   mode: 'add' | 'edit' | 'none';
   setMode: (mode: 'add' | 'edit' | 'none') => void;
-  
+
   // Selected ingredients (for add mode)
   selectedIngredients: any[];
   setSelectedIngredients: (ingredients: any[]) => void;
-  
+
   // Collapsible states
   notesCollapsed: boolean;
   setNotesCollapsed: (collapsed: boolean) => void;
   instructionsCollapsed: boolean;
   setInstructionsCollapsed: (collapsed: boolean) => void;
-  
+
   // Search state
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  
+
   // Original ingredients (for edit mode)
   originalIngredients: Array<{ id: number; name: string; quantity: number }>;
   setOriginalIngredients: (ingredients: Array<{ id: number; name: string; quantity: number }>) => void;
-  
+
   // Original standalone macros (for edit mode)
   originalStandaloneMacros: {
     calories: number;
@@ -46,18 +46,18 @@ interface MealManagementContextType {
     fat: number;
   };
   setOriginalStandaloneMacros: (macros: { calories: number; protein: number; carbs: number; fat: number }) => void;
-  
+
   // Meal type
   mealType: 'composed' | 'standalone';
   setMealType: (type: 'composed' | 'standalone') => void;
-  
+
   // Data
   meals: Meal[];
   availableIngredients: Ingredient[];
   filteredIngredients: Ingredient[];
   filteredMeals: Meal[];
   isLoading: boolean;
-  
+
   // Actions
   addIngredient: (ingredient: Ingredient) => void;
   removeIngredient: (ingredientId: number) => void;
@@ -70,7 +70,7 @@ interface MealManagementContextType {
   handleDeleteClick: (id: number) => void;
   resetForm: () => void;
   handleDialogClose: (open: boolean) => void;
-  
+
   // Calculations
   calculateTotals: (ingredients: { id: number; name: string; quantity: number }[]) => {
     calories: number;

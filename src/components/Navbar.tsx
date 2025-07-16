@@ -60,7 +60,7 @@ const Navbar = ({
         className: "border-purple-200 hover:bg-purple-50 dark:border-purple-700 dark:hover:bg-purple-700 px-2 sm:px-3",
         variant: "outline"
       },
-      
+
     ] as ButtonConfig[]
   };
 
@@ -116,7 +116,7 @@ const Navbar = ({
                 <Menu className="h-5 w-5" />
               )}
             </Button>
-          <ThemeToggle />
+            <ThemeToggle />
           </div>
         </div>
 

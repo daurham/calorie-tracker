@@ -118,8 +118,8 @@ const MealManagementModal = ({
     // For standalone meals, use the formData values directly
     if (formData.meal_type === 'standalone') {
       const meal = meals.find(meal => meal.id === editingId);
-        // console.log(formData);
-        // console.log(meal);
+      // console.log(formData);
+      // console.log(meal);
       return {
         calories: formData.calories,
         protein: formData.protein,
@@ -132,9 +132,24 @@ const MealManagementModal = ({
   }, [calculateTotals, formData.ingredients, formData.meal_type, formData.calories, formData.protein, formData.carbs, formData.fat]);
 
 
-  // Set formData when editing existing meal
+  // Initialize modal when it opens
   useEffect(() => {
+    if (open) {
+      initializeModal();
+    }
+  }, [open, mealId, meals]);
+
+
+  // Reset selectedIngredients when mealType changes
+  useEffect(() => {
+    setSelectedIngredients([]);
+    // console.log("formData mealType change", formData);
+  }, [mealType]);
+
+  // Initializer function that runs when modal opens
+  const initializeModal = () => {
     if (mealId !== null) {
+      setMode('edit');
       setEditingId(mealId);
       const meal = meals.find(meal => meal.id === mealId);
       if (meal) {
@@ -154,15 +169,15 @@ const MealManagementModal = ({
           instructions: meal.instructions || '',
         });
       }
+    } else {
+      setMode('none');
+      setEditingId(null);
     }
-  }, [mealId, meals]);
+  };
 
-
-  // Reset selectedIngredients when mealType changes
-  useEffect(() => {
-    setSelectedIngredients([]);
-    // console.log("formData mealType change", formData);
-  }, [mealType]);
+  // useEffect(() => {
+  //   console.log("mode state change", mode);
+  // }, [mode]);
 
 
   const handleAddIngredient = () => {
@@ -384,7 +399,7 @@ const MealManagementModal = ({
       name: i.name,
       quantity: i.quantity
     })) : [];
-    
+
     setFormData({
       name: meal.name,
       meal_type: meal.meal_type,
@@ -396,7 +411,7 @@ const MealManagementModal = ({
       notes: meal.notes || '',
       instructions: meal.instructions || '',
     });
-    
+
     // Store original data for both meal types
     if (meal.meal_type === 'composed') {
       setOriginalIngredients(ingredients);
@@ -409,7 +424,7 @@ const MealManagementModal = ({
         fat: meal.fat,
       });
     }
-    
+
     // Set initial collapsed state based on content
     setNotesCollapsed(!meal.notes);
     setInstructionsCollapsed(!meal.instructions);
@@ -443,6 +458,7 @@ const MealManagementModal = ({
   };
 
   const resetForm = () => {
+    // console.log("resetForm");
     setFormData({
       name: '',
       meal_type: 'composed',
@@ -514,7 +530,7 @@ const MealManagementModal = ({
     // Original ingredients
     originalIngredients,
     setOriginalIngredients,
-    
+
     // Original standalone macros
     originalStandaloneMacros,
     setOriginalStandaloneMacros,
@@ -558,7 +574,7 @@ const MealManagementModal = ({
             onOpenChange(val)
             delay(resetForm)
           }}
-          title="Manage Meals"
+          title="Manage Meals "
           description="Add, edit, or remove meals from your database."
           leftColumn={
             mode === 'add' ?
