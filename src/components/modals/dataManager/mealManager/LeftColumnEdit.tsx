@@ -137,8 +137,18 @@ const LeftColumnEdit = () => {
                   </div>
                   <Input
                     type="number"
-                    value={ingredient.quantity}
-                    onChange={e => handleIngredientChange(index, 'quantity', parseFloat(e.target.value))}
+                    value={typeof ingredient.quantity === 'number' && ingredient.quantity === 0 ? '' : ingredient.quantity}
+                    onChange={e => {
+                      const value = e.target.value;
+                      // Allow empty string or leading decimal in the input, but store 0 in state if not a valid number
+                      let numValue = parseFloat(value);
+                      if (value === '' || value === '.') {
+                        numValue = 0;
+                      } else if (isNaN(numValue)) {
+                        numValue = 0;
+                      }
+                      handleIngredientChange(index, 'quantity', numValue);
+                    }}
                     min="0"
                     step="0.1"
                     className="w-24"

@@ -6,7 +6,7 @@ interface MealManagementContextType {
   formData: {
     name: string;
     meal_type: 'composed' | 'standalone';
-    ingredients: Array<{ id: number; name: string; quantity: number }>;
+    ingredients: Ingredient[];
     calories: number;
     protein: number;
     carbs: number;
@@ -35,8 +35,8 @@ interface MealManagementContextType {
   setSearchQuery: (query: string) => void;
 
   // Original ingredients (for edit mode)
-  originalIngredients: Array<{ id: number; name: string; quantity: number }>;
-  setOriginalIngredients: (ingredients: Array<{ id: number; name: string; quantity: number }>) => void;
+  originalIngredients: Ingredient[];
+  setOriginalIngredients: (ingredients: Ingredient[]) => void;
 
   // Original standalone macros (for edit mode)
   originalStandaloneMacros: {

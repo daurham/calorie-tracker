@@ -39,7 +39,7 @@ const MealManagementModal = ({
   const [formData, setFormData] = useState<{
     name: string;
     meal_type: 'composed' | 'standalone';
-    ingredients: Array<{ id: number; name: string; quantity: number }>;
+    ingredients: Ingredient[];
     calories: number;
     protein: number;
     carbs: number;
@@ -63,7 +63,7 @@ const MealManagementModal = ({
   const [mode, setMode] = useState<'add' | 'edit' | 'none'>('none');
   const [mealType, setMealType] = useState<'composed' | 'standalone'>('composed');
 
-  const [originalIngredients, setOriginalIngredients] = useState<Array<{ id: number; name: string; quantity: number }>>([]);
+  const [originalIngredients, setOriginalIngredients] = useState<Ingredient[]>([]);
   const [originalStandaloneMacros, setOriginalStandaloneMacros] = useState<{
     calories: number;
     protein: number;
@@ -156,11 +156,7 @@ const MealManagementModal = ({
         setFormData({
           name: meal.name,
           meal_type: meal.meal_type,
-          ingredients: meal.ingredients.map(i => ({
-            id: i.id,
-            name: i.name,
-            quantity: i.quantity
-          })),
+          ingredients: meal.ingredients,
           calories: meal.calories,
           protein: meal.protein,
           carbs: meal.carbs,
@@ -185,11 +181,7 @@ const MealManagementModal = ({
     if (firstIngredient) {
       setFormData(prev => ({
         ...prev,
-        ingredients: [...prev.ingredients, {
-          id: firstIngredient.id,
-          name: firstIngredient.name,
-          quantity: 1
-        }],
+        ingredients: [...prev.ingredients, firstIngredient],
       }));
     }
   };
@@ -208,11 +200,7 @@ const MealManagementModal = ({
         if (i === index) {
           if (field === 'id') {
             const ingredient = availableIngredients.find(ing => ing.id === value);
-            return {
-              id: value,
-              name: ingredient?.name || '',
-              quantity: ing.quantity
-            };
+            return ingredient ? { ...ing, ...ingredient } : ing;
           }
           return { ...ing, [field]: value };
         }
@@ -256,10 +244,10 @@ const MealManagementModal = ({
     const isAdding = mode === 'add' || (mode === 'edit' && addAsNew);
     const isEditing = mode === 'edit' && !addAsNew;
 
-    console.log("#### Running handleSubmit ####");
-    console.log('MODE: ', mode);
-    console.log('IS ADDING: ', isAdding);
-    console.log('IS EDITING: ', isEditing);
+    // console.log("#### Running handleSubmit ####");
+    // console.log('MODE: ', mode);
+    // console.log('IS ADDING: ', isAdding);
+    // console.log('IS EDITING: ', isEditing);
 
     // Validate meal name
     if (!formData.name.trim()) {
@@ -292,6 +280,16 @@ const MealManagementModal = ({
         });
         return;
       }
+      // Validate that all ingredients have valid quantities
+      const invalidIngredients = ingredients.filter(ing => ing.quantity === undefined || ing.quantity === null || ing.quantity === '' || isNaN(Number(ing.quantity)) || Number(ing.quantity) <= 0);
+      if (invalidIngredients.length > 0) {
+        toast({
+          title: "Invalid ingredient quantity",
+          description: "Please enter a valid quantity for all ingredients (must be greater than 0).",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     // Validate standalone meals
@@ -306,6 +304,18 @@ const MealManagementModal = ({
       return;
     }
 
+    const allIngredientsMatch = (mealData: Meal) => formData.ingredients.every((ing, index) => {
+      return (
+        ing.id === mealData.ingredients[index].id &&
+        ing.quantity === mealData.ingredients[index].quantity &&
+        ing.name === mealData.ingredients[index].name &&
+        ing.calories === mealData.ingredients[index].calories &&
+        ing.protein === mealData.ingredients[index].protein &&
+        ing.carbs === mealData.ingredients[index].carbs &&
+        ing.fat === mealData.ingredients[index].fat
+      );
+    });
+
     // Check if nothing changed when updating existing meal
     if (isEditing) {
       const mealData = meals.find(meal => meal.id === editingId);
@@ -315,6 +325,7 @@ const MealManagementModal = ({
           trimmedMealData.name === formData.name &&
           trimmedMealData.ingredients.length === formData.ingredients.length &&
           trimmedMealData.ingredients.every((ing, index) => ing.id === formData.ingredients[index].id) &&
+          allIngredientsMatch(trimmedMealData) &&
           trimmedMealData.notes === formData.notes &&
           trimmedMealData.instructions === formData.instructions &&
           trimmedMealData.calories == formData.calories &&
@@ -404,7 +415,7 @@ const MealManagementModal = ({
     setFormData({
       name: meal.name,
       meal_type: meal.meal_type,
-      ingredients: ingredients,
+      ingredients: meal.ingredients,
       calories: meal.calories,
       protein: meal.protein,
       carbs: meal.carbs,
@@ -415,7 +426,7 @@ const MealManagementModal = ({
 
     // Store original data for both meal types
     if (meal.meal_type === 'composed') {
-      setOriginalIngredients(ingredients);
+      setOriginalIngredients(meal.ingredients);
     } else {
       // Store original standalone macros
       setOriginalStandaloneMacros({
