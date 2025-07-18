@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChefHat, Utensils, Plus, Settings, Sparkles, Menu, X } from "lucide-react";
+import { ChefHat, Utensils, Plus, Settings, Sparkles, Menu, X, Puzzle } from "lucide-react";
 import { ThemeToggle } from ".";
 import { Button } from "./ui";
 
@@ -9,6 +9,7 @@ const Navbar = ({
   setIsMealsModalOpen,
   setIsIngredientsModalOpen,
   setIsLogModalOpen,
+  setIsModSettingsOpen,
 }) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -58,6 +59,13 @@ const Navbar = ({
         onClick: () => navigate('/meal-plan-generator'),
         label: "AI Meal Plan",
         className: "border-purple-200 hover:bg-purple-50 dark:border-purple-700 dark:hover:bg-purple-700 px-2 sm:px-3",
+        variant: "outline"
+      },
+      {
+        icon: <Puzzle className="h-4 w-4" />,
+        onClick: () => setIsModSettingsOpen(true),
+        label: "Mods",
+        className: "border-orange-200 hover:bg-orange-50 dark:border-orange-700 dark:hover:bg-orange-950 px-2 sm:px-3",
         variant: "outline"
       },
 

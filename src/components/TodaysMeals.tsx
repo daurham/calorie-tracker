@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, Clock, ChevronDown, ChevronRight } from "lucide-react";
+import { Trash2, Clock, ChevronDown, ChevronRight, Sparkles } from "lucide-react";
 import {
   Button,
   Card,
@@ -28,7 +28,12 @@ const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: Today
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                <h3 className="font-semibold text-sm sm:text-base line-clamp-2">{meal.name}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-sm sm:text-base line-clamp-2">{meal.name}</h3>
+                  {meal.modData && (
+                    <Sparkles className="h-3 w-3 text-purple-500" />
+                  )}
+                </div>
                 {meal.timestamp && (
                   <span className="text-xs sm:text-sm text-muted-foreground bg-white dark:bg-slate-700 px-2 py-1 rounded w-fit">
                     {meal.timestamp}
@@ -37,6 +42,11 @@ const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: Today
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
                 {meal.ingredients.map(i => i.name).join(", ")}
+                {meal.weight && (
+                  <span className="ml-2 text-purple-600 dark:text-purple-400 font-medium">
+                    ({meal.weight}g)
+                  </span>
+                )}
               </p>
             </div>
             <div className="text-center flex-shrink-0">

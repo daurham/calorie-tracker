@@ -31,6 +31,10 @@ import {
   proteinGoal,
 } from "@/settings.config";
 import { Meal, MealInput } from '@/types';
+import { initializeMods, modManager } from '@/lib/mods';
+import { ModMeal } from '@/types/mods';
+import ModModal from '@/components/modals/ModModal';
+import ModSettingsModal from '@/components/modals/ModSettingsModal';
 
 // Local storage keys
 const STORAGE_KEYS = {
@@ -56,6 +60,11 @@ const Index = () => {
 
   const [isIngredientsManagementOpen, setIsIngredientsManagementOpen] = useState(false);
   const [isMealManagementOpen, setIsMealManagementOpen] = useState(false);
+
+  // Mod system state
+  const [isModModalOpen, setIsModModalOpen] = useState(false);
+  const [isModSettingsOpen, setIsModSettingsOpen] = useState(false);
+  const [selectedMod, setSelectedMod] = useState(null);
 
   const [allIngredientsData, setAllIngredientsData] = useState([]);
   const [mealsData, setMealsData] = useState([]);
@@ -139,6 +148,8 @@ const Index = () => {
 
   useEffect(() => {
     loadData();
+    // Initialize mods
+    initializeMods();
   }, []);
 
   // Load saved state from localStorage on component mount
@@ -337,6 +348,30 @@ const Index = () => {
     setIsMealManagementOpen(true);
   };
 
+  // Mod system handlers
+  const handleModMealClick = (mod) => {
+    setSelectedMod(mod);
+    setIsModModalOpen(true);
+  };
+
+  const handleModMealGenerated = (modMeal: ModMeal) => {
+    // Convert ModMeal to regular Meal format for compatibility
+    const regularMeal = {
+      ...modMeal,
+      id: parseInt(modMeal.id) || Date.now(),
+      meal_type: 'standalone' as const,
+      ingredients: modMeal.ingredients.map(ing => ({
+        ...ing,
+        id: parseInt(ing.id) || Date.now()
+      })),
+      // Preserve mod-specific data for display
+      modData: modMeal.modData,
+      weight: modMeal.weight
+    };
+    
+    addMealToToday(regularMeal);
+  };
+
   const filteredMeals = mealsData.filter(meal =>
     meal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     meal.ingredients.some(i => i.name?.toLowerCase()?.includes(searchQuery.toLowerCase()))
@@ -351,6 +386,7 @@ const Index = () => {
         setIsIngredientsModalOpen={setIsIngredientsManagementOpen}
         setIsMealsModalOpen={setIsMealManagementOpen}
         setIsLogModalOpen={setIsLogModalOpen}
+        setIsModSettingsOpen={setIsModSettingsOpen}
       />
 
       <main className="container mx-auto px-4 py-4 sm:py-8">
@@ -390,14 +426,15 @@ const Index = () => {
         />
 
         {/* Available Meal Combos */}
-        <AvailableMeals
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          addMealToToday={addMealToToday}
-          openMealEditManagement={openMealEditManagement}
-          handleDeleteMealCombo={handleDeleteMealCombo}
-          filteredMeals={filteredMeals}
-        />
+                    <AvailableMeals
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              addMealToToday={addMealToToday}
+              openMealEditManagement={openMealEditManagement}
+              handleDeleteMealCombo={handleDeleteMealCombo}
+              filteredMeals={filteredMeals}
+              onModMealClick={handleModMealClick}
+            />
       </main>
 
       {/* Modals */}
@@ -442,6 +479,21 @@ const Index = () => {
         onDeleteMealCombo={handleDeleteMealCombo}
         mealId={editingId}
         isLoading={isLoading}
+      />
+      
+      {/* Mod Modals */}
+      {selectedMod && (
+        <ModModal
+          open={isModModalOpen}
+          onOpenChange={setIsModModalOpen}
+          mod={selectedMod}
+          onMealGenerated={handleModMealGenerated}
+        />
+      )}
+      
+      <ModSettingsModal
+        open={isModSettingsOpen}
+        onOpenChange={setIsModSettingsOpen}
       />
     </div>
   );
