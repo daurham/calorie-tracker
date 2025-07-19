@@ -1,3 +1,5 @@
+export type MealType = 'composed' | 'standalone' | 'mod';
+
 export interface Ingredient {
   id: number;
   name: string;
@@ -15,7 +17,7 @@ export interface Ingredient {
 
 export interface MealInput {
   name: string;
-  meal_type: 'composed' | 'standalone' | 'mod';
+  meal_type: MealType;
   ingredients: Array<{
     id: number;
     quantity: number;
@@ -31,7 +33,7 @@ export interface MealInput {
 export interface Meal {
   id: number;
   name: string;
-  meal_type: 'composed' | 'standalone' | 'mod';
+  meal_type: MealType;
 
   calories: number;
   protein: number;
@@ -46,7 +48,7 @@ export interface Meal {
 export interface MealCombo {
   id: number;
   name: string;
-  meal_type: 'composed' | 'standalone';
+  meal_type: MealType;
   calories: number;
   protein: number;
   carbs: number;

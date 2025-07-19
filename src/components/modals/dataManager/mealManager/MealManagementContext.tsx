@@ -1,11 +1,11 @@
 import { createContext, useContext, ReactNode } from 'react';
-import { Ingredient, Meal } from '@/types';
+import { Ingredient, Meal, MealType } from '@/types';
 
 interface MealManagementContextType {
   // Form state
   formData: {
     name: string;
-    meal_type: 'composed' | 'standalone';
+    meal_type: MealType;
     ingredients: Ingredient[];
     calories: number;
     protein: number;
@@ -48,8 +48,8 @@ interface MealManagementContextType {
   setOriginalStandaloneMacros: (macros: { calories: number; protein: number; carbs: number; fat: number }) => void;
 
   // Meal type
-  mealType: 'composed' | 'standalone';
-  setMealType: (type: 'composed' | 'standalone') => void;
+  mealType: MealType;
+  setMealType: (type: MealType) => void;
 
   // Data
   meals: Meal[];

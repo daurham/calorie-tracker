@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks";
 import { DataManagementModal, AlertModal } from "@/components/modals";
-import { Ingredient, Meal, MealInput } from '@/types';
+import { Ingredient, Meal, MealInput, MealType } from '@/types';
 import RightColumnAdd from "./RightColumnAdd";
 import RightColumnEdit from "./RightColumnEdit";
 import LeftColumnAdd from "./LeftColumnAdd";
@@ -38,7 +38,7 @@ const MealManagementModal = ({
   const [editingId, setEditingId] = useState<number | null>(mealId || null);
   const [formData, setFormData] = useState<{
     name: string;
-    meal_type: 'composed' | 'standalone';
+    meal_type: MealType;
     ingredients: Ingredient[];
     calories: number;
     protein: number;
@@ -61,7 +61,7 @@ const MealManagementModal = ({
   const [instructionsCollapsed, setInstructionsCollapsed] = useState(() => !formData.instructions);
 
   const [mode, setMode] = useState<'add' | 'edit' | 'none'>('none');
-  const [mealType, setMealType] = useState<'composed' | 'standalone'>('composed');
+  const [mealType, setMealType] = useState<MealType>('composed');
 
   const [originalIngredients, setOriginalIngredients] = useState<Ingredient[]>([]);
   const [originalStandaloneMacros, setOriginalStandaloneMacros] = useState<{
@@ -117,8 +117,7 @@ const MealManagementModal = ({
   const editModeTotals = useMemo(() => {
     // For standalone meals, use the formData values directly
     if (formData.meal_type === 'standalone') {
-      const meal = meals.find(meal => meal.id === editingId);
-      // console.log(formData);
+      // const meal = meals.find(meal => meal.id === editingId);
       // console.log(meal);
       return {
         calories: formData.calories,
@@ -127,6 +126,7 @@ const MealManagementModal = ({
         fat: formData.fat,
       };
     }
+
     // For composed meals, calculate from ingredients
     return calculateTotals(formData.ingredients);
   }, [calculateTotals, formData.ingredients, formData.meal_type, formData.calories, formData.protein, formData.carbs, formData.fat]);
@@ -171,17 +171,12 @@ const MealManagementModal = ({
     }
   };
 
-  // useEffect(() => {
-  //   console.log("mode state change", mode);
-  // }, [mode]);
-
-
   const handleAddIngredient = () => {
     const firstIngredient = availableIngredients[0];
     if (firstIngredient) {
       setFormData(prev => ({
         ...prev,
-        ingredients: [...prev.ingredients, firstIngredient],
+        ingredients: [...prev.ingredients, { ...firstIngredient, quantity: 1 }],
       }));
     }
   };

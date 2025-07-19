@@ -111,7 +111,7 @@ const LeftColumnEdit = () => {
                 <div key={index} className="flex gap-2 items-center">
                   <div className="flex-1 min-w-0 relative">
                     <select
-                      value={ingredient.id.toString()}
+                      value={ingredient?.id?.toString()}
                       onChange={(e) => handleIngredientChange(index, 'id', parseInt(e.target.value))}
                       disabled={isLoading}
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
@@ -127,7 +127,7 @@ const LeftColumnEdit = () => {
                         </option>
                       ) : (
                         availableIngredients.map(ing => (
-                          <option key={ing.id} value={ing.id.toString()}>
+                          <option key={ing.id} value={ing?.id?.toString()}>
                             {ing.name}
                           </option>
                         ))
@@ -141,7 +141,7 @@ const LeftColumnEdit = () => {
                   </div>
                   <Input
                     type="number"
-                    value={inputValues[`${index}`] ?? (ingredient.quantity === 0 ? '' : ingredient.quantity.toString())}
+                    value={inputValues[`${index}`] ?? (ingredient?.quantity === 0 ? '' : (ingredient?.quantity?.toString() || "1"))}
                     onChange={e => {
                       const value = e.target.value;
                       // Update local input state immediately for responsive UX
