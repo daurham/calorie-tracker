@@ -370,11 +370,26 @@ const Index = () => {
     addMealToToday(regularMeal);
   };
 
-  const filteredMeals = mealsData.filter(meal =>
+  // Get enabled mods
+  const enabledMods = modManager.getEnabledMods();
+  
+  // Filter regular meals
+  const filteredRegularMeals = mealsData.filter(meal =>
     meal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     meal.ingredients.some(i => i.name?.toLowerCase()?.includes(searchQuery.toLowerCase()))
   );
-  // console.log("filteredMeals", filteredMeals);
+  
+  // Filter mod meals based on search query
+  const filteredModMeals = enabledMods.filter(mod =>
+    mod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    mod.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  // Combine and sort alphabetically
+  const filteredMeals = [
+    ...filteredRegularMeals,
+    ...filteredModMeals
+  ].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
@@ -431,6 +446,7 @@ const Index = () => {
               handleDeleteMealCombo={handleDeleteMealCombo}
               filteredMeals={filteredMeals}
               onModMealClick={handleModMealClick}
+              isLoading={isLoading}
             />
       </main>
 

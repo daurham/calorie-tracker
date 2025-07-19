@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingUp, MoreVertical, Pencil, Trash2, Sparkles } from "lucide-react";
+import { TrendingUp, MoreVertical, Pencil, Trash2, Sparkles, Loader2 } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -11,11 +11,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   SearchBar,
+  Skeleton,
 } from "./ui";
 import { AlertModal } from "./modals";
 import IngredientListSummaryText from "./IngredientListSummaryText";
 import MacroSummaryText from "./MacroSummaryText";
-import { modManager } from "@/lib/mods";
 
 const AvailableMeals = ({
   searchQuery,
@@ -25,12 +25,12 @@ const AvailableMeals = ({
   handleDeleteMealCombo,
   filteredMeals,
   onModMealClick,
+  isLoading = false,
 }) => {
   const [deleteMealId, setDeleteMealId] = useState<number | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  // Get enabled mods
-  const enabledMods = modManager.getEnabledMods();
+
 
   const handleDeleteClick = (id: number) => {
     setDeleteMealId(id);
@@ -47,6 +47,8 @@ const AvailableMeals = ({
       setDeleteMealId(null);
     }
   };
+
+
 
   const AvailableMealCard = ({ meal }) => (
     <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer group border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
@@ -141,6 +143,32 @@ const AvailableMeals = ({
     </Card>
   );
 
+  const LoadingSkeletonCard = () => (
+    <Card className="border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex justify-between items-start mb-2 sm:mb-3">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-6 w-12" />
+        </div>
+        <div className="space-y-2 mb-2 sm:mb-3">
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-3/4" />
+        </div>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div className="flex gap-2">
+            <Skeleton className="h-3 w-8" />
+            <Skeleton className="h-3 w-8" />
+            <Skeleton className="h-3 w-8" />
+          </div>
+          <div className="flex gap-1 w-full sm:w-auto">
+            <Skeleton className="h-8 w-16" />
+            <Skeleton className="h-8 w-8" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <>
       <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
@@ -156,25 +184,26 @@ const AvailableMeals = ({
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Regular Meals */}
-            {filteredMeals.length > 0 && (
-              filteredMeals.map((meal) => (
-                <AvailableMealCard key={meal.id} meal={meal} />
+            {isLoading ? (
+              // Show loading skeletons
+              Array.from({ length: 6 }).map((_, index) => (
+                <LoadingSkeletonCard key={`skeleton-${index}`} />
               ))
-            )}
-            
-            {/* Mod Meals */}
-            {enabledMods.length > 0 && (
-              enabledMods.map((mod) => (
-                <ModMealCard key={mod.id} mod={mod} />
-              ))
-            )}
-            
-            {/* Empty State */}
-            {filteredMeals.length === 0 && enabledMods.length === 0 && (
+            ) : filteredMeals.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
                 {searchQuery ? "No meals found matching your search." : "No meal combos available."}
               </p>
+            ) : (
+              filteredMeals.map((item) => {
+                // Check if this is a mod meal (has description property)
+                const isMod = item.description && !item.meal_type;
+                
+                if (isMod) {
+                  return <ModMealCard key={`mod-${item.id}`} mod={item} />;
+                } else {
+                  return <AvailableMealCard key={`meal-${item.id}`} meal={item} />;
+                }
+              })
             )}
           </div>
         </CardContent>
