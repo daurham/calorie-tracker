@@ -230,7 +230,7 @@ const IngredientsManagementModal = ({
     setShowScanner(false);
     // Here you can also populate your form automatically.
     setFormData({
-      name: `${product.product_name} (${product.brands})`,
+      name: `${product.product_name} (${product.brands || ""})`,
       calories: product.nutriments["energy-kcal_serving"],
       protein: product.nutriments.proteins_serving,
       carbs: product.nutriments.carbohydrates_serving,

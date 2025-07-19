@@ -16,7 +16,7 @@ const IngredientListSummaryText = ({ meal }: { meal: Meal }) => {
     <p className="text-sm text-muted-foreground">
       {meal.ingredients.map((ingredient, index) => (
         <span key={ingredient.id}>
-          {ingredient.quantity > 1
+          {ingredient.quantity !== 1
             ? `${ingredient.name} (${ingredient.quantity}) `
             : `${ingredient.name} `
           }
