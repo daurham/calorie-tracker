@@ -34,7 +34,6 @@ import { Meal, MealInput } from '@/types';
 import { initializeMods, modManager } from '@/lib/mods';
 import { ModMeal } from '@/types/mods';
 import ModModal from '@/components/modals/ModModal';
-import ModSettingsModal from '@/components/modals/ModSettingsModal';
 
 // Local storage keys
 const STORAGE_KEYS = {
@@ -63,7 +62,6 @@ const Index = () => {
 
   // Mod system state
   const [isModModalOpen, setIsModModalOpen] = useState(false);
-  const [isModSettingsOpen, setIsModSettingsOpen] = useState(false);
   const [selectedMod, setSelectedMod] = useState(null);
 
   const [allIngredientsData, setAllIngredientsData] = useState([]);
@@ -386,7 +384,6 @@ const Index = () => {
         setIsIngredientsModalOpen={setIsIngredientsManagementOpen}
         setIsMealsModalOpen={setIsMealManagementOpen}
         setIsLogModalOpen={setIsLogModalOpen}
-        setIsModSettingsOpen={setIsModSettingsOpen}
       />
 
       <main className="container mx-auto px-4 py-4 sm:py-8">
@@ -479,24 +476,19 @@ const Index = () => {
         onDeleteMealCombo={handleDeleteMealCombo}
         mealId={editingId}
         isLoading={isLoading}
-      />
-      
-      {/* Mod Modals */}
-      {selectedMod && (
-        <ModModal
-          open={isModModalOpen}
-          onOpenChange={setIsModModalOpen}
-          mod={selectedMod}
-          onMealGenerated={handleModMealGenerated}
-        />
-      )}
-      
-      <ModSettingsModal
-        open={isModSettingsOpen}
-        onOpenChange={setIsModSettingsOpen}
-      />
-    </div>
-  );
+              />
+        
+        {/* Mod Modal */}
+        {selectedMod && (
+          <ModModal
+            open={isModModalOpen}
+            onOpenChange={setIsModModalOpen}
+            mod={selectedMod}
+            onMealGenerated={handleModMealGenerated}
+          />
+        )}
+      </div>
+    );
 };
 
 

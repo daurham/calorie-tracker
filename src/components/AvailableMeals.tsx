@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingUp, MoreVertical, Pencil, Trash2, Pizza, Sparkles } from "lucide-react";
+import { TrendingUp, MoreVertical, Pencil, Trash2, Sparkles } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -16,7 +16,6 @@ import { AlertModal } from "./modals";
 import IngredientListSummaryText from "./IngredientListSummaryText";
 import MacroSummaryText from "./MacroSummaryText";
 import { modManager } from "@/lib/mods";
-import { ModMeal } from "@/types/mods";
 
 const AvailableMeals = ({
   searchQuery,

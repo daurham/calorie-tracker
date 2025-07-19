@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Settings, Calculator, ArrowLeft } from "lucide-react";
+import { Settings, Calculator, ArrowLeft, Puzzle, ChevronDown, ChevronUp, TrendingUp } from "lucide-react";
 import {
   Button,
   Label,
@@ -10,8 +10,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
 } from "@/components/ui";
 import { delay } from "@/lib/utils";
+import { modManager } from "@/lib/mods";
+import { ModConfig } from "@/types/mods";
 
 interface SettingsMenuProps {
   open: boolean;
@@ -43,6 +48,9 @@ const SettingsMenu = ({
   onVisibleMacrosChange
 }: SettingsMenuProps) => {
   const [showBMICalculator, setShowBMICalculator] = useState(false);
+  const [modConfigs, setModConfigs] = useState<ModConfig[]>([]);
+  const [isModsExpanded, setIsModsExpanded] = useState(false);
+  const [isMacrosExpanded, setIsMacrosExpanded] = useState(false);
 
   // Store original values for reset functionality
   const [originalValues, setOriginalValues] = useState({
@@ -59,6 +67,8 @@ const SettingsMenu = ({
         macroGoals,
         visibleMacros
       });
+      // Load mod configs
+      setModConfigs(modManager.getAllModConfigs());
     }
   }, [open, dailyGoal, macroGoals, visibleMacros]);
 
@@ -91,6 +101,11 @@ const SettingsMenu = ({
       ...visibleMacros,
       [macro]: visible
     });
+  };
+
+  const handleToggleMod = (modId: string, enabled: boolean) => {
+    modManager.setModEnabled(modId, enabled);
+    setModConfigs(modManager.getAllModConfigs());
   };
 
   const calculateBMIGoals = (formData: FormData) => {
@@ -349,33 +364,98 @@ const SettingsMenu = ({
           </div>
 
           <div className="pt-4 border-t mt-6">
-            <h3 className="text-sm font-medium mb-4">Visible Macros</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="show-protein">Show Protein</Label>
-                <Switch
-                  id="show-protein"
-                  checked={visibleMacros.protein}
-                  onCheckedChange={(checked) => handleVisibilityChange("protein", checked)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="show-carbs">Show Carbs</Label>
-                <Switch
-                  id="show-carbs"
-                  checked={visibleMacros.carbs}
-                  onCheckedChange={(checked) => handleVisibilityChange("carbs", checked)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="show-fat">Show Fat</Label>
-                <Switch
-                  id="show-fat"
-                  checked={visibleMacros.fat}
-                  onCheckedChange={(checked) => handleVisibilityChange("fat", checked)}
-                />
-              </div>
-            </div>
+            <Collapsible open={isMacrosExpanded} onOpenChange={setIsMacrosExpanded}>
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-between p-0 h-auto font-medium text-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    Visible Macros
+                  </div>
+                  {isMacrosExpanded ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="show-protein">Show Protein</Label>
+                    <Switch
+                      id="show-protein"
+                      checked={visibleMacros.protein}
+                      onCheckedChange={(checked) => handleVisibilityChange("protein", checked)}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="show-carbs">Show Carbs</Label>
+                    <Switch
+                      id="show-carbs"
+                      checked={visibleMacros.carbs}
+                      onCheckedChange={(checked) => handleVisibilityChange("carbs", checked)}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="show-fat">Show Fat</Label>
+                    <Switch
+                      id="show-fat"
+                      checked={visibleMacros.fat}
+                      onCheckedChange={(checked) => handleVisibilityChange("fat", checked)}
+                    />
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
+
+          <div className="pt-4 border-t mt-6">
+            <Collapsible open={isModsExpanded} onOpenChange={setIsModsExpanded}>
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-between p-0 h-auto font-medium text-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <Puzzle className="h-4 w-4" />
+                    Mods & Extensions
+                  </div>
+                  {isModsExpanded ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Enable or disable additional features and meal calculation mods.
+                </p>
+                {modConfigs.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No mods available
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {modConfigs.map((config) => (
+                      <div key={config.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="space-y-1">
+                          <h4 className="font-medium text-sm">{config.name}</h4>
+                          <p className="text-xs text-muted-foreground">{config.description}</p>
+                        </div>
+                        <Switch
+                          checked={config.enabled}
+                          onCheckedChange={(enabled) => handleToggleMod(config.id, enabled)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
           </div>
 
           <div className="pt-4 border-t mt-6">
