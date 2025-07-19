@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { X } from "lucide-react";
 import {
   Label,
@@ -16,6 +17,9 @@ const RightColumnAdd = () => {
     updateQuantity,
     addModeTotals
   } = useMealManagement();
+
+  // Local state to track input values for better UX
+  const [inputValues, setInputValues] = useState<Record<number, string>>({});
 
   return (
     <div className="space-y-6">
@@ -45,17 +49,44 @@ const RightColumnAdd = () => {
                   <div className="flex items-center gap-2">
                     <Input
                       type="number"
-                      min="0.1"
                       step="0.1"
-                      value={ingredient.quantity}
-                      onChange={(e) => updateQuantity(ingredient.id, parseFloat(e.target.value))}
+                      value={inputValues[ingredient.id] ?? (ingredient.quantity === 0 ? '' : ingredient.quantity.toString())}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Update local input state immediately for responsive UX
+                        setInputValues(prev => ({
+                          ...prev,
+                          [ingredient.id]: value
+                        }));
+                        
+                        // Only update the actual quantity if it's a valid number
+                        if (value === '' || value === '.') {
+                          updateQuantity(ingredient.id, 0);
+                        } else if (/^\d*\.?\d*$/.test(value)) {
+                          const numValue = parseFloat(value);
+                          if (!isNaN(numValue)) {
+                            updateQuantity(ingredient.id, numValue);
+                          }
+                        }
+                      }}
+                      onBlur={() => {
+                        // Clean up local state when input loses focus
+                        setInputValues(prev => {
+                          const newState = { ...prev };
+                          delete newState[ingredient.id];
+                          return newState;
+                        });
+                      }}
                       className="w-20"
                     />
                     <span className="text-sm text-muted-foreground">
                       {ingredient.unit}
                     </span>
                     <span className="text-sm font-medium ml-auto">
-                      {Math.round(ingredient.calories * ingredient.quantity)} cal
+                      {(() => {
+                        const calories = ingredient.calories * ingredient.quantity;
+                        return isNaN(calories) || calories <= 0 ? '—' : `${Math.round(calories)} cal`;
+                      })()}
                     </span>
                   </div>
                 </CardContent>

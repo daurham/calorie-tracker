@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { X, ChevronRight, ChevronDown } from "lucide-react";
 import { Button, Input, Label, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Textarea, Collapsible, CollapsibleTrigger, CollapsibleContent, NutritionalSummaryCard } from "@/components/ui";
 import { useMealManagement } from "./MealManagementContext";
@@ -25,6 +26,9 @@ const LeftColumnEdit = () => {
     calculateTotals,
     editModeTotals
   } = useMealManagement();
+
+  // Local state to track input values for better UX
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
 
   return (
     <div className="space-y-6">
@@ -137,19 +141,33 @@ const LeftColumnEdit = () => {
                   </div>
                   <Input
                     type="number"
-                    value={typeof ingredient.quantity === 'number' && ingredient.quantity === 0 ? '' : ingredient.quantity}
+                    value={inputValues[`${index}`] ?? (ingredient.quantity === 0 ? '' : ingredient.quantity.toString())}
                     onChange={e => {
                       const value = e.target.value;
-                      // Allow empty string or leading decimal in the input, but store 0 in state if not a valid number
-                      let numValue = parseFloat(value);
+                      // Update local input state immediately for responsive UX
+                      setInputValues(prev => ({
+                        ...prev,
+                        [`${index}`]: value
+                      }));
+                      
+                      // Only update the actual quantity if it's a valid number
                       if (value === '' || value === '.') {
-                        numValue = 0;
-                      } else if (isNaN(numValue)) {
-                        numValue = 0;
+                        handleIngredientChange(index, 'quantity', 0);
+                      } else if (/^\d*\.?\d*$/.test(value)) {
+                        const numValue = parseFloat(value);
+                        if (!isNaN(numValue)) {
+                          handleIngredientChange(index, 'quantity', numValue);
+                        }
                       }
-                      handleIngredientChange(index, 'quantity', numValue);
                     }}
-                    min="0"
+                    onBlur={() => {
+                      // Clean up local state when input loses focus
+                      setInputValues(prev => {
+                        const newState = { ...prev };
+                        delete newState[`${index}`];
+                        return newState;
+                      });
+                    }}
                     step="0.1"
                     className="w-24"
                   />
