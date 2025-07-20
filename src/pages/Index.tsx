@@ -237,18 +237,26 @@ const Index = () => {
   };
 
   const addMealToToday = (meal) => {
-    const mealWithId = {
+    // Handle portion logic
+    const portion = meal.portion || 1;
+    const adjustedMeal = {
       ...meal,
+      calories: Math.round(meal.calories * portion),
+      protein: Number((meal.protein * portion).toFixed(1)),
+      carbs: Number((meal.carbs * portion).toFixed(1)),
+      fat: Number((meal.fat * portion).toFixed(1)),
+      portion: portion,
       id: meal.id,
       uniqueMealId: generateUniqueId(),
       timestamp: new Date().toLocaleTimeString()
     };
-    setTodaysMeals(prev => [...prev, mealWithId]);
-    setDailyCalories(prev => prev + meal.calories);
+    
+    setTodaysMeals(prev => [...prev, adjustedMeal]);
+    setDailyCalories(prev => prev + adjustedMeal.calories);
     setDailyMacros(prev => ({
-      protein: Number(prev.protein) + Number(meal.protein),
-      carbs: Number(prev.carbs) + Number(meal.carbs),
-      fat: Number(prev.fat) + Number(meal.fat)
+      protein: Number(prev.protein) + Number(adjustedMeal.protein),
+      carbs: Number(prev.carbs) + Number(adjustedMeal.carbs),
+      fat: Number(prev.fat) + Number(adjustedMeal.fat)
     }));
   };
 

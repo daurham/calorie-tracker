@@ -2,7 +2,7 @@
 export { Button } from "./button";
 export { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./card";
 export { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./collapsible";
-export { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
+export { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "./dropdown-menu";
 export { Input } from "./input";
 export { Progress } from "./progress";
 export { Label } from "./label";
@@ -28,6 +28,7 @@ export { ScrollArea, ScrollBar } from "./scroll-area";
 export { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./sheet";
 export { Skeleton } from "./skeleton";
 export { Slider } from "./slider";
+export { NumberInput } from "./NumberInput";
 export { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./table";
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 export { Toast } from "./toast";

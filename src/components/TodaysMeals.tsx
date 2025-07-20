@@ -33,6 +33,11 @@ const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: Today
                   {meal.modData && (
                     <Sparkles className="h-3 w-3 text-purple-500" />
                   )}
+                  {meal.portion && meal.portion !== 1 && (
+                    <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-2 py-1 rounded">
+                      {meal.portion === 0.5 ? '½' : meal.portion === 0.33 ? '⅓' : meal.portion === 0.25 ? '¼' : `${Math.round(meal.portion * 100)}%`}
+                    </span>
+                  )}
                 </div>
                 {meal.timestamp && (
                   <span className="text-xs sm:text-sm text-muted-foreground bg-white dark:bg-slate-700 px-2 py-1 rounded w-fit">

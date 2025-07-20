@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TrendingUp, MoreVertical, Pencil, Trash2, Sparkles, Loader2 } from "lucide-react";
+import { TrendingUp, MoreVertical, Pencil, Trash2, Sparkles, Loader2, ChevronDown } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   SearchBar,
   Skeleton,
 } from "./ui";
@@ -69,24 +70,31 @@ const AvailableMeals = ({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <MacroSummaryText data={meal} />
           <div className="flex gap-1 w-full sm:w-auto">
-            <Button
-              size="sm"
-              onClick={() => addMealToToday(meal)}
-              className="bg-emerald-500 hover:bg-emerald-600 flex-1 sm:flex-none transition-all duration-150 hover:scale-105 active:scale-95"
-            >
-              Add
-            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="px-2"
+                  onClick={() => addMealToToday(meal)}
+                  className="bg-emerald-500 hover:bg-emerald-600 flex-1 sm:flex-none transition-all duration-150 hover:scale-105 active:scale-95"
                 >
-                  <MoreVertical className="h-4 w-4" />
+                  Add
+                  <ChevronDown className="h-3 w-3 ml-1" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => addMealToToday(meal)}>
+                  Add Full Meal
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => addMealToToday({ ...meal, portion: 0.5 })}>
+                  Add ½ Meal
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => addMealToToday({ ...meal, portion: 0.33 })}>
+                  Add ⅓ Meal
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => addMealToToday({ ...meal, portion: 0.25 })}>
+                  Add ¼ Meal
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => {
                   openMealEditManagement(meal.id);
                 }}>

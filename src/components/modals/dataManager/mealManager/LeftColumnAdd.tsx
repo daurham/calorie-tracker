@@ -3,6 +3,7 @@ import {
   Button,
   Input,
   Label,
+  NumberInput,
   Select,
   SelectTrigger,
   SelectValue,
@@ -159,45 +160,46 @@ const LeftColumnAdd = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="calories">Calories</Label>
-              <Input
+              <NumberInput
                 id="calories"
-                type="number"
                 value={formData.calories}
-                onChange={(e) => setFormData(prev => ({ ...prev, calories: parseInt(e.target.value) || 0 }))}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, calories: value }))}
+                allowEmpty={true}
+                allowDecimal={false}
                 placeholder="0"
               />
             </div>
             <div>
               <Label htmlFor="protein">Protein (g)</Label>
-              <Input
+              <NumberInput
                 id="protein"
-                type="number"
                 value={formData.protein}
-                onChange={(e) => setFormData(prev => ({ ...prev, protein: parseFloat(e.target.value) || 0 }))}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, protein: value }))}
+                allowEmpty={true}
+                step={0.1}
                 placeholder="0"
-                step="0.1"
               />
             </div>
             <div>
               <Label htmlFor="carbs">Carbs (g)</Label>
-              <Input
+              <NumberInput
                 id="carbs"
-                type="number"
                 value={formData.carbs}
-                onChange={(e) => setFormData(prev => ({ ...prev, carbs: parseFloat(e.target.value) || 0 }))}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, carbs: value }))}
+                allowEmpty={true}
+                step={0.1}
                 placeholder="0"
-                step="0.1"
               />
             </div>
             <div>
               <Label htmlFor="fat">Fat (g)</Label>
-              <Input
+              <NumberInput
                 id="fat"
-                type="number"
                 value={formData.fat}
-                onChange={(e) => setFormData(prev => ({ ...prev, fat: parseFloat(e.target.value) || 0 }))}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, fat: value }))}
+                allowEmpty={true}
+                step={0.1}
                 placeholder="0"
-                step="0.1"
               />
             </div>
           </div>
