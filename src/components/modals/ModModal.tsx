@@ -27,6 +27,7 @@ const ModModal = ({ open, onOpenChange, mod, onMealGenerated }: ModModalProps) =
     carbs: number;
     fat: number;
   } | null>(null);
+  const [portion, setPortion] = useState(1);
 
   // Initialize inputs with default values
   useEffect(() => {
@@ -38,7 +39,25 @@ const ModModal = ({ open, onOpenChange, mod, onMealGenerated }: ModModalProps) =
         }
       });
       setInputs(defaultInputs);
-      setCalculation(null);
+      
+      // Trigger initial calculation if all required inputs have defaults
+      const hasAllRequiredInputs = mod.inputs.every(input => {
+        if (!input.required) return true;
+        const inputValue = defaultInputs[input.key];
+        return inputValue !== undefined && inputValue !== null && inputValue !== '';
+      });
+      
+      if (hasAllRequiredInputs) {
+        try {
+          const result = mod.calculate(defaultInputs);
+          setCalculation(result);
+        } catch (error) {
+          console.error('Error calculating mod:', error);
+          setCalculation(null);
+        }
+      } else {
+        setCalculation(null);
+      }
     }
   }, [open, mod]);
 
@@ -72,7 +91,12 @@ const ModModal = ({ open, onOpenChange, mod, onMealGenerated }: ModModalProps) =
   const handleGenerateMeal = () => {
     try {
       const meal = mod.generateMeal(inputs);
-      onMealGenerated(meal);
+      // Apply portion to the generated meal
+      const mealWithPortion = {
+        ...meal,
+        portion: portion
+      };
+      onMealGenerated(mealWithPortion);
       onOpenChange(false);
     } catch (error) {
       console.error('Error generating meal:', error);
@@ -208,6 +232,77 @@ const ModModal = ({ open, onOpenChange, mod, onMealGenerated }: ModModalProps) =
                 <div>Protein: <span className="font-medium">{calculation.protein}g</span></div>
                 <div>Carbs: <span className="font-medium">{calculation.carbs}g</span></div>
                 <div>Fat: <span className="font-medium">{calculation.fat}g</span></div>
+              </div>
+            </div>
+          )}
+
+          {/* Portion Selection */}
+          {calculation && (
+            <div className="space-y-3">
+              <Label htmlFor="portion">Portion Size</Label>
+              <div className="grid grid-cols-4 gap-2">
+                <Button
+                  type="button"
+                  variant={portion === 1 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setPortion(1)}
+                  className="text-xs"
+                >
+                  Full
+                </Button>
+                <Button
+                  type="button"
+                  variant={portion === 0.5 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setPortion(0.5)}
+                  className="text-xs"
+                >
+                  ½
+                </Button>
+                <Button
+                  type="button"
+                  variant={portion === 0.33 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setPortion(0.33)}
+                  className="text-xs"
+                >
+                  ⅓
+                </Button>
+                <Button
+                  type="button"
+                  variant={portion === 0.25 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setPortion(0.25)}
+                  className="text-xs"
+                >
+                  ¼
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  value={portion === 1 ? "" : portion.toString()}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    if (value >= 0.1 && value <= 2.0) {
+                      setPortion(value);
+                    }
+                  }}
+                  placeholder="Custom (0.1-2.0)"
+                  className="flex-1"
+                  min="0.1"
+                  max="2.0"
+                  step="0.01"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPortion(1)}
+                  className="text-xs"
+                >
+                  Reset
+                </Button>
               </div>
             </div>
           )}

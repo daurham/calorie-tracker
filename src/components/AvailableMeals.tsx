@@ -30,6 +30,9 @@ const AvailableMeals = ({
 }) => {
   const [deleteMealId, setDeleteMealId] = useState<number | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [customPortionMeal, setCustomPortionMeal] = useState(null);
+  const [customPortionValue, setCustomPortionValue] = useState("");
+  const [showCustomPortionDialog, setShowCustomPortionDialog] = useState(false);
 
 
 
@@ -93,6 +96,15 @@ const AvailableMeals = ({
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => addMealToToday({ ...meal, portion: 0.25 })}>
                   Add ¼ Meal
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => {
+                    setCustomPortionMeal(meal);
+                    setCustomPortionValue("");
+                    setShowCustomPortionDialog(true);
+                  }}
+                >
+                  Custom portion...
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => {
@@ -224,6 +236,60 @@ const AvailableMeals = ({
         title="Delete Meal"
         description="Are you sure you want to delete this meal? This action cannot be undone."
       />
+
+      {/* Custom Portion Dialog */}
+      {showCustomPortionDialog && customPortionMeal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Custom Portion</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              How much of "{customPortionMeal.name}" did you eat?
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Portion (0.1 - 2.0)</label>
+                <input
+                  type="number"
+                  value={customPortionValue}
+                  onChange={(e) => setCustomPortionValue(e.target.value)}
+                  placeholder="e.g., 0.75 for ¾"
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-700 text-sm"
+                  min="0.1"
+                  max="2.0"
+                  step="0.01"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    const portion = parseFloat(customPortionValue);
+                    if (portion >= 0.1 && portion <= 2.0) {
+                      addMealToToday({ ...customPortionMeal, portion });
+                      setShowCustomPortionDialog(false);
+                      setCustomPortionMeal(null);
+                      setCustomPortionValue("");
+                    }
+                  }}
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  Add
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCustomPortionDialog(false);
+                    setCustomPortionMeal(null);
+                    setCustomPortionValue("");
+                  }}
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-md text-sm font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

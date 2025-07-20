@@ -35,7 +35,12 @@ const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: Today
                   )}
                   {meal.portion && meal.portion !== 1 && (
                     <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-2 py-1 rounded">
-                      {meal.portion === 0.5 ? '½' : meal.portion === 0.33 ? '⅓' : meal.portion === 0.25 ? '¼' : `${Math.round(meal.portion * 100)}%`}
+                      {meal.portion === 0.5 ? '½' : 
+                       meal.portion === 0.33 ? '⅓' : 
+                       meal.portion === 0.25 ? '¼' : 
+                       meal.portion === 0.75 ? '¾' :
+                       meal.portion === 0.67 ? '⅔' :
+                       `${Math.round(meal.portion * 100)}%`}
                     </span>
                   )}
                 </div>
