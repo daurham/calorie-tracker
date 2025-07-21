@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks";
 import { DataManagementModal, AlertModal } from "@/components/modals";
 import { Ingredient, Meal, MealInput, MealType } from '@/types';
+import { capitalizeMealName } from '@/lib/utils';
 import RightColumnAdd from "./RightColumnAdd";
 import RightColumnEdit from "./RightColumnEdit";
 import LeftColumnAdd from "./LeftColumnAdd";
@@ -358,7 +359,7 @@ const MealManagementModal = ({
         : { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
       const newMealData: MealInput = {
-        name: formData.name,
+        name: capitalizeMealName(formData.name),
         meal_type: formData.meal_type,
         ingredients: finalIngredients.map(({ id, quantity }) => ({ id, quantity })),
         notes: formData.notes,

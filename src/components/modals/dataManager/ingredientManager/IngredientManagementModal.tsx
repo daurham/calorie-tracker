@@ -14,7 +14,7 @@ import { Ingredient } from "@/types";
 import MacroSummaryText from "@/components/MacroSummaryText";
 import { LargeIngredientSkeleton } from "@/components/skeletons";
 import IngredientSummaryText from "@/components/IngredientSummaryText";
-import { delay } from "@/lib/utils";
+import { delay, capitalizeMealName } from "@/lib/utils";
 
 interface IngredientManagementModalProps {
   open: boolean;
@@ -120,6 +120,7 @@ const IngredientsManagementModal = ({
 
     const ingredientData = {
       ...formData,
+      name: capitalizeMealName(formData.name),
       calories: parseInt(formData.calories),
       protein: parseFloat(formData.protein) || 0,
       carbs: parseFloat(formData.carbs) || 0,

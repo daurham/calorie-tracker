@@ -89,3 +89,38 @@ export const delay = (callback: () => void, ms = 500) => {
     callback()
   }, ms)
 }
+
+export const capitalizeMealName = (name: string): string => {
+  const lowercaseWords = ['and', 'to', 'of', 'in', 'with', 'for', 'the', 'a', 'an', 'or', 'but', 'at', 'by', 'from', 'up', 'on', 'off', 'out', 'over', 'under', 'into', 'onto', 'upon', 'within', 'without', 'through', 'throughout', 'during', 'before', 'after', 'since', 'until', 'while', 'when', 'where', 'why', 'how', 'what', 'which', 'who', 'whom', 'whose', 'that', 'this', 'these', 'those'];
+  
+  // Split by spaces and preserve punctuation
+  const parts = name.toLowerCase().split(/(\s+|[()\[\]{}])/);
+  
+  return parts.map((part, index) => {
+    // Skip if it's just whitespace or punctuation
+    if (/^\s*$/.test(part) || /^[()\[\]{}]$/.test(part)) {
+      return part;
+    }
+    
+    // Split the part into words and punctuation
+    const words = part.split(/(\s+)/);
+    
+    return words.map((word, wordIndex) => {
+      // Skip if it's just whitespace
+      if (/^\s*$/.test(word)) {
+        return word;
+      }
+      
+      // Check if this is the first word of the entire name
+      const isFirstWord = index === 0 && wordIndex === 0;
+      
+      // Don't capitalize common words unless they're the first word
+      if (!isFirstWord && lowercaseWords.includes(word.toLowerCase())) {
+        return word;
+      }
+      
+      // Capitalize the word
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }).join('');
+  }).join('');
+};

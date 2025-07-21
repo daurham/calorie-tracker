@@ -1,4 +1,5 @@
 import { ModHandler, ModInput, ModCalculation, ModMeal } from '@/types/mods';
+import { capitalizeMealName } from '@/lib/utils';
 
 export const customFoodMod: ModHandler = {
   id: 'custom-food',
@@ -67,7 +68,7 @@ export const customFoodMod: ModHandler = {
     
     return {
       id: `custom-food-${Date.now()}`,
-      name: foodName,
+      name: capitalizeMealName(foodName),
       meal_type: 'mod',
       calories: calculation.calories,
       protein: calculation.protein,

@@ -1,14 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Copy, Edit3, Sparkles } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  Input,
-} from "@/components/ui";
-import { Button } from "@/components/ui";
+import { Button, Input } from "@/components/ui";
 import { generateUniqueId } from "@/lib/utils";
 import MacroSummaryText from "../MacroSummaryText";
 import IngredientEditor from "../ui/IngredientEditor";
