@@ -8,5 +8,5 @@ export { default as MealPlanGenerator } from "./MealPlanGenerator";
 export { default as IngredientListSummaryText } from "./IngredientListSummaryText";
 export { default as MacroSummaryText } from "./MacroSummaryText";
 export { default as IngredientSummaryText } from "./IngredientSummaryText";
-export { default as ModModal } from "./modals/ModModal";
+export { default as ModModalFactory } from "./modals/ModModalFactory";
 export { default as ModSettingsModal } from "./modals/ModSettingsModal";

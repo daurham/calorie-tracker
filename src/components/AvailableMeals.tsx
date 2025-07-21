@@ -56,7 +56,7 @@ const AvailableMeals = ({
 
   const AvailableMealCard = ({ meal }) => (
     <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer group border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-      <CardContent className="p-3 sm:p-4">
+      <CardContent className="p-3 sm:p-4 grid grid-rows-[auto_auto_1fr] h-full">
         <div className="flex justify-between items-start mb-2 sm:mb-3">
           <h3 className={`font-semibold ${meal.meal_type === 'standalone' ? 'text-yellow-500' : ''} group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors text-sm sm:text-base line-clamp-2`}>
             {meal.name || "Unnamed Meal"}
@@ -65,12 +65,12 @@ const AvailableMeals = ({
             {meal.calories}
           </span>
         </div>
-        <div className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2">
+        <div className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2 min-h-[1.5rem]">
           {meal.meal_type === 'composed' &&
             <IngredientListSummaryText meal={meal} />
           }
         </div>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 self-end">
           <MacroSummaryText data={meal} />
           <div className="flex gap-1 w-full sm:w-auto">
             <DropdownMenu>

@@ -33,7 +33,7 @@ import {
 import { Meal, MealInput } from '@/types';
 import { initializeMods, modManager } from '@/lib/mods';
 import { ModMeal } from '@/types/mods';
-import ModModal from '@/components/modals/ModModal';
+import ModModalFactory from '@/components/modals/ModModalFactory';
 
 // Local storage keys
 const STORAGE_KEYS = {
@@ -504,12 +504,12 @@ const Index = () => {
         
         {/* Mod Modal */}
         {selectedMod && (
-          <ModModal
-            open={isModModalOpen}
-            onOpenChange={setIsModModalOpen}
-            mod={selectedMod}
-            onMealGenerated={handleModMealGenerated}
-          />
+                  <ModModalFactory
+          open={isModModalOpen}
+          onOpenChange={setIsModModalOpen}
+          mod={selectedMod}
+          onMealGenerated={handleModMealGenerated}
+        />
         )}
       </div>
     );

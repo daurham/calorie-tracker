@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Calculator, Pizza } from 'lucide-react';
+import { X, Calculator, Pizza, Utensils } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -71,6 +71,15 @@ const ModModal = ({ open, onOpenChange, mod, onMealGenerated }: ModModalProps) =
     // Auto-calculate if all required inputs are filled
     const hasAllRequiredInputs = mod.inputs.every(input => {
       if (!input.required) return true;
+      
+      // Special handling for grid-macros type
+      if (input.type === 'grid-macros') {
+        return input.fields?.every(field => {
+          const fieldValue = newInputs[field.key];
+          return fieldValue !== undefined && fieldValue !== null && fieldValue !== '' && fieldValue > 0;
+        }) ?? false;
+      }
+      
       const inputValue = newInputs[input.key];
       return inputValue !== undefined && inputValue !== null && inputValue !== '';
     });
@@ -186,14 +195,60 @@ const ModModal = ({ open, onOpenChange, mod, onMealGenerated }: ModModalProps) =
           </div>
         );
 
+      case 'grid-macros':
+        return (
+          <div key={input.key} className="space-y-2">
+            <Label>{input.label}</Label>
+            <div className="grid grid-cols-2 gap-4">
+              {input.fields?.map(field => (
+                <div key={field.key}>
+                  <Label htmlFor={field.key}>{field.label}</Label>
+                  <Input
+                    id={field.key}
+                    type="number"
+                    value={inputs[field.key] || ''}
+                    onChange={(e) => handleInputChange(field.key, parseFloat(e.target.value) || 0)}
+                    placeholder={field.placeholder}
+                    min={field.min}
+                    max={field.max}
+                    step={field.step}
+                    required={input.required}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
       default:
         return null;
+    }
+  };
+
+  // INFO: Update this when adding new modals
+  const getModIcon = () => {
+    switch (mod.id) {
+      case 'costco-pizza-slice':
+        return <Pizza className="h-5 w-5" />;
+      case 'custom-food':
+        return <Utensils className="h-5 w-5" />;
+      default:
+        return <Calculator className="h-5 w-5" />;
     }
   };
 
   const isFormValid = () => {
     return mod.inputs.every(input => {
       if (!input.required) return true;
+      
+      // Special handling for grid-macros type
+      if (input.type === 'grid-macros') {
+        return input.fields?.every(field => {
+          const fieldValue = inputs[field.key];
+          return fieldValue !== undefined && fieldValue !== null && fieldValue !== '' && fieldValue > 0;
+        }) ?? false;
+      }
+      
       const value = inputs[input.key];
       return value !== undefined && value !== null && value !== '';
     });
@@ -204,7 +259,7 @@ const ModModal = ({ open, onOpenChange, mod, onMealGenerated }: ModModalProps) =
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Pizza className="h-5 w-5" />
+            {getModIcon()}
             {mod.name}
           </DialogTitle>
           <DialogDescription>

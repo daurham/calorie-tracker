@@ -13,7 +13,7 @@ export interface ModData {
 }
 
 export interface ModInput {
-  type: 'text' | 'number' | 'select' | 'radio';
+  type: 'text' | 'number' | 'select' | 'radio' | 'grid-macros';
   label: string;
   key: string;
   required?: boolean;
@@ -23,6 +23,14 @@ export interface ModInput {
   min?: number;
   max?: number;
   step?: number;
+  fields?: Array<{
+    key: string;
+    label: string;
+    placeholder?: string;
+    min?: number;
+    max?: number;
+    step?: number;
+  }>;
 }
 
 export interface ModCalculation {

@@ -5,5 +5,8 @@ export { default as IngredientManagementModal } from "./dataManager/ingredientMa
 export { default as ScannerModal } from "./ScannerModal";
 export { default as DataManagementModal } from "./dataManager/DataManagementModal";
 export { default as AlertModal } from "./AlertModal";
-export { default as ModModal } from "./ModModal";
+export { default as ModModalFactory } from "./ModModalFactory";
+export { default as BaseModModal } from "./BaseModModal";
+export { default as CostcoPizzaModal } from "./CostcoPizzaModal";
+export { default as CustomFoodModal } from "./CustomFoodModal";
 export { default as ModSettingsModal } from "./ModSettingsModal";

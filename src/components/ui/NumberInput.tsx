@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 interface NumberInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   value: number;
   onValueChange: (value: number) => void;
+  onInvalidInput?: () => void;
   step?: number;
   min?: number;
   max?: number;
@@ -15,6 +16,7 @@ interface NumberInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 const NumberInput = ({
   value,
   onValueChange,
+  onInvalidInput,
   step = 1,
   min,
   max,
@@ -34,13 +36,11 @@ const NumberInput = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     
-    // Update local input state immediately for responsive UX
-    setInputValue(value);
-    
     // Handle empty input
     if (value === "" || value === ".") {
       if (allowEmpty) {
-        onValueChange(0);
+        setInputValue(value);
+        return;
       }
       return;
     }
@@ -48,13 +48,32 @@ const NumberInput = ({
     // Validate input format
     const decimalRegex = allowDecimal ? /^\d*\.?\d*$/ : /^\d*$/;
     if (!decimalRegex.test(value)) {
+      // Don't update input state for invalid characters
+      onInvalidInput?.();
       return;
     }
+    
+    // Update local input state for valid input
+    setInputValue(value);
     
     // Parse and validate number
     const numValue = parseFloat(value);
     if (!isNaN(numValue)) {
-      // Apply min/max constraints
+      // Don't apply min/max constraints during typing - only on blur
+      onValueChange(numValue);
+    }
+  };
+
+  const handleBlur = () => {
+    // Clean up local state when input loses focus
+    const numValue = parseFloat(inputValue);
+    if (isNaN(numValue)) {
+      setInputValue(allowEmpty ? "" : "0");
+      if (!allowEmpty) {
+        onValueChange(0);
+      }
+    } else {
+      // Apply min/max constraints on blur
       let finalValue = numValue;
       if (min !== undefined && finalValue < min) {
         finalValue = min;
@@ -65,18 +84,13 @@ const NumberInput = ({
         setInputValue(finalValue.toString());
       }
       
+      if (finalValue === 0 && allowEmpty) {
+        setInputValue("");
+      } else {
+        setInputValue(finalValue.toString());
+      }
+      
       onValueChange(finalValue);
-    }
-  };
-
-  const handleBlur = () => {
-    // Clean up local state when input loses focus
-    const numValue = parseFloat(inputValue);
-    if (isNaN(numValue) || numValue === 0) {
-      setInputValue(allowEmpty ? "" : "0");
-      onValueChange(0);
-    } else {
-      setInputValue(numValue.toString());
     }
   };
 
