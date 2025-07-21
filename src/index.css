@@ -101,3 +101,25 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .mobile-button-layout {
+    position: relative;
+  }
+  
+  .mobile-button-layout > div {
+    position: relative;
+  }
+  
+  .mobile-button-layout svg {
+    position: absolute;
+    right: 0.5rem;
+  }
+  
+  @media (min-width: 640px) {
+    .mobile-button-layout svg {
+      position: relative;
+      right: auto;
+    }
+  }
+}

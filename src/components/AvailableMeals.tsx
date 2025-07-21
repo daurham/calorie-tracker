@@ -78,10 +78,12 @@ const AvailableMeals = ({
                 <Button
                   size="sm"
                   onClick={() => addMealToToday(meal)}
-                  className="bg-emerald-500 hover:bg-emerald-600 flex-1 sm:flex-none transition-all duration-150 hover:scale-105 active:scale-95"
+                  className="bg-emerald-500 hover:bg-emerald-600 flex-1 sm:flex-none transition-all duration-150 hover:scale-105 active:scale-95 mobile-button-layout"
                 >
-                  Add
-                  <ChevronDown className="h-3 w-3 ml-1" />
+                  <div className="flex items-center justify-center sm:justify-start w-full">
+                    <span>Add</span>
+                    <ChevronDown className="h-3 w-3 ml-1 sm:ml-1" />
+                  </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
