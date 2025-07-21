@@ -6,6 +6,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  Input,
 } from "@/components/ui";
 import { Button } from "@/components/ui";
 import { generateUniqueId } from "@/lib/utils";
@@ -13,6 +14,7 @@ import MacroSummaryText from "../MacroSummaryText";
 import IngredientEditor from "../ui/IngredientEditor";
 import { MealType } from "@/types";
 import IngredientListSummaryText from "../IngredientListSummaryText";
+import DataManagementModal from "./dataManager/DataManagementModal";
 
 interface TodaysMealsEditModalProps {
   open: boolean;
@@ -242,9 +244,9 @@ const TodaysMealsEditModal = ({
     return (
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="font-medium text-sm">Portion Size</h4>
+          <h4 className="font-medium text-sm">Portion:</h4>
           <div className="flex gap-1">
-            {[0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.25, 1.5, 2].map((p) => (
+            {[0.25, 0.33, 0.5, 0.67, 0.75, 1, 1.5, 2].map((p) => (
               <Button
                 key={p}
                 variant={portion === p ? "default" : "outline"}
@@ -263,7 +265,7 @@ const TodaysMealsEditModal = ({
           </div>
         </div>
         <div>
-          <input
+          <Input
             type="number"
             value={portion}
             onChange={(e) => {
@@ -274,7 +276,6 @@ const TodaysMealsEditModal = ({
             min="0.1"
             max="5"
             step="0.01"
-            className="w-full px-3 py-2 border rounded-md text-sm"
             placeholder="Custom portion"
           />
         </div>
@@ -575,48 +576,84 @@ const TodaysMealsEditModal = ({
     );
   };
 
+  const LeftColumn = (editingMeal ? (
+      editMode === 'standalone' ? (
+        <PortionEditor meal={editingMeal} />
+      ) : editMode === 'composed' ? (
+        <ComposedMealEditor meal={editingMeal} />
+      ) : editMode === 'mod' ? (
+        <ModEditor meal={editingMeal} />
+      ) : null
+    ) : (
+      <div className="text-center text-muted-foreground py-8">
+        Select a meal to edit
+      </div>
+    ));
+
+  const RightColumn = (
+    <div>
+        <div className="space-y-4 min-h-[65vh]">
+             <h3 className="text-lg font-semibold">Today's Meals</h3>
+             <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+               {meals.map((meal) => (
+                 <TodaysMealCard key={meal.uniqueMealId} meal={meal} />
+               ))}
+             </div>
+           </div>
+      </div>
+    )
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
-            Edit Today's Meals
-          </DialogTitle>
-          <DialogDescription>
-            Edit portions, ingredients, or mod configurations for your meals today.
-          </DialogDescription>
-        </DialogHeader>
+    <DataManagementModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Edit Today's Meals"
+      description="Edit portions, ingredients, or mod configurations for your meals today."
+      leftColumn={LeftColumn}
+      rightColumn={RightColumn}
+      />
+    // />
+    // <Dialog open={open} onOpenChange={onOpenChange}>
+    //   <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    //     <DialogHeader>
+    //       <DialogTitle className="text-xl sm:text-2xl bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+    //         Edit Today's Meals
+    //       </DialogTitle>
+    //       <DialogDescription>
+    //         Edit portions, ingredients, or mod configurations for your meals today.
+    //       </DialogDescription>
+    //     </DialogHeader>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Left Column - Editor */}
-          <div className="space-y-4">
-            {editingMeal ? (
-              editMode === 'standalone' ? (
-                <PortionEditor meal={editingMeal} />
-              ) : editMode === 'composed' ? (
-                <ComposedMealEditor meal={editingMeal} />
-              ) : editMode === 'mod' ? (
-                <ModEditor meal={editingMeal} />
-              ) : null
-            ) : (
-              <div className="text-center text-muted-foreground py-8">
-                Select a meal to edit
-              </div>
-            )}
-          </div>
+    //     <div className="grid gap-6 md:grid-cols-2">
+    //       {/* Left Column - Editor */}
+    //       <div className="space-y-4">
+    //         {editingMeal ? (
+    //           editMode === 'standalone' ? (
+    //             <PortionEditor meal={editingMeal} />
+    //           ) : editMode === 'composed' ? (
+    //             <ComposedMealEditor meal={editingMeal} />
+    //           ) : editMode === 'mod' ? (
+    //             <ModEditor meal={editingMeal} />
+    //           ) : null
+    //         ) : (
+    //           <div className="text-center text-muted-foreground py-8">
+    //             Select a meal to edit
+    //           </div>
+    //         )}
+    //       </div>
 
-          {/* Right Column - Meals List */}
-          <div className="space-y-4 min-h-[65vh]">
-            <h3 className="text-lg font-semibold">Today's Meals</h3>
-            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
-              {meals.map((meal) => (
-                <TodaysMealCard key={meal.uniqueMealId} meal={meal} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+    //       {/* Right Column - Meals List */}
+    //       <div className="space-y-4 min-h-[65vh]">
+    //         <h3 className="text-lg font-semibold">Today's Meals</h3>
+    //         <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+    //           {meals.map((meal) => (
+    //             <TodaysMealCard key={meal.uniqueMealId} meal={meal} />
+    //           ))}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </DialogContent>
+    // </Dialog>
   );
 };
 
