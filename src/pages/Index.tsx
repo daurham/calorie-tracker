@@ -122,7 +122,15 @@ const Index = () => {
           return {
             ...updatedMeal,
             uniqueMealId: oldMeal?.uniqueMealId || generateUniqueId(),
-            timestamp: oldMeal?.timestamp || ""
+            timestamp: oldMeal?.timestamp || "",
+            isEdited: oldMeal?.isEdited || false, // Preserve the isEdited flag
+            portion: oldMeal?.portion || 1, // Preserve portion
+            calories: oldMeal?.calories || updatedMeal.calories, // Use edited calories if available
+            protein: oldMeal?.protein || updatedMeal.protein, // Use edited protein if available
+            carbs: oldMeal?.carbs || updatedMeal.carbs, // Use edited carbs if available
+            fat: oldMeal?.fat || updatedMeal.fat, // Use edited fat if available
+            ingredients: oldMeal?.ingredients || updatedMeal.ingredients, // Preserve edited ingredients
+            modData: oldMeal?.modData || (updatedMeal as any).modData, // Preserve edited mod data
           }
         }
         return {
@@ -286,6 +294,44 @@ const Index = () => {
     }
   };
 
+  const updateMealInToday = (updatedMeal) => {
+    const oldMeal = todaysMeals.find(meal => meal.uniqueMealId === updatedMeal.uniqueMealId);
+    if (oldMeal) {
+      // Remove old meal's macros
+      setDailyCalories(prev => prev - oldMeal.calories);
+      setDailyMacros(prev => ({
+        protein: Number(prev.protein) - Number(oldMeal.protein),
+        carbs: Number(prev.carbs) - Number(oldMeal.carbs),
+        fat: Number(prev.fat) - Number(oldMeal.fat)
+      }));
+
+      // Add updated meal's macros
+      setDailyCalories(prev => prev + updatedMeal.calories);
+      setDailyMacros(prev => ({
+        protein: Number(prev.protein) + Number(updatedMeal.protein),
+        carbs: Number(prev.carbs) + Number(updatedMeal.carbs),
+        fat: Number(prev.fat) + Number(updatedMeal.fat)
+      }));
+
+      // Update the meal in the list
+      setTodaysMeals(prev => 
+        prev.map(meal => 
+          meal.uniqueMealId === updatedMeal.uniqueMealId ? updatedMeal : meal
+        )
+      );
+    }
+  };
+
+  const duplicateMealInToday = (duplicatedMeal) => {
+    setTodaysMeals(prev => [...prev, duplicatedMeal]);
+    setDailyCalories(prev => prev + duplicatedMeal.calories);
+    setDailyMacros(prev => ({
+      protein: Number(prev.protein) + Number(duplicatedMeal.protein),
+      carbs: Number(prev.carbs) + Number(duplicatedMeal.carbs),
+      fat: Number(prev.fat) + Number(duplicatedMeal.fat)
+    }));
+  };
+
   const addIngredient = async (ingredient) => {
     // console.log("adding ingredient", ingredient);
     const newIngredientResult = await addIngredientData(ingredient);
@@ -440,7 +486,10 @@ const Index = () => {
         {/* Today's Meals */}
         <TodaysMeals
           meals={todaysMeals}
+          availableIngredients={allIngredientsData}
           onRemoveMeal={removeMealFromToday}
+          onUpdateMeal={updateMealInToday}
+          onDuplicateMeal={duplicateMealInToday}
           isCollapsed={!isTodaysMealsOpen}
           setIsCollapsed={(collapsed) => setIsTodaysMealsOpen(!collapsed)}
         />

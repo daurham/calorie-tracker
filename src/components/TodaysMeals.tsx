@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, Clock, ChevronDown, ChevronRight, Sparkles } from "lucide-react";
+import { Trash2, Clock, ChevronDown, ChevronRight, Sparkles, Edit3 } from "lucide-react";
 import {
   Button,
   Card,
@@ -12,14 +12,20 @@ import {
 } from "@/components/ui";
 import { generateUniqueId } from "@/lib/utils";
 import MacroSummaryText from "./MacroSummaryText";
+import TodaysMealsEditModal from "./modals/TodaysMealsEditModal";
 interface TodaysMealsProps {
   meals: any[];
+  availableIngredients: any[];
   onRemoveMeal: (id: any) => void;
+  onUpdateMeal: (updatedMeal: any) => void;
+  onDuplicateMeal: (duplicatedMeal: any) => void;
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
 }
 
-const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: TodaysMealsProps) => {
+const TodaysMeals = ({ meals, availableIngredients, onRemoveMeal, onUpdateMeal, onDuplicateMeal, isCollapsed, setIsCollapsed }: TodaysMealsProps) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingMeal, setEditingMeal] = useState<any>(null);
 
   const TodaysMealCard = ({ meal }) => (
     <Card className="bg-gradient-to-r from-white to-emerald-50 dark:from-slate-800 dark:to-emerald-950 border-emerald-100 dark:border-emerald-800">
@@ -43,6 +49,11 @@ const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: Today
                        `${Math.round(meal.portion * 100)}%`}
                     </span>
                   )}
+                  {meal.isEdited && (
+                    <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">
+                      Edited
+                    </span>
+                  )}
                 </div>
                 {meal.timestamp && (
                   <span className="text-xs sm:text-sm text-muted-foreground bg-white dark:bg-slate-700 px-2 py-1 rounded w-fit">
@@ -51,7 +62,7 @@ const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: Today
                 )}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
-                {meal.ingredients.map(i => i.name).join(", ")}
+                {meal.ingredients?.map(i => i.name).join(", ")}
                 {meal.weight && (
                   <span className="ml-2 text-purple-600 dark:text-purple-400 font-medium">
                     ({meal.weight}g)
@@ -70,6 +81,17 @@ const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: Today
           <div className="flex items-center justify-between">
             <MacroSummaryText data={meal} showCalories={false} />
             <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setEditingMeal(meal);
+                  setIsEditModalOpen(true);
+                }}
+                className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950 px-2 h-8"
+              >
+                <Edit3 className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -120,8 +142,8 @@ const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: Today
   }
 
 
-  if (meals.length === 1) {
-    return (
+  return (
+    <>
       <Card className="mb-6 sm:mb-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
         <CardHeader>
           <Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed(!open)}>
@@ -153,54 +175,25 @@ const TodaysMeals = ({ meals, onRemoveMeal, isCollapsed, setIsCollapsed }: Today
           </Collapsible>
         </CardHeader>
       </Card>
-    );
-  }
 
-  return (
-    <Card className="mb-6 sm:mb-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-      <CardHeader>
-        <Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed(!open)}>
-          <div className="flex items-center justify-between">
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                className="p-0 h-auto font-normal hover:bg-transparent"
-              >
-                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
-                  Today's Meals ({meals.length})
-                </CardTitle>
-                {isCollapsed ? (
-                  <ChevronRight className="h-4 w-4 ml-2" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 ml-2" />
-                )}
-              </Button>
-            </CollapsibleTrigger>
-            {meals.length >= 2 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onRemoveMeal("all")}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-2 h-0 py-0"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Clear All
-              </Button>
-            )}
-          </div>
-          <CollapsibleContent>
-            <CardContent className="pt-4">
-              <div className="space-y-3">
-                {meals.map((meal) => (
-                  <TodaysMealCard key={generateUniqueId()} meal={meal} />
-                ))}
-              </div>
-            </CardContent>
-          </CollapsibleContent>
-        </Collapsible>
-      </CardHeader>
-    </Card>
+          {/* Edit Modal */}
+    <TodaysMealsEditModal
+      open={isEditModalOpen}
+      onOpenChange={(open) => {
+        setIsEditModalOpen(open);
+        if (!open) {
+          setEditingMeal(null);
+        }
+      }}
+      meals={meals}
+      editingMeal={editingMeal}
+      availableIngredients={availableIngredients}
+      onUpdateMeal={onUpdateMeal}
+      onDuplicateMeal={onDuplicateMeal}
+      onRemoveMeal={onRemoveMeal}
+      onUpdateEditingMeal={setEditingMeal}
+    />
+    </>
   );
 };
 
