@@ -12,6 +12,7 @@ import { generateUniqueId } from "@/lib/utils";
 import MacroSummaryText from "../MacroSummaryText";
 import IngredientEditor from "../ui/IngredientEditor";
 import { MealType } from "@/types";
+import IngredientListSummaryText from "../IngredientListSummaryText";
 
 interface TodaysMealsEditModalProps {
   open: boolean;
@@ -54,7 +55,7 @@ const TodaysMealsEditModal = ({
   }, [editingMeal]);
 
   const handleEditMeal = (meal: any) => {
-    onUpdateEditingMeal(meal);  
+    onUpdateEditingMeal(meal);
   };
 
   const handleCloseEdit = () => {
@@ -165,12 +166,12 @@ const TodaysMealsEditModal = ({
                 )}
                 {meal.portion && meal.portion !== 1 && (
                   <span className="text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-2 py-1 rounded">
-                    {meal.portion === 0.5 ? '½' : 
-                     meal.portion === 0.33 ? '⅓' : 
-                     meal.portion === 0.25 ? '¼' : 
-                     meal.portion === 0.75 ? '¾' :
-                     meal.portion === 0.67 ? '⅔' :
-                     `${Math.round(meal.portion * 100)}%`}
+                    {meal.portion === 0.5 ? '½' :
+                      meal.portion === 0.33 ? '⅓' :
+                        meal.portion === 0.25 ? '¼' :
+                          meal.portion === 0.75 ? '¾' :
+                            meal.portion === 0.67 ? '⅔' :
+                              `${Math.round(meal.portion * 100)}%`}
                   </span>
                 )}
                 {meal.isEdited && (
@@ -179,26 +180,21 @@ const TodaysMealsEditModal = ({
                   </span>
                 )}
               </div>
-              {meal.timestamp && (
-                <span className="text-xs sm:text-sm text-muted-foreground bg-white dark:bg-slate-700 px-2 py-1 rounded w-fit">
-                  {meal.timestamp}
-                </span>
-              )}
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
-              {meal.ingredients?.map((i: any) => i.name).join(", ")}
-              {meal.weight && (
-                <span className="ml-2 text-purple-600 dark:text-purple-400 font-medium">
-                  ({meal.weight}g)
-                </span>
-              )}
-            </p>
+            {meal.meal_type === 'composed' && (
+              <IngredientListSummaryText meal={meal} />
+            )}
           </div>
-          <div className="text-center flex-shrink-0">
+          <div className="text-center flex-shrink-0 flex flex-col">
             <div className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400">
-              {meal.calories}
+              {meal.calories} cal
             </div>
-            <div className="text-xs sm:text-sm text-muted-foreground">calories</div>
+            {/* <div className="text-xs sm:text-sm text-muted-foreground">calories</div> */}
+            {meal.timestamp && (
+              <span className="text-xs sm:text-sm text-muted-foreground bg-white dark:bg-slate-700 px-2 py-1 rounded w-fit">
+                {meal.timestamp}
+              </span>
+            )}
           </div>
         </div>
 
@@ -256,12 +252,12 @@ const TodaysMealsEditModal = ({
                 onClick={() => handlePortionChange(p)}
                 className="text-xs px-2 py-1 h-6"
               >
-                {p === 0.25 ? '¼' : 
-                 p === 0.33 ? '⅓' : 
-                 p === 0.5 ? '½' : 
-                 p === 0.67 ? '⅔' : 
-                 p === 0.75 ? '¾' : 
-                 p.toString()}
+                {p === 0.25 ? '¼' :
+                  p === 0.33 ? '⅓' :
+                    p === 0.5 ? '½' :
+                      p === 0.67 ? '⅔' :
+                        p === 0.75 ? '¾' :
+                          p.toString()}
               </Button>
             ))}
           </div>
@@ -286,32 +282,66 @@ const TodaysMealsEditModal = ({
     );
   };
 
+  const updatedMacrosComponent = ({ portion, previewTotals }: { portion: number, previewTotals: any }) => {
+    return (
+      <div className="bg-muted p-4 rounded-lg">
+        <h4 className="font-medium mb-2">Updated Macros:</h4>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>Calories: <span className="font-medium">{Math.round(previewTotals.calories * portion)}</span></div>
+          <div>Protein: <span className="font-medium">{(previewTotals.protein * portion).toFixed(1)}g</span></div>
+          <div>Carbs: <span className="font-medium">{(previewTotals.carbs * portion).toFixed(1)}g</span></div>
+          <div>Fat: <span className="font-medium">{(previewTotals.fat * portion).toFixed(1)}g</span></div>
+        </div>
+      </div>
+    )
+  }
+
   const PortionEditor = ({ meal }: { meal: any }) => {
-    const [portion, setPortion] = useState(meal.portion || 1);
+    const [localPortion, setLocalPortion] = useState(meal.portion || 1);
+
+    const handleUpdate = () => {
+      // For standalone meals, just update the portion and recalculate macros
+      const updatedMeal = {
+        ...meal,
+        portion: localPortion,
+        calories: Math.round((Number(meal.calories) / (Number(meal.portion) || 1)) * localPortion),
+        protein: Number(((Number(meal.protein) / (Number(meal.portion) || 1)) * localPortion).toFixed(1)),
+        carbs: Number(((Number(meal.carbs) / (Number(meal.portion) || 1)) * localPortion).toFixed(1)),
+        fat: Number(((Number(meal.fat) / (Number(meal.portion) || 1)) * localPortion).toFixed(1)),
+        isEdited: true,
+      };
+      onUpdateMeal(updatedMeal);
+      if (onUpdateEditingMeal) {
+        onUpdateEditingMeal(updatedMeal);
+      }
+      setEditMode(null);
+    };
 
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Edit Portion</h3>
+          <h3 className="text-lg font-semibold">Edit {meal.name}</h3>
           <Button variant="ghost" onClick={handleCloseEdit}>
             <X className="h-4 w-4" />
           </Button>
         </div>
-        
-        <CompactPortionEditor 
-          meal={meal} 
-          onPortionChange={(newPortion) => handleUpdatePortion(meal.uniqueMealId, newPortion)} 
-        />
 
+        {/* Portion Editor */}
         <div className="bg-muted p-4 rounded-lg">
-          <h4 className="font-medium mb-2">Updated Macros:</h4>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>Calories: <span className="font-medium">{Math.round((Number(meal.calories) / (Number(meal.portion) || 1)) * portion)}</span></div>
-            <div>Protein: <span className="font-medium">{((Number(meal.protein) / (Number(meal.portion) || 1)) * portion).toFixed(1)}g</span></div>
-            <div>Carbs: <span className="font-medium">{((Number(meal.carbs) / (Number(meal.portion) || 1)) * portion).toFixed(1)}g</span></div>
-            <div>Fat: <span className="font-medium">{((Number(meal.fat) / (Number(meal.portion) || 1)) * portion).toFixed(1)}g</span></div>
-          </div>
+          <CompactPortionEditor
+            meal={{ ...meal, portion: localPortion }}
+            onPortionChange={setLocalPortion}
+          />
         </div>
+
+        {updatedMacrosComponent({ portion: localPortion, previewTotals: { calories: meal.calories, protein: meal.protein, carbs: meal.carbs, fat: meal.fat } })}
+
+        <Button
+          onClick={handleUpdate}
+          className="w-full"
+        >
+          Update Meal
+        </Button>
       </div>
     );
   };
@@ -324,6 +354,7 @@ const TodaysMealsEditModal = ({
         id: ing.id || 0,
         name: ing.name || '',
         quantity: ing.quantity || 1,
+        unit: ing.unit || '',
         calories: ing.calories || 0,
         protein: ing.protein || 0,
         carbs: ing.carbs || 0,
@@ -332,63 +363,108 @@ const TodaysMealsEditModal = ({
     };
 
     const [ingredients, setIngredients] = useState(transformIngredients(meal.ingredients || []));
-    const [currentPortion, setCurrentPortion] = useState(Number(meal.portion) || 1);
+    const [localPortion, setLocalPortion] = useState(Number(meal.portion) || 1);
 
     const handleIngredientsChange = (updatedIngredients: any[]) => {
       setIngredients(updatedIngredients);
     };
 
-    const handlePortionChange = (newPortion: number) => {
-      setCurrentPortion(newPortion);
-      // Update the meal immediately with new portion
+    // Calculate preview macros
+    const calculateTotals = () => {
+      return ingredients.reduce((totals, ingredient) => {
+        const fullIngredient = availableIngredients.find(i => i.id === ingredient.id);
+        if (fullIngredient) {
+          const multiplier = ingredient.quantity;
+          return {
+            calories: totals.calories + (fullIngredient.calories * multiplier),
+            protein: totals.protein + (fullIngredient.protein * multiplier),
+            carbs: totals.carbs + (fullIngredient.carbs * multiplier),
+            fat: totals.fat + (fullIngredient.fat * multiplier),
+          };
+        }
+        return totals;
+      }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    };
+    const previewTotals = calculateTotals();
+
+    // Check if all ingredients are properly selected (have valid IDs)
+    const hasUnselectedIngredients = ingredients.some(ingredient => !ingredient.id || ingredient.id === 0);
+
+    // Commit update on button click
+    const handleUpdate = () => {
+      // Recalculate macros based on localPortion
+      const totalMacros = ingredients.reduce((totals, ingredient) => {
+        const fullIngredient = availableIngredients.find(i => i.id === ingredient.id);
+        if (fullIngredient && ingredient.id > 0) {
+          const multiplier = ingredient.quantity;
+          return {
+            calories: totals.calories + (fullIngredient.calories * multiplier),
+            protein: totals.protein + (fullIngredient.protein * multiplier),
+            carbs: totals.carbs + (fullIngredient.carbs * multiplier),
+            fat: totals.fat + (fullIngredient.fat * multiplier),
+          };
+        }
+        return totals;
+      }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+
+      // Ensure ingredients have unit information from availableIngredients
+      const ingredientsWithUnits = ingredients.map(ingredient => {
+        const fullIngredient = availableIngredients.find(i => i.id === ingredient.id);
+        return {
+          ...ingredient,
+          unit: fullIngredient?.unit || ingredient.unit || '',
+        };
+      });
+
       const updatedMeal = {
         ...meal,
-        portion: newPortion,
-        calories: Math.round((Number(meal.calories) / (Number(meal.portion) || 1)) * newPortion),
-        protein: Number(((Number(meal.protein) / (Number(meal.portion) || 1)) * newPortion).toFixed(1)),
-        carbs: Number(((Number(meal.carbs) / (Number(meal.portion) || 1)) * newPortion).toFixed(1)),
-        fat: Number(((Number(meal.fat) / (Number(meal.portion) || 1)) * newPortion).toFixed(1)),
+        ingredients: ingredientsWithUnits,
+        portion: localPortion,
+        calories: Math.round(totalMacros.calories * localPortion),
+        protein: Number((totalMacros.protein * localPortion).toFixed(1)),
+        carbs: Number((totalMacros.carbs * localPortion).toFixed(1)),
+        fat: Number((totalMacros.fat * localPortion).toFixed(1)),
+        isEdited: true,
       };
       onUpdateMeal(updatedMeal);
       if (onUpdateEditingMeal) {
         onUpdateEditingMeal(updatedMeal);
       }
+      setEditMode(null);
     };
-
-    // Check if all ingredients are properly selected (have valid IDs)
-    const hasUnselectedIngredients = ingredients.some(ingredient => !ingredient.id || ingredient.id === 0);
 
     // Edit Composed Meal
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Edit Composed Meal</h3>
+          <h3 className="text-lg font-semibold">Edit {meal.name}</h3>
           <Button variant="ghost" onClick={handleCloseEdit}>
             <X className="h-4 w-4" />
           </Button>
         </div>
-        
         {/* Portion Editor */}
         <div className="bg-muted p-4 rounded-lg">
-          <CompactPortionEditor 
-            meal={meal} 
-            onPortionChange={handlePortionChange} 
+          <CompactPortionEditor
+            meal={{ ...meal, portion: localPortion }}
+            onPortionChange={setLocalPortion}
           />
         </div>
-        
         <IngredientEditor
           ingredients={ingredients}
           availableIngredients={availableIngredients}
           onIngredientsChange={handleIngredientsChange}
-          portion={currentPortion}
+          portion={localPortion}
+          showMacros={false}
         />
 
-        <Button 
-          onClick={() => handleUpdateIngredients(meal.uniqueMealId, ingredients)}
+        {updatedMacrosComponent({ portion: localPortion, previewTotals })}
+
+        <Button
+          onClick={handleUpdate}
           disabled={hasUnselectedIngredients}
           className="w-full"
         >
-          Update Ingredients
+          Update Meal
         </Button>
       </div>
     );
@@ -402,7 +478,7 @@ const TodaysMealsEditModal = ({
       carbs: number;
       fat: number;
     } | null>(null);
-    const [currentPortion, setCurrentPortion] = useState(Number(meal.portion) || 1);
+    const [localPortion, setLocalPortion] = useState(Number(meal.portion) || 1);
 
     // Initialize with existing mod data
     useEffect(() => {
@@ -420,7 +496,6 @@ const TodaysMealsEditModal = ({
         [key]: value
       };
       setInputs(newInputs);
-      
       // For now, we'll use a simple calculation based on the original mod data
       // In a full implementation, this would use the actual mod.calculate function
       if (meal.modData && meal.modData.calculation) {
@@ -434,84 +509,68 @@ const TodaysMealsEditModal = ({
       }
     };
 
-    const handlePortionChange = (newPortion: number) => {
-      setCurrentPortion(newPortion);
-      // Update the meal immediately with new portion
+    // Commit update on button click
+    const handleUpdate = () => {
       const updatedMeal = {
         ...meal,
-        portion: newPortion,
-        calories: Math.round((Number(meal.calories) / (Number(meal.portion) || 1)) * newPortion),
-        protein: Number(((Number(meal.protein) / (Number(meal.portion) || 1)) * newPortion).toFixed(1)),
-        carbs: Number(((Number(meal.carbs) / (Number(meal.portion) || 1)) * newPortion).toFixed(1)),
-        fat: Number(((Number(meal.fat) / (Number(meal.portion) || 1)) * newPortion).toFixed(1)),
+        modData: {
+          ...meal.modData,
+          inputs,
+          calculation
+        },
+        portion: localPortion,
+        calories: calculation ? Math.round(calculation.calories * localPortion) : meal.calories,
+        protein: calculation ? Number((calculation.protein * localPortion).toFixed(1)) : meal.protein,
+        carbs: calculation ? Number((calculation.carbs * localPortion).toFixed(1)) : meal.carbs,
+        fat: calculation ? Number((calculation.fat * localPortion).toFixed(1)) : meal.fat,
+        isEdited: true,
       };
       onUpdateMeal(updatedMeal);
       if (onUpdateEditingMeal) {
         onUpdateEditingMeal(updatedMeal);
       }
+      setEditMode(null);
     };
 
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Edit Mod Configuration</h3>
+          <h3 className="text-lg font-semibold">Edit {meal.name}</h3>
           <Button variant="ghost" onClick={handleCloseEdit}>
             <X className="h-4 w-4" />
           </Button>
         </div>
-        
-        <div className="space-y-4">
-          {/* Portion Editor */}
-          <div className="bg-muted p-4 rounded-lg">
-            <CompactPortionEditor 
-              meal={meal} 
-              onPortionChange={handlePortionChange} 
-            />
-          </div>
-
-          {/* Mod Inputs */}
-          <div>
-            <h4 className="font-medium mb-2">Mod Parameters</h4>
-            <div className="space-y-3">
-              {Object.entries(inputs).map(([key, value]) => (
-                <div key={key} className="flex items-center gap-2">
-                  <label className="text-sm font-medium min-w-20">{key}:</label>
-                  <input
-                    type="number"
-                    value={value}
-                    onChange={(e) => handleInputChange(key, Number(e.target.value) || 0)}
-                    className="flex-1 px-3 py-2 border rounded-md"
-                    placeholder="Enter value"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Calculation Results */}
-          {calculation && (
-            <div className="bg-muted p-4 rounded-lg">
-              <h4 className="font-medium mb-2">Updated Macros:</h4>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>Calories: <span className="font-medium">{Math.round(calculation.calories * currentPortion)}</span></div>
-                <div>Protein: <span className="font-medium">{(calculation.protein * currentPortion).toFixed(1)}g</span></div>
-                <div>Carbs: <span className="font-medium">{(calculation.carbs * currentPortion).toFixed(1)}g</span></div>
-                <div>Fat: <span className="font-medium">{(calculation.fat * currentPortion).toFixed(1)}g</span></div>
-              </div>
-            </div>
-          )}
-
-          <Button 
-            onClick={() => handleUpdateMod(meal.uniqueMealId, {
-              ...meal.modData,
-              inputs,
-              calculation
-            })}
-            className="w-full"
-          >
-            Update Mod Configuration
-          </Button>
+        {/* Portion Editor */}
+        <div className="bg-muted p-4 rounded-lg">
+          <CompactPortionEditor
+            meal={{ ...meal, portion: localPortion }}
+            onPortionChange={setLocalPortion}
+          />
         </div>
+        {/* Mod Inputs */}
+        <div>
+          <h4 className="font-medium mb-2">Mod Parameters</h4>
+          <div className="space-y-3">
+            {Object.entries(inputs).map(([key, value]) => (
+              <div key={key} className="flex items-center gap-2">
+                <label className="text-sm font-medium min-w-20">{key}:</label>
+                <input
+                  type="number"
+                  value={value}
+                  onChange={(e) => handleInputChange(key, Number(e.target.value) || 0)}
+                  className="flex-1 px-3 py-2 border rounded-md"
+                  placeholder="Enter value"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        <Button
+          onClick={handleUpdate}
+          className="w-full"
+        >
+          Update Meal
+        </Button>
       </div>
     );
   };
@@ -547,7 +606,7 @@ const TodaysMealsEditModal = ({
           </div>
 
           {/* Right Column - Meals List */}
-          <div className="space-y-3">
+          <div className="space-y-4 min-h-[65vh]">
             <h3 className="text-lg font-semibold">Today's Meals</h3>
             <div className="space-y-3 max-h-[60vh] overflow-y-auto">
               {meals.map((meal) => (

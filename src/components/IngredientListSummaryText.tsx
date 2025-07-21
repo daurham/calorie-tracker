@@ -13,11 +13,11 @@ const Highlighter = ({ text }: { text: string }) => {
 
 const IngredientListSummaryText = ({ meal }: { meal: Meal }) => {
   return (
-    <p className="text-sm text-muted-foreground">
+    <p className="text-sm">
       {meal.ingredients.map((ingredient, index) => (
         <span key={ingredient.id}>
           {ingredient.quantity !== 1
-            ? `${ingredient.name} (${ingredient.quantity}) `
+            ? (<>{`${ingredient.name} (${ingredient.quantity})`}&nbsp;&times;&nbsp;</>)
             : `${ingredient.name} `
           }
           <Highlighter text={ingredient.unit} />

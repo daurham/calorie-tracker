@@ -147,6 +147,7 @@ const TodaysMeals = ({ meals, availableIngredients, onRemoveMeal, onUpdateMeal, 
       <Card className="mb-6 sm:mb-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
         <CardHeader>
           <Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed(!open)}>
+          <div className="flex items-center justify-between">
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
@@ -163,6 +164,18 @@ const TodaysMeals = ({ meals, availableIngredients, onRemoveMeal, onUpdateMeal, 
                 )}
               </Button>
             </CollapsibleTrigger>
+            {meals.length >= 2 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onRemoveMeal("all")}
+                className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-2 h-0 py-0"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Clear All
+              </Button>
+            )}
+          </div>
             <CollapsibleContent>
               <CardContent className="pt-4">
                 <div className="space-y-3">
