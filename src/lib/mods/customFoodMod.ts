@@ -35,13 +35,6 @@ export const customFoodMod: ModHandler = {
       max: 2000,
       step: 1
     },
-    // {
-    //   type: 'text',
-    //   label: 'Notes (Optional)',
-    //   key: 'notes',
-    //   required: false,
-    //   placeholder: 'e.g., Restaurant name, special occasion, etc.'
-    // }
   ],
 
   calculate: (inputs: Record<string, any>): ModCalculation => {
