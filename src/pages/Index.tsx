@@ -558,6 +558,7 @@ const Index = () => {
           onOpenChange={setIsModModalOpen}
           mod={selectedMod}
           onMealGenerated={handleModMealGenerated}
+          availableIngredients={allIngredientsData}
         />
         )}
       </div>

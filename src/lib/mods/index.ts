@@ -1,6 +1,7 @@
 import { ModManager } from './modManager';
 import { costcoPizzaMod } from './costcoPizzaMod';
 import { customFoodMod } from './customFoodMod';
+import { ingredientMixerMod } from './ingredientMixerMod';
 
 // Initialize mod manager
 const modManager = ModManager.getInstance();
@@ -12,6 +13,9 @@ export function initializeMods(): void {
   
   // Register Custom Food mod
   modManager.registerMod(customFoodMod);
+  
+  // Register Ingredient Mixer mod
+  modManager.registerMod(ingredientMixerMod);
   
   // Future mods can be registered here
   // modManager.registerMod(someOtherMod);
