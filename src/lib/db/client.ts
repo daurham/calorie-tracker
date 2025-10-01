@@ -6,14 +6,14 @@ dotenv.config();
 
 // Log the environment for debugging
 console.log('Environment:', {
-  NODE_ENV: process.env.NODE_ENV,
+  MODE: process.env.MODE,
   POSTGRES_URL: process.env.POSTGRES_URL,
 });
 
 // Create a connection pool
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URL,
-  ssl: process.env.NODE_ENV === 'production' ? {
+  ssl: process.env.MODE === 'production' ? {
     rejectUnauthorized: false
   } : false
 });

@@ -2,6 +2,7 @@ import { ModManager } from './modManager';
 import { costcoPizzaMod } from './costcoPizzaMod';
 import { customFoodMod } from './customFoodMod';
 import { ingredientMixerMod } from './ingredientMixerMod';
+import { aiFoodRecognitionMod } from './aiFoodRecognitionMod';
 
 // Initialize mod manager
 const modManager = ModManager.getInstance();
@@ -17,6 +18,9 @@ export function initializeMods(): void {
   // Register Ingredient Mixer mod
   modManager.registerMod(ingredientMixerMod);
   
+  // Register AI Food Recognition mod
+  modManager.registerMod(aiFoodRecognitionMod);
+  
   // Future mods can be registered here
   // modManager.registerMod(someOtherMod);
 }
@@ -25,4 +29,4 @@ export function initializeMods(): void {
 export { modManager };
 
 // Export individual mods for direct access if needed
-export { costcoPizzaMod, customFoodMod }; 
+export { costcoPizzaMod, customFoodMod, aiFoodRecognitionMod }; 

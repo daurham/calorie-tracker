@@ -1,7 +1,8 @@
 import { ModHandler, ModMeal } from '@/types/mods';
 import CostcoPizzaModal from './CostcoPizzaModal';
 import CustomFoodModal from './CustomFoodModal';
-import IngredientMixerModal from './CustomMealComposerModal';
+import IngredientMixerModal from './IngredientMixerModal';
+import { AIFoodRecognitionModal } from './AIFoodRecognitionModal';
 
 interface ModModalFactoryProps {
   open: boolean;
@@ -42,6 +43,15 @@ const ModModalFactory = ({ open, onOpenChange, mod, onMealGenerated, availableIn
           mod={mod}
           onMealGenerated={onMealGenerated}
           availableIngredients={availableIngredients}
+        />
+      );
+    
+    case 'ai-food-recognition':
+      return (
+        <AIFoodRecognitionModal
+          isOpen={open}
+          onClose={() => onOpenChange(false)}
+          onGenerateMeal={onMealGenerated}
         />
       );
     
