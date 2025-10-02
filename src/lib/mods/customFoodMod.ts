@@ -17,7 +17,7 @@ export const customFoodMod: ModHandler = {
       type: 'grid-macros',
       label: 'Nutritional Information',
       key: 'macros',
-      required: true,
+      required: false,
       fields: [
         { key: 'calories', label: 'Calories', placeholder: '0', min: 0, max: 5000, step: 1 },
         { key: 'protein', label: 'Protein (g)', placeholder: '0', min: 0, max: 200, step: 0.1 },
@@ -40,15 +40,11 @@ export const customFoodMod: ModHandler = {
   calculate: (inputs: Record<string, any>): ModCalculation => {
     const { calories, protein, carbs, fat } = inputs;
     
-    if (!calories || !protein || !carbs || !fat) {
-      return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-    }
-
     return {
-      calories: Math.round(calories),
-      protein: Math.round(protein * 10) / 10, // Round to 1 decimal
-      carbs: Math.round(carbs * 10) / 10,
-      fat: Math.round(fat * 10) / 10
+      calories: Math.round(calories || 0),
+      protein: Math.round((protein || 0) * 10) / 10, // Round to 1 decimal
+      carbs: Math.round((carbs || 0) * 10) / 10,
+      fat: Math.round((fat || 0) * 10) / 10
     };
   },
 

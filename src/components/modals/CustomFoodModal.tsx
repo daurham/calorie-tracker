@@ -44,12 +44,9 @@ const CustomFoodModal = ({ open, onOpenChange, mod, onMealGenerated }: CustomFoo
     const hasAllRequiredInputs = mod.inputs.every(input => {
       if (!input.required) return true;
       
-      // Special handling for grid-macros type
+      // Special handling for grid-macros type - now optional, so always true
       if (input.type === 'grid-macros') {
-        return input.fields?.every(field => {
-          const fieldValue = newInputs[field.key];
-          return fieldValue !== undefined && fieldValue !== null && fieldValue !== '' && fieldValue > 0;
-        }) ?? false;
+        return true;
       }
       
       const inputValue = newInputs[input.key];
@@ -73,12 +70,9 @@ const CustomFoodModal = ({ open, onOpenChange, mod, onMealGenerated }: CustomFoo
     const inputsValid = mod.inputs.every(input => {
       if (!input.required) return true;
       
-      // Special handling for grid-macros type
+      // Special handling for grid-macros type - now optional, so always true
       if (input.type === 'grid-macros') {
-        return input.fields?.every(field => {
-          const fieldValue = inputs[field.key];
-          return fieldValue !== undefined && fieldValue !== null && fieldValue !== '' && fieldValue > 0;
-        }) ?? false;
+        return true;
       }
       
       const value = inputs[input.key];
@@ -123,12 +117,14 @@ const CustomFoodModal = ({ open, onOpenChange, mod, onMealGenerated }: CustomFoo
                 id="calories"
                 type="number"
                 value={inputs.calories || ''}
-                onChange={(e) => handleInputChange('calories', parseFloat(e.target.value) || 0)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleInputChange('calories', value === '' ? 0 : parseFloat(value) || 0);
+                }}
                 placeholder="0"
                 min={0}
                 max={5000}
                 step={1}
-                required
               />
             </div>
             <div>
@@ -137,12 +133,14 @@ const CustomFoodModal = ({ open, onOpenChange, mod, onMealGenerated }: CustomFoo
                 id="protein"
                 type="number"
                 value={inputs.protein || ''}
-                onChange={(e) => handleInputChange('protein', parseFloat(e.target.value) || 0)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleInputChange('protein', value === '' ? 0 : parseFloat(value) || 0);
+                }}
                 placeholder="0"
                 min={0}
                 max={200}
                 step={0.1}
-                required
               />
             </div>
             <div>
@@ -151,12 +149,14 @@ const CustomFoodModal = ({ open, onOpenChange, mod, onMealGenerated }: CustomFoo
                 id="carbs"
                 type="number"
                 value={inputs.carbs || ''}
-                onChange={(e) => handleInputChange('carbs', parseFloat(e.target.value) || 0)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleInputChange('carbs', value === '' ? 0 : parseFloat(value) || 0);
+                }}
                 placeholder="0"
                 min={0}
                 max={500}
                 step={0.1}
-                required
               />
             </div>
             <div>
@@ -165,12 +165,14 @@ const CustomFoodModal = ({ open, onOpenChange, mod, onMealGenerated }: CustomFoo
                 id="fat"
                 type="number"
                 value={inputs.fat || ''}
-                onChange={(e) => handleInputChange('fat', parseFloat(e.target.value) || 0)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleInputChange('fat', value === '' ? 0 : parseFloat(value) || 0);
+                }}
                 placeholder="0"
                 min={0}
                 max={200}
                 step={0.1}
-                required
               />
             </div>
           </div>
