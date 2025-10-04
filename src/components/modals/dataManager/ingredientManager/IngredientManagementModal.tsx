@@ -10,6 +10,7 @@ import {
   SearchBar,
 } from "@/components/ui";
 import { ScannerModal, DataManagementModal, AlertModal } from "@/components/modals";
+import { AIIngredientLookupModal } from "@/components/modals/AIIngredientLookupModal";
 import { Ingredient } from "@/types";
 import MacroSummaryText from "@/components/MacroSummaryText";
 import { LargeIngredientSkeleton } from "@/components/skeletons";
@@ -48,6 +49,7 @@ const IngredientsManagementModal = ({
     is_staple: false
   });
   const [showScanner, setShowScanner] = useState(false);
+  const [showAILookup, setShowAILookup] = useState(false);
   const [deleteIngredientId, setDeleteIngredientId] = useState<number | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const isMobile = useIsMobile();
@@ -241,6 +243,19 @@ const IngredientsManagementModal = ({
     });
   };
 
+  const handleAIDetected = (ingredient) => {
+    setShowAILookup(false);
+    setFormData({
+      name: ingredient.name,
+      calories: ingredient.calories,
+      protein: ingredient.protein,
+      carbs: ingredient.carbs,
+      fat: ingredient.fat,
+      unit: ingredient.unit,
+      is_staple: ingredient.is_staple
+    });
+  };
+
   const DesktopStyling = "max-h-[60vh] overflow-y-auto";
 
   // Shows add / edit form
@@ -260,9 +275,12 @@ const IngredientsManagementModal = ({
       {isAdding ? (
         <div>
           {(isMobile && editingId === null) &&
-            (<div className="flex justify-center">
+            (<div className="flex justify-center gap-2">
               <Button onClick={() => setShowScanner(true)} className="bg-emerald-500 text-black hover:bg-emerald-600" variant="outline">
                 Barcode Lookup
+              </Button>
+              <Button onClick={() => setShowAILookup(true)} className="bg-blue-500 text-white hover:bg-blue-600" variant="outline">
+                AI Lookup
               </Button>
 
               {showScanner && (
@@ -271,8 +289,19 @@ const IngredientsManagementModal = ({
                   onClose={() => setShowScanner(false)}
                 />
               )}
+
             </div>
             )}
+          
+          {/* Desktop AI Lookup Button */}
+          {!isMobile && editingId === null && (
+            <div className="flex justify-center mb-4">
+              <Button onClick={() => setShowAILookup(true)} className="bg-blue-500 text-white hover:bg-blue-600" variant="outline">
+                AI Ingredient Lookup
+              </Button>
+            </div>
+          )}
+
           <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
             <div>
               <Label htmlFor="name">Name</Label>
@@ -481,6 +510,12 @@ const IngredientsManagementModal = ({
         handleDeleteConfirm={handleDeleteConfirm}
         title="Delete Ingredient"
         description="Are you sure you want to delete this ingredient? This action cannot be undone."
+      />
+
+      <AIIngredientLookupModal
+        isOpen={showAILookup}
+        onClose={() => setShowAILookup(false)}
+        onIngredientDetected={handleAIDetected}
       />
     </>
   );

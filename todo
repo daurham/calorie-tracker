@@ -4,3 +4,38 @@ TODO:
   - [ ] so, console log the data coming in from db. maybe the localstorage is the issue -- i checked the log meal btn and the old data persists
 - [ ] get data to render in and update smoothly.
 - [ ] 
+
+
+
+AI Recommendation Mod:
+
+I have a new AI mod id like to create. its called AI Food Recommendation, its purpose is used recommend the next meal for the user based on their craving, remaining macros needed and potentially their meal/ingredient database.
+
+When the user opens the mod modal they can:
+- check box the type of food theyre craving (salty/sweet/etc.), 
+- decide if want it to be based around common staple ingredients data, all ingredients data or anything, 
+- fill in an optional text box for their preferences
+then submit a request to gemini ai where it can produce a few meal ideas. if the user likes a specifc food ideal, they can add it to their "todays meal" list. 
+
+When submitting, the request to gemini ai should include the type of food theyre craving, the time of day (to consider), the users current macros and their goals, if the staples or ingredients are selected then send the those sets of data along with the meals data (so gemini "can" select from the list of meal if it deems, but shouldnt be forced. the most important thing is the ingredience), i want to send the ingredients data along with thier macros, 
+
+When submitting, I also want to keep track of the tokens used for the day. I'm sure you can't get it perfectly, but maybe you can guestimate the amount of tokens a request is making to gemini, and i want you to count them. clear on each new day, but i need to ensure that i stay under 1M tokens. This can easily be an issue if the user has a lot of data in their ingredients and meals. I think at least. if this isnt that big of a deal, then omit this idea, but it seems to be important, so ill still request it.
+
+
+Edge cases:
+If the user has less than 10 meals or ingredients, 
+If  meals data is included
+
+Constraints:
+Do your best to from the request in form of using the least amount of tokens possible.
+
+
+
+
+AI Ingredient Lookup:
+
+when the user opens up the ingredients modals, next to the barcode lookup, i want an AI Lookup option, which then prompts the user to describe an ingredient, which is asked to gemini api, and the response values are populated into the form fields name, calories, unit and macros. Giving the user the chance to read them over and submit adding the new ingredient. 
+
+I also want this to be flexible enough to descibe for a serving size or for a whole portion of said item. But by default it'd  be a serving size.
+
+A use case for this would be where the user wants to add a serving of a bell pepper, instead of looking it up, the user can stay within the app and have ai search it and input the values, allowing the user to simply verify the values and naming. 

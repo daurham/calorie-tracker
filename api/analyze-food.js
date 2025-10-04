@@ -12,8 +12,8 @@ export default async function handler(req, res) {
     }
 
     // Check if we have the API key
-    if (!process.env.GEMINI_API_KEY) {
-      console.log('No GEMINI_API_KEY found, returning mock data');
+    if (!process.env.AI_API_KEY) {
+      console.log('No AI_API_KEY found, returning mock data');
       // Return mock data if no API key
       const mockResult = {
         name: "Grilled Chicken Breast",
@@ -28,16 +28,15 @@ export default async function handler(req, res) {
     }
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      'https://ai.daurham.com/api/nutrition',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-api-key': process.env.AI_API_KEY,
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `You are a nutrition expert. Analyze the following food description and provide accurate nutritional information.
+          query: `You are a nutrition expert. Analyze the following food description and provide accurate nutritional information.
 
 Food Description: "${description}"
 
@@ -51,12 +50,6 @@ Please respond with a JSON object containing:
 - description: Brief explanation of your analysis
 
 Be as accurate as possible. If the description is unclear, make reasonable assumptions and note them in the description field.`
-            }]
-          }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 500,
-          }
         }),
       }
     );
@@ -64,20 +57,21 @@ Be as accurate as possible. If the description is unclear, make reasonable assum
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API error:', errorText);
-      throw new Error(`Gemini API error: ${response.statusText}`);
+      console.error('AI API error:', errorText);
+      throw new Error(`AI API error: ${response.statusText}`);
     }
 
     const data = await response.json();
-    console.log('Gemini API response data:', data);
+    console.log('AI API response data:', data);
     
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    // The new API should return the content directly in the response
+    const content = data.result || data.content || data.response || data.text || data;
     
     if (!content) {
-      throw new Error('No response from Gemini');
+      throw new Error('No response from AI API');
     }
 
-    console.log('Raw content from Gemini:', content);
+    console.log('Raw content from AI API:', content);
 
     // Clean the content - remove markdown code blocks if present
     let cleanedContent = content.trim();
