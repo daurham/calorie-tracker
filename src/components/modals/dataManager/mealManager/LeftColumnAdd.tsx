@@ -1,4 +1,4 @@
-import { X, Plus, ChevronRight, ChevronDown } from "lucide-react";
+import { X, Plus, ChevronRight, ChevronDown, Bot } from "lucide-react";
 import {
   Button,
   Input,
@@ -19,8 +19,12 @@ import {
 } from "@/components/ui";
 import { SmallIngredientSkeleton } from "@/components/skeletons";
 import { useMealManagement } from "./MealManagementContext";
+import { AIMealCreatorModal } from "@/components/modals/AIMealCreatorModal";
+import { useState } from "react";
 
 const LeftColumnAdd = () => {
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  
   const {
     formData,
     setFormData,
@@ -41,6 +45,23 @@ const LeftColumnAdd = () => {
     setInstructionsCollapsed,
     addModeTotals
   } = useMealManagement();
+
+  const handleAIMealDetected = (meal: {
+    name: string;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      name: meal.name,
+      calories: meal.calories,
+      protein: meal.protein,
+      carbs: meal.carbs,
+      fat: meal.fat,
+    }));
+  };
 
   return (
     <div className="space-y-6 min-h-[65vh]">
@@ -156,7 +177,19 @@ const LeftColumnAdd = () => {
       {/* Macro Inputs - Only for Standalone Meals */}
       {formData.meal_type === 'standalone' && (
         <div className="space-y-4">
-          <Label>Nutritional Information</Label>
+          <div className="flex items-center justify-between">
+            <Label>Nutritional Information</Label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAIModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Bot className="h-4 w-4" />
+              AI Creator
+            </Button>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="calories">Calories</Label>
@@ -267,6 +300,13 @@ const LeftColumnAdd = () => {
           Cancel
         </Button>
       </div>
+
+      {/* AI Meal Creator Modal */}
+      <AIMealCreatorModal
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        onMealDetected={handleAIMealDetected}
+      />
     </div>
   );
 };
