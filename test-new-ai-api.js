@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Test script for the converted APIs using the new AI API
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 const API_BASE = 'http://localhost:3000/api'; // Adjust if your server runs on a different port
 const AI_API_KEY = '1212'; // Your API key from the test

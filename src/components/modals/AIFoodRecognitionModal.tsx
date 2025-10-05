@@ -82,6 +82,12 @@ export const AIFoodRecognitionModal: React.FC<AIFoodRecognitionModalProps> = ({
     };
     
     onGenerateMeal(meal);
+    
+    // Clear all input fields after successful submission
+    setDescription('');
+    setAnalysisResult(null);
+    setPortion(1);
+    
     onClose();
   };
 
