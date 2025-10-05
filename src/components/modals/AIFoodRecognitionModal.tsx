@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { analyzeFoodDescription } from '@/lib/ai/secureFoodRecognition';
 import { isAIAuthenticated, authenticateAI } from '@/lib/ai/auth';
+import { useToast } from '@/hooks';
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,7 @@ export const AIFoodRecognitionModal: React.FC<AIFoodRecognitionModalProps> = ({
   const [showAuth, setShowAuth] = useState(!isAIAuthenticated());
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
+  const { toast } = useToast();
 
   const handleAnalyze = async () => {
     if (!description.trim()) return;
@@ -40,6 +42,11 @@ export const AIFoodRecognitionModal: React.FC<AIFoodRecognitionModalProps> = ({
       setAnalysisResult(result);
     } catch (error) {
       console.error('AI analysis failed:', error);
+      toast({
+        title: "AI Analysis Failed",
+        description: error instanceof Error ? error.message : "Failed to analyze food description. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsAnalyzing(false);
     }
