@@ -50,7 +50,9 @@ Current Nutrition Status:
 - Current macros: ${currentMacros.calories} calories, ${currentMacros.protein}g protein, ${currentMacros.carbs}g carbs, ${currentMacros.fat}g fat
 - Remaining macros needed: ${remainingMacros.calories} calories, ${remainingMacros.protein}g protein, ${remainingMacros.carbs}g carbs, ${remainingMacros.fat}g fat
 
-Data Source: ${dataSource}`;
+Data Source: ${dataSource}
+
+CRITICAL: The user is tracking macros and needs to stay within their remaining limits. DO NOT exceed the remaining macros. If the remaining macros are low, recommend smaller portions or lighter meals.`;
 
     // Add ingredient/meal data if available
     if (dataSource === 'all' && availableIngredients.length > 0) {
@@ -75,34 +77,41 @@ Data Source: ${dataSource}`;
     }
 
     prompt += `\n\nIMPORTANT GUIDELINES:
-1. For ${timeOfDay} meals, consider appropriate portion sizes:
+1. MACRO LIMITS ARE CRITICAL - Stay within remaining macros:
+   - Calories: DO NOT exceed ${remainingMacros.calories} calories
+   - Protein: DO NOT exceed ${remainingMacros.protein}g protein  
+   - Carbs: DO NOT exceed ${remainingMacros.carbs}g carbs
+   - Fat: DO NOT exceed ${remainingMacros.fat}g fat
+   - If remaining macros are very low, recommend smaller portions or lighter meals
+
+2. For ${timeOfDay} meals, consider appropriate portion sizes:
    - Morning: Moderate portions (don't fill all remaining macros)
    - Midday: Reasonable portions (leave room for dinner)
    - Evening: Can be larger portions (can fill more remaining macros)
 
-2. Each recommendation should include:
+3. Each recommendation should include:
    - A creative, appealing meal name
    - Detailed description of the meal
-   - Accurate nutritional breakdown
+   - Accurate nutritional breakdown (MUST stay within remaining macro limits)
    - Confidence score (0-1) based on how well it matches criteria
    - Reasoning for why this meal fits their needs
    - List of ingredients with quantities and units
    - Simple cooking instructions (max 4 steps, keep it brief)
 
-3. Consider the craving types in your recommendations
-4. If using available ingredients/meals, you can reference them but don't feel constrained
-5. Make recommendations diverse and appealing
-6. Consider the time of day for appropriate meal types
+4. Consider the craving types in your recommendations
+5. If using available ingredients/meals, you can reference them but don't feel constrained
+6. Make recommendations diverse and appealing
+7. Consider the time of day for appropriate meal types
 
 Respond with ONLY a valid JSON array of ${NUMBER_OF_RECOMMENDATIONS} meal objects in this exact format:
 [
   {
     "name": "Meal Name",
     "description": "Detailed description of the meal",
-    "calories": 500,
-    "protein": 30,
-    "carbs": 45,
-    "fat": 20,
+    "calories": 350,
+    "protein": 25,
+    "carbs": 30,
+    "fat": 15,
     "confidence": 0.85,
     "reasoning": "Why this meal fits their needs and cravings",
     "ingredients": [
@@ -118,7 +127,9 @@ Respond with ONLY a valid JSON array of ${NUMBER_OF_RECOMMENDATIONS} meal object
       "Season and serve"
     ]
   }
-]`;
+]
+
+REMEMBER: The user is tracking macros carefully. Your recommendation MUST stay within their remaining macro limits. If their remaining macros are very low, recommend a smaller, lighter meal.`;
 
     console.log('AI Recommendation request:', {
       cravingTypes,
