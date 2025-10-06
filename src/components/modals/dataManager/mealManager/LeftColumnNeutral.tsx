@@ -12,6 +12,7 @@ const LeftColumnNeutral = () => {
           Add New Meal
         </h3>
       </div>
+      
       <Button onClick={() => setMode('add')} className="w-full" disabled={isLoading}>
         <Plus className="h-4 w-4 mr-2" />
         Add New Meal

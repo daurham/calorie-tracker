@@ -559,6 +559,19 @@ const Index = () => {
           mod={selectedMod}
           onMealGenerated={handleModMealGenerated}
           availableIngredients={allIngredientsData}
+          availableMeals={mealsData}
+          currentMacros={{
+            calories: Math.round((dailyCalories) * 10) / 10,
+            protein: Math.round(dailyMacros.protein * 10) / 10,
+            carbs: Math.round(dailyMacros.carbs * 10) / 10,
+            fat: Math.round(dailyMacros.fat * 10) / 10
+          }}
+          remainingMacros={{
+            calories: Math.round((dailyGoal - dailyCalories) || 0),
+            protein: Math.round(((macroGoals.protein - dailyMacros.protein) || 0) * 10) / 10,
+            carbs: Math.round(((macroGoals.carbs - dailyMacros.carbs) || 0) * 10) / 10,
+            fat: Math.round(((macroGoals.fat - dailyMacros.fat) || 0) * 10) / 10
+          }}
         />
         )}
       </div>

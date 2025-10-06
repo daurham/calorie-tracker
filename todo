@@ -15,19 +15,16 @@ When the user opens the mod modal they can:
 - check box the type of food theyre craving (salty/sweet/etc.), 
 - decide if want it to be based around common staple ingredients data, all ingredients data or anything, 
 - fill in an optional text box for their preferences
-then submit a request to gemini ai where it can produce a few meal ideas. if the user likes a specifc food ideal, they can add it to their "todays meal" list. 
+then submit a request to my ai api where it can produce 3 meal recommendations. if the user likes a specifc meal, they can add it to their "todays meal" list. Each list can have a name, macros, a visual showing where they'd be if they chose that meal, and a description of the meal. Design a way to cleanly demo the options.
 
-When submitting, the request to gemini ai should include the type of food theyre craving, the time of day (to consider), the users current macros and their goals, if the staples or ingredients are selected then send the those sets of data along with the meals data (so gemini "can" select from the list of meal if it deems, but shouldnt be forced. the most important thing is the ingredience), i want to send the ingredients data along with thier macros, 
-
-When submitting, I also want to keep track of the tokens used for the day. I'm sure you can't get it perfectly, but maybe you can guestimate the amount of tokens a request is making to gemini, and i want you to count them. clear on each new day, but i need to ensure that i stay under 1M tokens. This can easily be an issue if the user has a lot of data in their ingredients and meals. I think at least. if this isnt that big of a deal, then omit this idea, but it seems to be important, so ill still request it.
+When submitting, the request to the ai api, it should include the type of food theyre craving, the time of day (to consider if there will be other meals later, so it doesnt have to produce a meal that checks all boxes), the users current macros, their goals, if the staples or ingredients are selected then send those sets of data along with the meals data (so my ai api "can" select from the list of meal if it deems, but shouldnt be forced. the most important thing is the ingredience), and send whatever else is relavent to ensure the ai can produce the best result for the user.
 
 
 Edge cases:
-If the user has less than 10 meals or ingredients, 
-If  meals data is included
+If no ingredients or meals, disable the ability for the user to require a response centered around those values.
 
 Constraints:
-Do your best to from the request in form of using the least amount of tokens possible.
+The meals shouldnt be designed to fill up the rest of the remaining macros the user needs unless its around dinner time. if its morning or mid-day, the meal should be reasonable.
 
 
 
