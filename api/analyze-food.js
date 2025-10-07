@@ -1,5 +1,7 @@
+const AI_API_URL = 'https://ai.daurham.com/api/nutrition';
+const AI_API_KEY = process.env.AI_API_KEY;
+
 export default async function handler(req, res) {
-  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -12,7 +14,7 @@ export default async function handler(req, res) {
     }
 
     // Check if we have the API key
-    if (!process.env.AI_API_KEY) {
+    if (!AI_API_KEY) {
       console.log('No AI_API_KEY found, returning mock data');
       // Return mock data if no API key
       const mockResult = {
@@ -28,12 +30,12 @@ export default async function handler(req, res) {
     }
 
     const response = await fetch(
-      'https://ai.daurham.com/api/nutrition',
+      AI_API_URL,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': process.env.AI_API_KEY,
+          'x-api-key': AI_API_KEY,
         },
         body: JSON.stringify({
           query: `You are a nutrition expert. Analyze the following food description and provide accurate nutritional information.

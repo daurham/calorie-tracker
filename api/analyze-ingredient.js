@@ -1,3 +1,6 @@
+const AI_API_URL = 'https://ai.daurham.com/api/nutrition';
+const AI_API_KEY = process.env.AI_API_KEY;
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -9,10 +12,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Description is required' });
   }
 
-  try {
-    const apiKey = process.env.AI_API_KEY;
-    
-    if (!apiKey) {
+  try {  
+    if (!AI_API_KEY) {
       console.log('No API key found, using mock data');
       // Mock data for development
       const mockData = {
@@ -52,12 +53,12 @@ Guidelines:
 - Include descriptive units (e.g., "1 medium (119g)")`;
 
     const response = await fetch(
-      'https://ai.daurham.com/api/nutrition',
+      AI_API_URL,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': process.env.AI_API_KEY,
+          'x-api-key': AI_API_KEY,
         },
         body: JSON.stringify({
           query: prompt
