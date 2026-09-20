@@ -13,9 +13,9 @@ interface TodaysProgressProps {
   dailyCalories: number;
   dailyGoal: number;
   dailyMacros: {
-    protein: number;
-    carbs: number;
-    fat: number;
+    protein: number | null;
+    carbs: number | null;
+    fat: number | null;
   };
   macroGoals: {
     protein: number;
@@ -45,9 +45,9 @@ const TodaysProgress = ({
   const progressPercentage = dailyGoal > 0 ? Math.min((dailyCalories / dailyGoal) * 100, 100) : 0;
 
   const macroProgress = {
-    protein: macroGoals.protein > 0 ? Math.min((dailyMacros.protein / macroGoals.protein) * 100, 100) : 0,
-    carbs: macroGoals.carbs > 0 ? Math.min((dailyMacros.carbs / macroGoals.carbs) * 100, 100) : 0,
-    fat: macroGoals.fat > 0 ? Math.min((dailyMacros.fat / macroGoals.fat) * 100, 100) : 0
+    protein: macroGoals.protein > 0 && dailyMacros.protein != null ? Math.min((dailyMacros.protein / macroGoals.protein) * 100, 100) : 0,
+    carbs: macroGoals.carbs > 0 && dailyMacros.carbs != null ? Math.min((dailyMacros.carbs / macroGoals.carbs) * 100, 100) : 0,
+    fat: macroGoals.fat > 0 && dailyMacros.fat != null ? Math.min((dailyMacros.fat / macroGoals.fat) * 100, 100) : 0
   };
 
   return (
@@ -124,7 +124,7 @@ const TodaysProgress = ({
             </div>
             <div className="text-center">
               <div className="text-xl sm:text-2xl font-bold">{todaysMeals.length}</div>
-              <div className="text-xs sm:text-sm opacity-90">Meals logged</div>
+              <div className="text-xs sm:text-sm opacity-90">Logged</div>
             </div>
           </div>
         </div>

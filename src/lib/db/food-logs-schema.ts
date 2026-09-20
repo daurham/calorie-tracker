@@ -1,0 +1,35 @@
+export const FOOD_LOG_SCHEMA_STATEMENTS = [
+  `CREATE TABLE IF NOT EXISTS food_log_groups (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    display_name VARCHAR(255),
+    original_input TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE TABLE IF NOT EXISTS food_logs (
+    id SERIAL PRIMARY KEY,
+    logged_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    group_id UUID REFERENCES food_log_groups(id) ON DELETE SET NULL,
+    display_name VARCHAR(255) NOT NULL,
+    source_type VARCHAR(30) NOT NULL,
+    source_id INTEGER,
+    nutrition_source VARCHAR(30) NOT NULL,
+    quantity DECIMAL(8,2) NOT NULL DEFAULT 1,
+    serving_description VARCHAR(100),
+    weight_grams DECIMAL(8,2),
+    calories INTEGER NOT NULL,
+    protein DECIMAL(7,2),
+    carbs DECIMAL(7,2),
+    fat DECIMAL(7,2),
+    confidence VARCHAR(20),
+    calorie_low INTEGER,
+    calorie_high INTEGER,
+    original_input TEXT,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_food_logs_logged_at ON food_logs(logged_at)`,
+  `CREATE INDEX IF NOT EXISTS idx_food_logs_source ON food_logs(source_type, source_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_food_logs_group ON food_logs(group_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_food_logs_name ON food_logs(display_name)`,
+];

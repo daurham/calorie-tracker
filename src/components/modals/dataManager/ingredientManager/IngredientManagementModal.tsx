@@ -16,6 +16,7 @@ import MacroSummaryText from "@/components/MacroSummaryText";
 import { LargeIngredientSkeleton } from "@/components/skeletons";
 import IngredientSummaryText from "@/components/IngredientSummaryText";
 import { delay, capitalizeMealName } from "@/lib/utils";
+import { lookupBarcodeRequest } from "@/lib/packaged-foods/api-client";
 
 interface IngredientManagementModalProps {
   open: boolean;
@@ -228,19 +229,36 @@ const IngredientsManagementModal = ({
     }
   };
 
-  const handleDetected = (product) => {
-    // console.log("Product data:", product);
+  const handleDetected = async (barcode: string) => {
     setShowScanner(false);
-    // Here you can also populate your form automatically.
-    setFormData({
-      name: `${product.product_name} (${product.brands || ""})`,
-      calories: product.nutriments["energy-kcal_serving"],
-      protein: product.nutriments.proteins_serving,
-      carbs: product.nutriments.carbohydrates_serving,
-      fat: product.nutriments.fat_serving,
-      unit: product.serving_size,
-      is_staple: false
-    });
+    try {
+      const result = await lookupBarcodeRequest(barcode);
+      const product = result.product;
+      const nutrition = product?.selectedNutrition || product?.nutritionPerServing;
+      if (result.status !== 'found' || !product || !nutrition) {
+        toast({
+          title: "Product not found",
+          description: "Enter the ingredient manually, or scan a nutrition label from Quick Log.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setFormData({
+        name: product.brand ? `${product.name} (${product.brand})` : product.name,
+        calories: String(nutrition.calories ?? ""),
+        protein: nutrition.protein == null ? "" : String(nutrition.protein),
+        carbs: nutrition.carbs == null ? "" : String(nutrition.carbs),
+        fat: nutrition.fat == null ? "" : String(nutrition.fat),
+        unit: product.serving?.description || product.serving?.unit || "",
+        is_staple: false
+      });
+    } catch {
+      toast({
+        title: "Lookup unavailable",
+        description: "Enter the ingredient manually.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAIDetected = (ingredient) => {

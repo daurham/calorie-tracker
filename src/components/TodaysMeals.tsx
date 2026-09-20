@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, Clock, ChevronDown, ChevronRight, Sparkles, Edit3 } from "lucide-react";
+import { Trash2, Clock, ChevronDown, ChevronRight, Sparkles, Edit3, Copy } from "lucide-react";
 import {
   Button,
   Card,
@@ -23,9 +23,34 @@ interface TodaysMealsProps {
   setIsCollapsed: (collapsed: boolean) => void;
 }
 
+const groupTodaysMeals = (meals: any[]) => {
+  const groups = new Map<string, any[]>();
+  const order: Array<{ key: string; meals: any[]; grouped: boolean }> = [];
+  for (const meal of meals) {
+    const groupId = meal.foodLogGroupId;
+    if (groupId) {
+      const existing = groups.get(groupId);
+      if (existing) {
+        existing.push(meal);
+        continue;
+      }
+      const next = [meal];
+      groups.set(groupId, next);
+      order.push({ key: groupId, meals: next, grouped: true });
+      continue;
+    }
+    order.push({ key: String(meal.uniqueMealId ?? meal.foodLogId ?? meal.id), meals: [meal], grouped: false });
+  }
+  return order.map(entry => ({
+    ...entry,
+    grouped: entry.grouped && entry.meals.length > 1,
+  }));
+};
+
 const TodaysMeals = ({ meals, availableIngredients, onRemoveMeal, onUpdateMeal, onDuplicateMeal, isCollapsed, setIsCollapsed }: TodaysMealsProps) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<any>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
   const TodaysMealCard = ({ meal }) => (
     <Card className="bg-gradient-to-r from-white to-emerald-50 dark:from-slate-800 dark:to-emerald-950 border-emerald-100 dark:border-emerald-800">
@@ -62,7 +87,9 @@ const TodaysMeals = ({ meals, availableIngredients, onRemoveMeal, onUpdateMeal, 
                 )}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
-                {meal.ingredients?.map(i => i.name).join(", ")}
+                {meal.servingDescription
+                  || meal.ingredients?.map(i => i.name).filter(Boolean).join(", ")
+                  || (meal.sourceType === 'quick_calories' ? 'Quick calories' : '')}
                 {meal.weight && (
                   <span className="ml-2 text-purple-600 dark:text-purple-400 font-medium">
                     ({meal.weight}g)
@@ -95,8 +122,18 @@ const TodaysMeals = ({ meals, availableIngredients, onRemoveMeal, onUpdateMeal, 
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={() => onDuplicateMeal({ ...meal, uniqueMealId: generateUniqueId() })}
+                className="text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950 px-2 h-8"
+                aria-label="Duplicate"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => onRemoveMeal(meal.uniqueMealId)}
                 className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-2 h-8"
+                aria-label="Delete"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -118,7 +155,7 @@ const TodaysMeals = ({ meals, availableIngredients, onRemoveMeal, onUpdateMeal, 
               >
                 <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                   <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
-                  Today's Meals
+                  Today
                 </CardTitle>
                 {isCollapsed ? (
                   <ChevronRight className="h-4 w-4" />
@@ -130,8 +167,8 @@ const TodaysMeals = ({ meals, availableIngredients, onRemoveMeal, onUpdateMeal, 
             <CollapsibleContent>
               <CardContent className="pt-4">
                 <div className="text-center py-6 sm:py-8 text-muted-foreground">
-                  <p className="text-sm sm:text-base">No meals logged today yet.</p>
-                  <p className="text-xs sm:text-sm">Start by logging your first meal!</p>
+                  <p className="text-sm sm:text-base">Nothing logged yet.</p>
+                  <p className="text-xs sm:text-sm">Use Quick Log above to add food.</p>
                 </div>
               </CardContent>
             </CollapsibleContent>
@@ -155,7 +192,7 @@ const TodaysMeals = ({ meals, availableIngredients, onRemoveMeal, onUpdateMeal, 
               >
                 <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                   <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
-                  Today's Meals ({meals.length})
+                  Today ({meals.length})
                 </CardTitle>
                 {isCollapsed ? (
                   <ChevronRight className="h-4 w-4" />
@@ -179,9 +216,36 @@ const TodaysMeals = ({ meals, availableIngredients, onRemoveMeal, onUpdateMeal, 
             <CollapsibleContent>
               <CardContent className="pt-4">
                 <div className="space-y-3">
-                  {meals.map((meal) => (
-                    <TodaysMealCard key={generateUniqueId()} meal={meal} />
-                  ))}
+                  {groupTodaysMeals(meals).map((entry) => {
+                    if (!entry.grouped) {
+                      return <TodaysMealCard key={entry.key} meal={entry.meals[0]} />;
+                    }
+                    const totalCalories = entry.meals.reduce((sum, meal) => sum + (Number(meal.calories) || 0), 0);
+                    const expanded = Boolean(expandedGroups[entry.key]);
+                    return (
+                      <div key={entry.key} className="space-y-2">
+                        <button
+                          type="button"
+                          className="w-full rounded-lg border border-emerald-100 bg-emerald-50/70 px-3 py-2 text-left dark:border-emerald-800 dark:bg-emerald-950/40"
+                          onClick={() => setExpandedGroups(prev => ({ ...prev, [entry.key]: !prev[entry.key] }))}
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <p className="font-medium text-sm">{entry.meals.map(meal => meal.name).join(', ')}</p>
+                              <p className="text-xs text-muted-foreground">{entry.meals.length} foods</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold text-emerald-600 dark:text-emerald-400">{totalCalories}</p>
+                              <p className="text-xs text-muted-foreground">{expanded ? 'Hide' : 'Show'}</p>
+                            </div>
+                          </div>
+                        </button>
+                        {expanded && entry.meals.map(meal => (
+                          <TodaysMealCard key={meal.uniqueMealId ?? meal.foodLogId} meal={meal} />
+                        ))}
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </CollapsibleContent>

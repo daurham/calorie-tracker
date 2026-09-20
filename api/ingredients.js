@@ -54,6 +54,42 @@ async function updateIngredient(req, res) {
     if (result.rows.length === 0) {
       res.status(404).json({ error: 'Ingredient not found' });
     } else {
+      await sql.query(
+        `UPDATE meal_combos mc
+         SET
+           calories = COALESCE((
+             SELECT ROUND(SUM(i.calories * mci.quantity))
+             FROM meal_combo_ingredients mci
+             JOIN ingredients i ON i.id = mci.ingredient_id
+             WHERE mci.meal_combo_id = mc.id
+           ), 0),
+           protein = COALESCE((
+             SELECT SUM(i.protein * mci.quantity)
+             FROM meal_combo_ingredients mci
+             JOIN ingredients i ON i.id = mci.ingredient_id
+             WHERE mci.meal_combo_id = mc.id
+           ), 0),
+           carbs = COALESCE((
+             SELECT SUM(i.carbs * mci.quantity)
+             FROM meal_combo_ingredients mci
+             JOIN ingredients i ON i.id = mci.ingredient_id
+             WHERE mci.meal_combo_id = mc.id
+           ), 0),
+           fat = COALESCE((
+             SELECT SUM(i.fat * mci.quantity)
+             FROM meal_combo_ingredients mci
+             JOIN ingredients i ON i.id = mci.ingredient_id
+             WHERE mci.meal_combo_id = mc.id
+           ), 0)
+         WHERE mc.meal_type = 'composed'
+           AND EXISTS (
+             SELECT 1
+             FROM meal_combo_ingredients mci
+             WHERE mci.meal_combo_id = mc.id
+               AND mci.ingredient_id = $1
+           )`,
+        [id]
+      );
       res.status(200).json(result.rows[0]);
     }
   } catch (error) {

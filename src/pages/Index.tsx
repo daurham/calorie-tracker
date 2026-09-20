@@ -6,6 +6,11 @@ import {
   AvailableMeals,
   Navbar,
 } from "@/components";
+import QuickLog from "@/components/quick-log/QuickLog";
+import RecentFrequent from "@/components/quick-log/RecentFrequent";
+import UndoToastHost from "@/components/quick-log/UndoToastHost";
+import { candidateKey, candidateToFoodLogInput } from "@/lib/quick-log";
+import type { SearchCandidate } from "@/types/food-search";
 import {
   MealLogModal,
   IngredientManagementModal,
@@ -22,15 +27,15 @@ import {
 import {
   formatMacroProgress,
   mapComboMealsWithIngredients,
-  generateUniqueId
 } from "@/lib/utils";
+import { useTodaysFoodLogs } from "@/hooks/useTodaysFoodLogs";
 import {
   caloricGoal,
   carbsGoal,
   fatGoal,
   proteinGoal,
 } from "@/settings.config";
-import { Meal, MealInput } from '@/types';
+import { MealInput } from '@/types';
 import { initializeMods, modManager } from '@/lib/mods';
 import { ModMeal } from '@/types/mods';
 import ModModalFactory from '@/components/modals/ModModalFactory';
@@ -39,7 +44,6 @@ import ModModalFactory from '@/components/modals/ModModalFactory';
 const STORAGE_KEYS = {
   DAILY_GOAL: 'nutritrack_daily_goal',
   MACRO_GOALS: 'nutritrack_macro_goals',
-  TODAYS_MEALS: 'nutritrack_todays_meals',
   VISIBLE_MACROS: 'nutritrack_visible_macros',
   SHOW_MACROS: 'nutritrack_show_macros',
   QUICK_STATS_OPEN: 'nutritrack_quick_stats_open',
@@ -50,9 +54,21 @@ const STORAGE_KEYS = {
 const Index = () => {
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [todaysMeals, setTodaysMeals] = useState([]);
-  const [dailyCalories, setDailyCalories] = useState(0);
-  const [dailyMacros, setDailyMacros] = useState({ protein: 0, carbs: 0, fat: 0 });
+  const {
+    todaysMeals,
+    dailyCalories,
+    dailyMacros,
+    addMealToToday,
+    removeMealFromToday,
+    updateMealInToday,
+    duplicateMealInToday,
+    recentFrequent,
+    logFood,
+    logFoods,
+    undoAction,
+    undoLastAction,
+  } = useTodaysFoodLogs();
+  const [recentAddingKey, setRecentAddingKey] = useState<string | null>(null);
   const [showMacros, setShowMacros] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,7 +86,7 @@ const Index = () => {
   // Collapsible states
   const [isQuickStatsOpen, setIsQuickStatsOpen] = useState(true);
   const [isTodaysMealsOpen, setIsTodaysMealsOpen] = useState(true);
-  const [isMealCombosOpen, setIsMealCombosOpen] = useState(true);
+  const [isMealCombosOpen, setIsMealCombosOpen] = useState(false);
   // Configurable goals
   const [dailyGoal, setDailyGoal] = useState(caloricGoal);
   const [macroGoals, setMacroGoals] = useState({
@@ -89,9 +105,11 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Load data from database or sample data
-  const loadData = async () => {
+  const loadData = async (options?: { silent?: boolean }) => {
     try {
-      setIsLoading(true);
+      if (!options?.silent) {
+        setIsLoading(true);
+      }
       const [ingredients, meals] = await Promise.all([
         getIngredientsData(),
         getMealCombosData()
@@ -101,56 +119,14 @@ const Index = () => {
       const sortedMeals = mappedMeals.sort((a, b) => a.name.localeCompare(b.name));
       setMealsData(sortedMeals);
       setAllIngredientsData(sortedIngredients);
-      loadLocalMealData(sortedMeals as Meal[]);
-      // You might want to store ingredients in state if needed
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
-      setIsLoading(false);
+      if (!options?.silent) {
+        setIsLoading(false);
+      }
     }
   };
-
-  const loadLocalMealData = (mealsData: Meal[]) => {
-    // Load today's meals
-    const savedTodaysMeals = localStorage.getItem(STORAGE_KEYS.TODAYS_MEALS);
-    if (savedTodaysMeals) {
-      const oldSavedMeals = JSON.parse(savedTodaysMeals);
-      // Map the old comboId to the combo data, in case of updates 
-      const updatedMeals = oldSavedMeals.map(oldMeal => {
-        const updatedMeal = mealsData.find(meal => meal.id === oldMeal.id);
-        if (updatedMeal) {
-          return {
-            ...updatedMeal,
-            uniqueMealId: oldMeal?.uniqueMealId || generateUniqueId(),
-            timestamp: oldMeal?.timestamp || "",
-            isEdited: oldMeal?.isEdited || false, // Preserve the isEdited flag
-            portion: oldMeal?.portion || 1, // Preserve portion
-            calories: oldMeal?.calories || updatedMeal.calories, // Use edited calories if available
-            protein: oldMeal?.protein || updatedMeal.protein, // Use edited protein if available
-            carbs: oldMeal?.carbs || updatedMeal.carbs, // Use edited carbs if available
-            fat: oldMeal?.fat || updatedMeal.fat, // Use edited fat if available
-            ingredients: oldMeal?.ingredients || updatedMeal.ingredients, // Preserve edited ingredients
-            modData: oldMeal?.modData || (updatedMeal as any).modData, // Preserve edited mod data
-          }
-        }
-        return {
-          ...oldMeal,
-          uniqueMealId: oldMeal?.uniqueMealId || generateUniqueId()
-        };
-      });
-      setTodaysMeals(updatedMeals);
-
-      // Recalculate daily calories and macros
-      const totalCalories = updatedMeals.reduce((sum, meal) => sum + meal.calories, 0);
-      const totalMacros = updatedMeals.reduce((acc, meal) => ({
-        protein: Number(acc.protein) + Number(meal.protein),
-        carbs: Number(acc.carbs) + Number(meal.carbs),
-        fat: Number(acc.fat) + Number(meal.fat)
-      }), { protein: 0, carbs: 0, fat: 0 });
-      setDailyCalories(totalCalories);
-      setDailyMacros(totalMacros);
-    }
-  }
 
   useEffect(() => {
     loadData();
@@ -171,9 +147,6 @@ const Index = () => {
     if (savedMacroGoals) {
       setMacroGoals(JSON.parse(savedMacroGoals));
     }
-
-    // Load today's meals
-    loadLocalMealData([]);
 
     // Load visible macros
     const savedVisibleMacros = localStorage.getItem(STORAGE_KEYS.VISIBLE_MACROS);
@@ -214,10 +187,6 @@ const Index = () => {
   }, [macroGoals]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.TODAYS_MEALS, JSON.stringify(todaysMeals));
-  }, [todaysMeals]);
-
-  useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.VISIBLE_MACROS, JSON.stringify(visibleMacros));
   }, [visibleMacros]);
 
@@ -239,97 +208,15 @@ const Index = () => {
 
   const progressPercentage = Math.min((dailyCalories / dailyGoal) * 100, 100);
   const macroProgress = {
-    protein: Math.min((dailyMacros.protein / macroGoals.protein) * 100, 100),
-    carbs: Math.min((dailyMacros.carbs / macroGoals.carbs) * 100, 100),
-    fat: Math.min((dailyMacros.fat / macroGoals.fat) * 100, 100)
-  };
-
-  const addMealToToday = (meal) => {
-    // Handle portion logic
-    const portion = meal.portion || 1;
-    const adjustedMeal = {
-      ...meal,
-      calories: Math.round(meal.calories * portion),
-      protein: Number((meal.protein * portion).toFixed(1)),
-      carbs: Number((meal.carbs * portion).toFixed(1)),
-      fat: Number((meal.fat * portion).toFixed(1)),
-      portion: portion,
-      id: meal.id,
-      uniqueMealId: generateUniqueId(),
-      timestamp: new Date().toLocaleTimeString()
-    };
-    
-    setTodaysMeals(prev => [...prev, adjustedMeal]);
-    setDailyCalories(prev => prev + adjustedMeal.calories);
-    setDailyMacros(prev => ({
-      protein: Number(prev.protein) + Number(adjustedMeal.protein),
-      carbs: Number(prev.carbs) + Number(adjustedMeal.carbs),
-      fat: Number(prev.fat) + Number(adjustedMeal.fat)
-    }));
-  };
-
-  const removeMealFromToday = (mealId) => {
-    if (mealId === "all") {
-      // console.log("removing all meals");
-      todaysMeals.length = 0;
-      setTodaysMeals([]);
-      setDailyCalories(0);
-      setDailyMacros({
-        protein: 0,
-        carbs: 0,
-        fat: 0,
-      })
-      return;
-    }
-    const meal = todaysMeals.find(m => m.uniqueMealId === mealId);
-    // console.log("Removing one meal: ", meal);
-    if (meal) {
-      setTodaysMeals(prev => prev.filter(m => m.uniqueMealId !== mealId));
-      setDailyCalories(prev => prev - meal.calories);
-      setDailyMacros(prev => ({
-        protein: Number(prev.protein) - Number(meal.protein),
-        carbs: Number(prev.carbs) - Number(meal.carbs),
-        fat: Number(prev.fat) - Number(meal.fat)
-      }));
-    }
-  };
-
-  const updateMealInToday = (updatedMeal) => {
-    const oldMeal = todaysMeals.find(meal => meal.uniqueMealId === updatedMeal.uniqueMealId);
-    if (oldMeal) {
-      // Remove old meal's macros
-      setDailyCalories(prev => prev - oldMeal.calories);
-      setDailyMacros(prev => ({
-        protein: Number(prev.protein) - Number(oldMeal.protein),
-        carbs: Number(prev.carbs) - Number(oldMeal.carbs),
-        fat: Number(prev.fat) - Number(oldMeal.fat)
-      }));
-
-      // Add updated meal's macros
-      setDailyCalories(prev => prev + updatedMeal.calories);
-      setDailyMacros(prev => ({
-        protein: Number(prev.protein) + Number(updatedMeal.protein),
-        carbs: Number(prev.carbs) + Number(updatedMeal.carbs),
-        fat: Number(prev.fat) + Number(updatedMeal.fat)
-      }));
-
-      // Update the meal in the list
-      setTodaysMeals(prev => 
-        prev.map(meal => 
-          meal.uniqueMealId === updatedMeal.uniqueMealId ? updatedMeal : meal
-        )
-      );
-    }
-  };
-
-  const duplicateMealInToday = (duplicatedMeal) => {
-    setTodaysMeals(prev => [...prev, duplicatedMeal]);
-    setDailyCalories(prev => prev + duplicatedMeal.calories);
-    setDailyMacros(prev => ({
-      protein: Number(prev.protein) + Number(duplicatedMeal.protein),
-      carbs: Number(prev.carbs) + Number(duplicatedMeal.carbs),
-      fat: Number(prev.fat) + Number(duplicatedMeal.fat)
-    }));
+    protein: macroGoals.protein > 0 && dailyMacros.protein != null
+      ? Math.min((dailyMacros.protein / macroGoals.protein) * 100, 100)
+      : 0,
+    carbs: macroGoals.carbs > 0 && dailyMacros.carbs != null
+      ? Math.min((dailyMacros.carbs / macroGoals.carbs) * 100, 100)
+      : 0,
+    fat: macroGoals.fat > 0 && dailyMacros.fat != null
+      ? Math.min((dailyMacros.fat / macroGoals.fat) * 100, 100)
+      : 0
   };
 
   const addIngredient = async (ingredient) => {
@@ -339,10 +226,15 @@ const Index = () => {
   };
 
   const updateIngredient = async (ingredient) => {
-    // console.log("updating ingredient", ingredient);
     const updatedIngredientResult = await updateIngredientData(ingredient);
-    loadData();
-    // setAllIngredientsData(prev => prev.map(i => i.id === ingredient.id ? updatedIngredientResult : i).sort((a, b) => a.name.localeCompare(b.name)));
+    const nextIngredients = allIngredientsData
+      .map(i => i.id === ingredient.id ? { ...i, ...updatedIngredientResult } : i)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    const nextMeals = mapComboMealsWithIngredients(mealsData, nextIngredients)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    setAllIngredientsData(nextIngredients);
+    setMealsData(nextMeals);
+    await loadData({ silent: true });
   };
 
   const deleteIngredient = async (ingredientId) => {
@@ -360,7 +252,8 @@ const Index = () => {
       });
       if (!response.ok) throw new Error('Failed to add meal combo');
       const newMealCombo = await response.json();
-      setMealsData(prev => [...prev, newMealCombo].sort((a, b) => a.name.localeCompare(b.name)));
+      const mappedMeal = mapComboMealsWithIngredients([newMealCombo], allIngredientsData)[0];
+      setMealsData(prev => [...prev, mappedMeal].sort((a, b) => a.name.localeCompare(b.name)));
     } catch (error) {
       console.error('Error adding meal combo:', error);
       throw error;
@@ -375,7 +268,7 @@ const Index = () => {
         body: JSON.stringify(meal),
       });
       if (!response.ok) throw new Error('Failed to update meal combo');
-      loadData();
+      await loadData({ silent: true });
     } catch (error) {
       console.error('Error updating meal combo:', error);
       throw error;
@@ -483,7 +376,25 @@ const Index = () => {
           />
         </div>
 
-        {/* Today's Meals */}
+        <UndoToastHost action={undoAction} onUndo={undoLastAction} />
+        <QuickLog onLog={logFood} onLogGroup={logFoods} />
+
+        <RecentFrequent
+          items={recentFrequent}
+          addingKey={recentAddingKey}
+          onAdd={async (candidate: SearchCandidate) => {
+            const key = candidateKey(candidate);
+            setRecentAddingKey(key);
+            try {
+              await logFood(candidateToFoodLogInput(candidate, {
+                originalInput: candidate.name,
+              }));
+            } finally {
+              setRecentAddingKey(null);
+            }
+          }}
+        />
+
         <TodaysMeals
           meals={todaysMeals}
           availableIngredients={allIngredientsData}
@@ -494,17 +405,18 @@ const Index = () => {
           setIsCollapsed={(collapsed) => setIsTodaysMealsOpen(!collapsed)}
         />
 
-        {/* Available Meal Combos */}
-                    <AvailableMeals
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              addMealToToday={addMealToToday}
-              openMealEditManagement={openMealEditManagement}
-              handleDeleteMealCombo={handleDeleteMealCombo}
-              filteredMeals={filteredMeals}
-              onModMealClick={handleModMealClick}
-              isLoading={isLoading}
-            />
+        <AvailableMeals
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          addMealToToday={addMealToToday}
+          openMealEditManagement={openMealEditManagement}
+          handleDeleteMealCombo={handleDeleteMealCombo}
+          filteredMeals={filteredMeals}
+          onModMealClick={handleModMealClick}
+          isLoading={isLoading}
+          isCollapsed={!isMealCombosOpen}
+          setIsCollapsed={(collapsed) => setIsMealCombosOpen(!collapsed)}
+        />
       </main>
 
       {/* Modals */}
@@ -562,15 +474,15 @@ const Index = () => {
           availableMeals={mealsData}
           currentMacros={{
             calories: Math.round((dailyCalories) * 10) / 10,
-            protein: Math.round(dailyMacros.protein * 10) / 10,
-            carbs: Math.round(dailyMacros.carbs * 10) / 10,
-            fat: Math.round(dailyMacros.fat * 10) / 10
+            protein: Math.round((dailyMacros.protein ?? 0) * 10) / 10,
+            carbs: Math.round((dailyMacros.carbs ?? 0) * 10) / 10,
+            fat: Math.round((dailyMacros.fat ?? 0) * 10) / 10
           }}
           remainingMacros={{
             calories: Math.round((dailyGoal - dailyCalories) || 0),
-            protein: Math.round(((macroGoals.protein - dailyMacros.protein) || 0) * 10) / 10,
-            carbs: Math.round(((macroGoals.carbs - dailyMacros.carbs) || 0) * 10) / 10,
-            fat: Math.round(((macroGoals.fat - dailyMacros.fat) || 0) * 10) / 10
+            protein: Math.round(((macroGoals.protein - (dailyMacros.protein ?? 0)) || 0) * 10) / 10,
+            carbs: Math.round(((macroGoals.carbs - (dailyMacros.carbs ?? 0)) || 0) * 10) / 10,
+            fat: Math.round(((macroGoals.fat - (dailyMacros.fat ?? 0)) || 0) * 10) / 10
           }}
         />
         )}

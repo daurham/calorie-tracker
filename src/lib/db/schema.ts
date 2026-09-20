@@ -1,6 +1,8 @@
 import { query } from './client';
 import { sql } from '@vercel/postgres';
 import { Ingredient, Meal } from '@/types';
+import { FOOD_LOG_SCHEMA_STATEMENTS } from './food-logs-schema';
+import { FOODS_SCHEMA_STATEMENTS } from './foods-schema';
 
 // Schema creation
 export async function createTables() {
@@ -154,6 +156,14 @@ export async function createTables() {
       FOR EACH ROW
       EXECUTE FUNCTION update_meal_combos_on_ingredient_change()
     `);
+
+    for (const statement of FOOD_LOG_SCHEMA_STATEMENTS) {
+      await sql.query(statement);
+    }
+
+    for (const statement of FOODS_SCHEMA_STATEMENTS) {
+      await sql.query(statement);
+    }
 
     console.log('Database tables and triggers created successfully');
   } catch (error) {

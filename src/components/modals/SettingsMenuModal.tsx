@@ -17,6 +17,7 @@ import {
 import { delay } from "@/lib/utils";
 import { modManager } from "@/lib/mods";
 import { ModConfig } from "@/types/mods";
+import AiUsageSection from "@/components/settings/AiUsageSection";
 
 interface SettingsMenuProps {
   open: boolean;
@@ -457,6 +458,8 @@ const SettingsMenu = ({
               </CollapsibleContent>
             </Collapsible>
           </div>
+
+          <AiUsageSection />
 
           <div className="pt-4 border-t mt-6">
             <p className="text-sm text-muted-foreground mb-3">

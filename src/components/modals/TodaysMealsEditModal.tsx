@@ -585,7 +585,7 @@ const TodaysMealsEditModal = ({
   const RightColumn = (
     <div>
         <div className="space-y-4 min-h-[65vh]">
-             <h3 className="text-lg font-semibold">Today's Meals</h3>
+             <h3 className="text-lg font-semibold">Today</h3>
              <div className="space-y-3 max-h-[60vh] overflow-y-auto">
                {meals.map((meal) => (
                  <TodaysMealCard key={meal.uniqueMealId} meal={meal} />
@@ -599,7 +599,7 @@ const TodaysMealsEditModal = ({
     <DataManagementModal
       open={open}
       onOpenChange={onOpenChange}
-      title="Edit Today's Meals"
+      title="Edit Today"
       description="Edit portions, ingredients, or mod configurations for your meals today."
       leftColumn={LeftColumn}
       rightColumn={RightColumn}

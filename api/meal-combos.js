@@ -3,11 +3,37 @@ import { sql } from '@vercel/postgres';
 async function getMealCombos(req, res) {
   try {
     const result = await sql`
-      SELECT mc.*, 
-             json_agg(json_build_object(
-               'id', i.id,
-               'quantity', mci.quantity
-             )) as ingredients
+      SELECT
+        mc.id,
+        mc.name,
+        mc.meal_type,
+        mc.notes,
+        mc.instructions,
+        CASE
+          WHEN mc.meal_type = 'composed' THEN COALESCE(ROUND(SUM(i.calories * mci.quantity)), 0)
+          ELSE mc.calories
+        END as calories,
+        CASE
+          WHEN mc.meal_type = 'composed' THEN COALESCE(SUM(i.protein * mci.quantity), 0)
+          ELSE mc.protein
+        END as protein,
+        CASE
+          WHEN mc.meal_type = 'composed' THEN COALESCE(SUM(i.carbs * mci.quantity), 0)
+          ELSE mc.carbs
+        END as carbs,
+        CASE
+          WHEN mc.meal_type = 'composed' THEN COALESCE(SUM(i.fat * mci.quantity), 0)
+          ELSE mc.fat
+        END as fat,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', i.id,
+              'quantity', mci.quantity
+            )
+          ) FILTER (WHERE i.id IS NOT NULL),
+          '[]'::json
+        ) as ingredients
       FROM meal_combos mc
       LEFT JOIN meal_combo_ingredients mci ON mc.id = mci.meal_combo_id
       LEFT JOIN ingredients i ON mci.ingredient_id = i.id

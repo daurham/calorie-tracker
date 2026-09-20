@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
-import { TrendingUp, MoreVertical, Pencil, Trash2, Sparkles, Loader2, ChevronDown, Star } from "lucide-react";
+import { TrendingUp, MoreVertical, Pencil, Trash2, Sparkles, Loader2, ChevronDown, ChevronRight, Star } from "lucide-react";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
   Button,
   DropdownMenu,
   DropdownMenuTrigger,
@@ -27,6 +30,8 @@ const AvailableMeals = ({
   filteredMeals,
   onModMealClick,
   isLoading = false,
+  isCollapsed = false,
+  setIsCollapsed,
 }) => {
   const [deleteMealId, setDeleteMealId] = useState<number | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -271,42 +276,51 @@ const AvailableMeals = ({
 
   return (
     <>
-      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-        <CardHeader>
-          <div className="space-y-4">
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 dark:text-emerald-400" />
-              Available Meals
-            </CardTitle>
-            {/* Search Bar */}
-            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {isLoading ? (
-              // Show loading skeletons
-              Array.from({ length: 6 }).map((_, index) => (
-                <LoadingSkeletonCard key={`skeleton-${index}`} />
-              ))
-            ) : sortedMeals.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                {searchQuery ? "No meals found matching your search." : "No meal combos available."}
-              </p>
-            ) : (
-              sortedMeals.map((item) => {
-                // Check if this is a mod meal (has description property)
-                const isMod = item.description && !item.meal_type;
-                
-                if (isMod) {
-                  return <ModMealCard key={`mod-${item.id}`} mod={item} />;
-                } else {
-                  return <AvailableMealCard key={`meal-${item.id}`} meal={item} />;
-                }
-              })
-            )}
-          </div>
-        </CardContent>
+      <Card className="bg-slate-50/80 dark:bg-slate-900/60 backdrop-blur-sm border-slate-200 dark:border-slate-700">
+        <Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed?.(!open)}>
+          <CardHeader>
+            <div className="space-y-4">
+              <CollapsibleTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-between p-0 h-auto font-normal hover:bg-transparent"
+                >
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-slate-600 dark:text-slate-300">
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-slate-500" />
+                    Available Meals
+                  </CardTitle>
+                  {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+              </CollapsibleContent>
+            </div>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {isLoading ? (
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <LoadingSkeletonCard key={`skeleton-${index}`} />
+                  ))
+                ) : sortedMeals.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    {searchQuery ? "No meals found matching your search." : "No meal combos available."}
+                  </p>
+                ) : (
+                  sortedMeals.map((item) => {
+                    const isMod = item.description && !item.meal_type;
+                    if (isMod) {
+                      return <ModMealCard key={`mod-${item.id}`} mod={item} />;
+                    }
+                    return <AvailableMealCard key={`meal-${item.id}`} meal={item} />;
+                  })
+                )}
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
       </Card>
 
       <AlertModal
