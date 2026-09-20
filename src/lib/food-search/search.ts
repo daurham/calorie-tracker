@@ -2,10 +2,10 @@ import type {
   FoodSearchResponse,
   RawSearchRecord,
   SearchCandidate,
-} from '../../types/food-search';
-import { classifySearchResults } from './classify';
-import { dedupeCandidates } from './dedupe';
-import { scoreCandidate } from './score';
+} from '../../types/food-search.js';
+import { classifySearchResults } from './classify.js';
+import { dedupeCandidates } from './dedupe.js';
+import { scoreCandidate } from './score.js';
 
 const SOURCE_BY_ENTITY = {
   food: 'food',

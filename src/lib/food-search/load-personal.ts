@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
-import type { RawSearchRecord } from '../../types/food-search';
-import { normalizeName, tokenize } from './normalize';
-import { aggregateHistoricalLogs, attachUsageSignals } from './usage';
+import type { RawSearchRecord } from '../../types/food-search.js';
+import { normalizeName, tokenize } from './normalize.js';
+import { aggregateHistoricalLogs, attachUsageSignals } from './usage.js';
 
 const toNullableNumber = (value: unknown): number | null => {
   if (value == null || value === '') return null;

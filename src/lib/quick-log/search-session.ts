@@ -1,4 +1,4 @@
-import type { MatchClassification } from '../../types/food-search';
+import type { MatchClassification } from '../../types/food-search.js';
 
 export const SEARCH_DEBOUNCE_MS = 200;
 

@@ -1,4 +1,4 @@
-import type { Nutrition, NutritionConfidence } from './food-log';
+import type { Nutrition, NutritionConfidence } from './food-log.js';
 
 export type NutritionProviderId = 'usda';
 

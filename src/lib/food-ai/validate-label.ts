@@ -1,4 +1,4 @@
-import type { NutritionLabelResult, NutritionLabelWarning } from '../../types/nutrition-label';
+import type { NutritionLabelResult, NutritionLabelWarning } from '../../types/nutrition-label.js';
 
 export const estimatedMacroCalories = (
   protein: number | null,

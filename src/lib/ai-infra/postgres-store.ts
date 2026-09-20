@@ -1,9 +1,9 @@
 import { sql } from '@vercel/postgres';
-import type { AiCacheEntry, AiMonthSummary, AiRequestType, AiUsageRecord } from '../../types/ai-infra';
-import { AI_REQUEST_TYPES } from '../../types/ai-infra';
-import { AI_SCHEMA_STATEMENTS } from '../db/ai-schema';
-import { calendarMonthRange, loadBudgetConfig } from './config';
-import type { AiInfraStore, CacheWriteInput, FinalizeInput, ReserveInput } from './store';
+import type { AiCacheEntry, AiMonthSummary, AiRequestType, AiUsageRecord } from '../../types/ai-infra.js';
+import { AI_REQUEST_TYPES } from '../../types/ai-infra.js';
+import { AI_SCHEMA_STATEMENTS } from '../db/ai-schema.js';
+import { calendarMonthRange, loadBudgetConfig } from './config.js';
+import type { AiInfraStore, CacheWriteInput, FinalizeInput, ReserveInput } from './store.js';
 
 let tablesReady = false;
 

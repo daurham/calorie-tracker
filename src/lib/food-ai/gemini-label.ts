@@ -1,10 +1,10 @@
-import { ProviderError } from '../../types/nutrition-provider';
-import type { FoodAIProvider, ImageInput, NutritionLabelResult } from '../../types/nutrition-label';
-import type { FoodInterpretation } from '../../types/food-interpretation';
-import type { AiCallUsage } from '../../types/ai-infra';
-import { NUTRITION_LABEL_PROMPT_VERSION, NUTRITION_LABEL_SCHEMA_VERSION } from '../ai-infra/gate';
-import { sanitizeFoodInterpretation } from '../food-estimate/sanitize';
-import { sanitizeNutritionLabel } from './validate-label';
+import { ProviderError } from '../../types/nutrition-provider.js';
+import type { FoodAIProvider, ImageInput, NutritionLabelResult } from '../../types/nutrition-label.js';
+import type { FoodInterpretation } from '../../types/food-interpretation.js';
+import type { AiCallUsage } from '../../types/ai-infra.js';
+import { NUTRITION_LABEL_PROMPT_VERSION, NUTRITION_LABEL_SCHEMA_VERSION } from '../ai-infra/gate.js';
+import { sanitizeFoodInterpretation } from '../food-estimate/sanitize.js';
+import { sanitizeNutritionLabel } from './validate-label.js';
 
 export { NUTRITION_LABEL_PROMPT_VERSION, NUTRITION_LABEL_SCHEMA_VERSION };
 

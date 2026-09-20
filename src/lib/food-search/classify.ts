@@ -1,7 +1,7 @@
-import type { MatchClassification } from '../../types/food-search';
-import { extractAttributes, isGenericQuery } from './attributes';
-import { tokenize } from './normalize';
-import type { ScoredCandidate } from './score';
+import type { MatchClassification } from '../../types/food-search.js';
+import { extractAttributes, isGenericQuery } from './attributes.js';
+import { tokenize } from './normalize.js';
+import type { ScoredCandidate } from './score.js';
 
 export const classifySearchResults = (
   query: string,

@@ -1,8 +1,8 @@
-import type { NutritionProvider, NutritionReference } from '../../../types/nutrition-provider';
-import { ProviderError } from '../../../types/nutrition-provider';
-import { applyParsedQuantityToCandidate } from '../math';
-import { parseQuantityQuery } from '../../quick-log/quantity';
-import { normalizeUsdaFood, normalizeUsdaSearchResults } from './normalize';
+import type { NutritionProvider, NutritionReference } from '../../../types/nutrition-provider.js';
+import { ProviderError } from '../../../types/nutrition-provider.js';
+import { applyParsedQuantityToCandidate } from '../math.js';
+import { parseQuantityQuery } from '../../quick-log/quantity.js';
+import { normalizeUsdaFood, normalizeUsdaSearchResults } from './normalize.js';
 
 const SEARCH_URL = 'https://api.nal.usda.gov/fdc/v1/foods/search';
 const FOOD_URL = 'https://api.nal.usda.gov/fdc/v1/food';

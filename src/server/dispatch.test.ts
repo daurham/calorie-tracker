@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import path from 'node:path';
 import { describe, it } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import {
   API_ROUTES,
   createDispatcher,
@@ -9,14 +12,14 @@ import {
   type ApiHandler,
   type ApiRequest,
   type ApiResponse,
-} from './dispatch';
-import { handleAiUsage } from './routes/ai-usage';
-import { handleBarcodeLookup } from './routes/barcode-lookup';
-import { handleFoodSearch } from './routes/foods-search';
-import { handleNutritionLabelExtract } from './routes/nutrition-label-extract';
-import { handlePackagedFoodSave } from './routes/packaged-food-save';
-import { handleQuickLogEstimate } from './routes/quick-log-estimate';
-import { handleQuickLogResolve } from './routes/quick-log-resolve';
+} from './dispatch.js';
+import { handleAiUsage } from './routes/ai-usage.js';
+import { handleBarcodeLookup } from './routes/barcode-lookup.js';
+import { handleFoodSearch } from './routes/foods-search.js';
+import { handleNutritionLabelExtract } from './routes/nutrition-label-extract.js';
+import { handlePackagedFoodSave } from './routes/packaged-food-save.js';
+import { handleQuickLogEstimate } from './routes/quick-log-estimate.js';
+import { handleQuickLogResolve } from './routes/quick-log-resolve.js';
 import { handleAnalyzeFood } from './routes/analyze-food.js';
 import { handleAnalyzeIngredient } from './routes/analyze-ingredient.js';
 import { handleGenerateMealPlan } from './routes/generate-meal-plan.js';
@@ -101,6 +104,44 @@ describe('API dispatcher registry', () => {
   it('does not resolve routes from user-controlled module paths', () => {
     assert.equal(API_ROUTES['/../package.json'], undefined);
     assert.equal(API_ROUTES['/food-logs/../../scripts/init-db'], undefined);
+  });
+
+  it('uses Node ESM .js specifiers for every relative import in the Vercel graph', () => {
+    const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+    const seen = new Set<string>();
+    const extensionless: string[] = [];
+
+    const walk = (file: string) => {
+      const abs = path.resolve(file);
+      if (seen.has(abs)) return;
+      if (!abs.startsWith(path.join(root, 'src')) && !abs.startsWith(path.join(root, 'api'))) return;
+      if (/\.test\.(ts|js)$/.test(abs)) return;
+      seen.add(abs);
+      if (!/\.(ts|js)$/.test(abs)) return;
+      const source = readFileSync(abs, 'utf8');
+      const matcher = /(?:from|import|export)\s*\(?\s*['"](\.\.?\/[^'"]+)['"]/g;
+      let match: RegExpExecArray | null;
+      while ((match = matcher.exec(source))) {
+        const spec = match[1];
+        if (!/\.(js|json)$/.test(spec)) {
+          extensionless.push(`${path.relative(root, abs)}: '${spec}'`);
+        }
+        const base = path.resolve(path.dirname(abs), spec);
+        const candidates = [
+          base,
+          base.replace(/\.js$/, '.ts'),
+          base + '.ts',
+          base + '.js',
+          path.join(base, 'index.ts'),
+          path.join(base, 'index.js'),
+        ];
+        const resolved = candidates.find((candidate) => existsSync(candidate) && statSync(candidate).isFile());
+        if (resolved) walk(resolved);
+      }
+    };
+
+    walk(path.join(root, 'api/index.ts'));
+    assert.deepEqual(extensionless, []);
   });
 });
 

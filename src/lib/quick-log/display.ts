@@ -1,6 +1,6 @@
-import type { SearchCandidate } from '../../types/food-search';
-import type { ParsedQuantity } from './quantity';
-import { scaleCandidateNutrition } from './scale';
+import type { SearchCandidate } from '../../types/food-search.js';
+import type { ParsedQuantity } from './quantity.js';
+import { scaleCandidateNutrition } from './scale.js';
 
 export const isEstimatedCandidate = (candidate: SearchCandidate) => {
   if (candidate.confidence === 'verified' || candidate.confidence === 'high') return false;

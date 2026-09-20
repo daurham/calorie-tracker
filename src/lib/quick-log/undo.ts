@@ -1,4 +1,4 @@
-import type { FoodLogInput } from '../../types/food-log';
+import type { FoodLogInput } from '../../types/food-log.js';
 
 export type UndoAction =
   | { type: 'add'; logId: number; label: string; calories: number }

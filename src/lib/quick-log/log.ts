@@ -1,7 +1,7 @@
-import type { FoodLog, FoodLogInput, FoodLogNutritionSource, FoodLogSourceType } from '../../types/food-log';
-import type { SearchCandidate } from '../../types/food-search';
-import type { ParsedQuantity } from './quantity';
-import { scaleCandidateNutrition } from './scale';
+import type { FoodLog, FoodLogInput, FoodLogNutritionSource, FoodLogSourceType } from '../../types/food-log.js';
+import type { SearchCandidate } from '../../types/food-search.js';
+import type { ParsedQuantity } from './quantity.js';
+import { scaleCandidateNutrition } from './scale.js';
 
 export const SOURCE_BY_ENTITY: Record<SearchCandidate['entityType'], FoodLogSourceType> = {
   food: 'food',

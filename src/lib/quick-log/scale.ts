@@ -1,6 +1,6 @@
-import type { Nutrition } from '../../types/food-log';
-import { ouncesToGrams } from '../nutrition-providers/math';
-import type { ParsedQuantity } from './quantity';
+import type { Nutrition } from '../../types/food-log.js';
+import { ouncesToGrams } from '../nutrition-providers/math.js';
+import type { ParsedQuantity } from './quantity.js';
 
 export const scaleNutrition = (nutrition: Nutrition, factor: number): Nutrition => ({
   calories: Math.round(Number(nutrition.calories || 0) * factor),

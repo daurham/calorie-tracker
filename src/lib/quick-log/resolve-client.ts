@@ -1,4 +1,4 @@
-import type { QuickLogResolveRequest, ResolveOutcome } from '../../types/quick-log-resolve';
+import type { QuickLogResolveRequest, ResolveOutcome } from '../../types/quick-log-resolve.js';
 
 export async function resolveQuickLogRequest(text: string): Promise<ResolveOutcome> {
   const payload: QuickLogResolveRequest = {

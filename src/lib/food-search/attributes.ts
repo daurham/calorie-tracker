@@ -1,5 +1,5 @@
-import type { FoodAttributes } from '../../types/food-search';
-import { tokenize } from './normalize';
+import type { FoodAttributes } from '../../types/food-search.js';
+import { tokenize } from './normalize.js';
 
 const PROTEINS = new Set([
   'chicken', 'pork', 'beef', 'turkey', 'ham', 'fish', 'salmon', 'tuna', 'shrimp', 'tofu', 'steak',

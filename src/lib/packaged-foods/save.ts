@@ -1,7 +1,7 @@
-import type { FoodLogInput } from '../../types/food-log';
-import type { CanonicalUpsertPlan, PackagedFoodResult } from '../../types/packaged-food';
-import { planCanonicalUpsert } from './canonical';
-import { packagedFoodToFoodLogInput } from './log';
+import type { FoodLogInput } from '../../types/food-log.js';
+import type { CanonicalUpsertPlan, PackagedFoodResult } from '../../types/packaged-food.js';
+import { planCanonicalUpsert } from './canonical.js';
+import { packagedFoodToFoodLogInput } from './log.js';
 
 export interface CanonicalFoodStore {
   findByBarcode(barcode: string): Promise<PackagedFoodResult | null>;

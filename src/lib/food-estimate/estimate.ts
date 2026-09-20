@@ -1,25 +1,25 @@
-import type { EstimateDraft, EstimateOutcome, FoodInterpretation } from '../../types/food-interpretation';
-import type { FoodAIProvider, ImageInput } from '../../types/nutrition-label';
-import type { NutritionProvider } from '../../types/nutrition-provider';
-import { ProviderError } from '../../types/nutrition-provider';
-import { AiGateError } from '../../types/ai-infra';
-import { loadAiProviderConfig } from '../ai-infra/config';
-import { BUDGET_EXHAUSTED_MESSAGE, runPaidAiRequest } from '../ai-infra/gate';
-import { buildAiRequestHash, hashImageBytes, normalizeAiText } from '../ai-infra/hash';
-import { estimateMaxPhotoCostUsd, estimateMaxTextCostUsd } from '../ai-infra/pricing';
-import { estimateBase64Bytes } from '../food-ai/rate-limit';
-import type { AiInfraStore } from '../ai-infra/store';
-import { MemoryAiStore } from '../ai-infra/store';
-import type { FoodSearchResponse } from '../../types/food-search';
-import { resolveQuickLog, type ResolveDependencies } from '../quick-log/resolve';
+import type { EstimateDraft, EstimateOutcome, FoodInterpretation } from '../../types/food-interpretation.js';
+import type { FoodAIProvider, ImageInput } from '../../types/nutrition-label.js';
+import type { NutritionProvider } from '../../types/nutrition-provider.js';
+import { ProviderError } from '../../types/nutrition-provider.js';
+import { AiGateError } from '../../types/ai-infra.js';
+import { loadAiProviderConfig } from '../ai-infra/config.js';
+import { BUDGET_EXHAUSTED_MESSAGE, runPaidAiRequest } from '../ai-infra/gate.js';
+import { buildAiRequestHash, hashImageBytes, normalizeAiText } from '../ai-infra/hash.js';
+import { estimateMaxPhotoCostUsd, estimateMaxTextCostUsd } from '../ai-infra/pricing.js';
+import { estimateBase64Bytes } from '../food-ai/rate-limit.js';
+import type { AiInfraStore } from '../ai-infra/store.js';
+import { MemoryAiStore } from '../ai-infra/store.js';
+import type { FoodSearchResponse } from '../../types/food-search.js';
+import { resolveQuickLog, type ResolveDependencies } from '../quick-log/resolve.js';
 import {
   FOOD_ESTIMATE_CACHE_TTL_MS,
   FOOD_ESTIMATE_RESOLVER_VERSION,
   FOOD_INTERPRETATION_PROMPT_VERSION,
   FOOD_INTERPRETATION_SCHEMA_VERSION,
-} from './constants';
-import { resolveInterpretation, type InterpretationResolveDeps } from './resolve-interpretation';
-import { isLowQualityInterpretation } from './sanitize';
+} from './constants.js';
+import { resolveInterpretation, type InterpretationResolveDeps } from './resolve-interpretation.js';
+import { isLowQualityInterpretation } from './sanitize.js';
 
 const looksLikeMultipleFoods = (text: string) =>
   /,\s+/.test(text) || /\s+and\s+/i.test(text) || /\s+&\s+/.test(text);

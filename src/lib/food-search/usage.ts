@@ -1,5 +1,5 @@
-import type { RawSearchRecord } from '../../types/food-search';
-import { normalizeName } from './normalize';
+import type { RawSearchRecord } from '../../types/food-search.js';
+import { normalizeName } from './normalize.js';
 
 export interface UsageSignal {
   normalizedName: string;

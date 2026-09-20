@@ -1,6 +1,6 @@
-import { ProviderError } from '../../types/nutrition-provider';
-import type { PackagedFoodResult } from '../../types/packaged-food';
-import { normalizeOpenFoodFactsProduct } from './normalize';
+import { ProviderError } from '../../types/nutrition-provider.js';
+import type { PackagedFoodResult } from '../../types/packaged-food.js';
+import { normalizeOpenFoodFactsProduct } from './normalize.js';
 
 const OFF_URL = 'https://world.openfoodfacts.org/api/v0/product';
 const DEFAULT_TIMEOUT_MS = 8000;

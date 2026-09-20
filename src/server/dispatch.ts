@@ -18,26 +18,26 @@ export type ApiHandler = (req: ApiRequest, res: ApiResponse) => Promise<unknown>
 const ROUTE_LOADERS: Record<string, () => Promise<ApiHandler>> = {
   '/ai-recommend-meals': () =>
     import('./routes/ai-recommend-meals.js').then((module) => module.handleAiRecommendMeals),
-  '/ai/usage': () => import('./routes/ai-usage').then((module) => module.handleAiUsage),
+  '/ai/usage': () => import('./routes/ai-usage.js').then((module) => module.handleAiUsage),
   '/analyze-food': () => import('./routes/analyze-food.js').then((module) => module.handleAnalyzeFood),
   '/analyze-ingredient': () =>
     import('./routes/analyze-ingredient.js').then((module) => module.handleAnalyzeIngredient),
-  '/barcode/lookup': () => import('./routes/barcode-lookup').then((module) => module.handleBarcodeLookup),
+  '/barcode/lookup': () => import('./routes/barcode-lookup.js').then((module) => module.handleBarcodeLookup),
   '/food-logs': () => import('./routes/food-logs.js').then((module) => module.handleFoodLogs),
-  '/foods/search': () => import('./routes/foods-search').then((module) => module.handleFoodSearch),
+  '/foods/search': () => import('./routes/foods-search.js').then((module) => module.handleFoodSearch),
   '/generate-meal-plan': () =>
     import('./routes/generate-meal-plan.js').then((module) => module.handleGenerateMealPlan),
   '/get-data': () => import('./routes/get-data.js').then((module) => module.handleGetData),
   '/ingredients': () => import('./routes/ingredients.js').then((module) => module.handleIngredients),
   '/meal-combos': () => import('./routes/meal-combos.js').then((module) => module.handleMealCombos),
   '/nutrition-label/extract': () =>
-    import('./routes/nutrition-label-extract').then((module) => module.handleNutritionLabelExtract),
+    import('./routes/nutrition-label-extract.js').then((module) => module.handleNutritionLabelExtract),
   '/packaged-foods/save': () =>
-    import('./routes/packaged-food-save').then((module) => module.handlePackagedFoodSave),
+    import('./routes/packaged-food-save.js').then((module) => module.handlePackagedFoodSave),
   '/quick-log/estimate': () =>
-    import('./routes/quick-log-estimate').then((module) => module.handleQuickLogEstimate),
+    import('./routes/quick-log-estimate.js').then((module) => module.handleQuickLogEstimate),
   '/quick-log/resolve': () =>
-    import('./routes/quick-log-resolve').then((module) => module.handleQuickLogResolve),
+    import('./routes/quick-log-resolve.js').then((module) => module.handleQuickLogResolve),
 };
 
 export const API_ROUTES = Object.freeze({ ...ROUTE_LOADERS });

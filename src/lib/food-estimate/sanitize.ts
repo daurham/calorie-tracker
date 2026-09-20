@@ -1,4 +1,4 @@
-import type { FallbackNutrition, FoodComponent, FoodInterpretation } from '../../types/food-interpretation';
+import type { FallbackNutrition, FoodComponent, FoodInterpretation } from '../../types/food-interpretation.js';
 
 const toNullableNumber = (value: unknown): number | null => {
   if (value == null || value === '') return null;

@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
-import { FOODS_SCHEMA_STATEMENTS } from '../db/foods-schema';
-import { normalizeName } from '../food-search/normalize';
-import type { CanonicalFoodRecord, PackagedFoodResult } from '../../types/packaged-food';
+import { FOODS_SCHEMA_STATEMENTS } from '../db/foods-schema.js';
+import { normalizeName } from '../food-search/normalize.js';
+import type { CanonicalFoodRecord, PackagedFoodResult } from '../../types/packaged-food.js';
 
 let tablesReady = false;
 

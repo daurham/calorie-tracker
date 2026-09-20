@@ -1,4 +1,4 @@
-import type { FoodLogNutritionSource, FoodLogSourceType, Nutrition, NutritionConfidence } from './food-log';
+import type { FoodLogNutritionSource, FoodLogSourceType, Nutrition, NutritionConfidence } from './food-log.js';
 
 export interface FoodComponent {
   name: string;

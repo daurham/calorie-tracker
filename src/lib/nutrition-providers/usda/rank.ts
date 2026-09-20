@@ -1,8 +1,8 @@
-import type { MatchClassification } from '../../../types/food-search';
-import type { NutritionCandidate } from '../../../types/nutrition-provider';
-import { extractAttributes, preparationsConflict } from '../../food-search/attributes';
-import { normalizeName, tokenize } from '../../food-search/normalize';
-import { isCompleteEnough } from '../math';
+import type { MatchClassification } from '../../../types/food-search.js';
+import type { NutritionCandidate } from '../../../types/nutrition-provider.js';
+import { extractAttributes, preparationsConflict } from '../../food-search/attributes.js';
+import { normalizeName, tokenize } from '../../food-search/normalize.js';
+import { isCompleteEnough } from '../math.js';
 
 const DISTRACTORS = new Set([
   'bread', 'chip', 'juice', 'yogurt', 'smoothie', 'muffin', 'cake', 'candy',

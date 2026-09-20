@@ -1,5 +1,5 @@
-import type { CanonicalFoodRecord, CanonicalUpsertPlan, PackagedFoodResult } from '../../types/packaged-food';
-import { normalizeName } from '../food-search/normalize';
+import type { CanonicalFoodRecord, CanonicalUpsertPlan, PackagedFoodResult } from '../../types/packaged-food.js';
+import { normalizeName } from '../food-search/normalize.js';
 
 export const packagedFoodToCanonical = (
   product: PackagedFoodResult,

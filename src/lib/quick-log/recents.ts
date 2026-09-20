@@ -1,6 +1,6 @@
-import type { FoodLog } from '../../types/food-log';
-import type { RawSearchRecord, SearchCandidate } from '../../types/food-search';
-import { aggregateHistoricalLogs } from '../food-search/usage';
+import type { FoodLog } from '../../types/food-log.js';
+import type { RawSearchRecord, SearchCandidate } from '../../types/food-search.js';
+import { aggregateHistoricalLogs } from '../food-search/usage.js';
 
 export const logsToRecentRecords = (logs: FoodLog[]): RawSearchRecord[] =>
   aggregateHistoricalLogs(logs.map(log => ({

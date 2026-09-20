@@ -1,6 +1,6 @@
-import type { Nutrition } from '../../types/food-log';
-import type { PackagedFoodResult, PackagedServing } from '../../types/packaged-food';
-import { calculateFromPer100g } from '../nutrition-providers/math';
+import type { Nutrition } from '../../types/food-log.js';
+import type { PackagedFoodResult, PackagedServing } from '../../types/packaged-food.js';
+import { calculateFromPer100g } from '../nutrition-providers/math.js';
 
 const toNullableNumber = (value: unknown): number | null => {
   if (value == null || value === '') return null;

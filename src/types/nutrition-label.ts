@@ -1,6 +1,6 @@
-import type { FoodInterpretation } from './food-interpretation';
-import type { NutritionConfidence } from './food-log';
-import type { PackagedServing } from './packaged-food';
+import type { FoodInterpretation } from './food-interpretation.js';
+import type { NutritionConfidence } from './food-log.js';
+import type { PackagedServing } from './packaged-food.js';
 
 export interface NutritionLabelResult {
   productName: string | null;

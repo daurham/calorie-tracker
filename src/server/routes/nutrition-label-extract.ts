@@ -1,6 +1,6 @@
-import { GeminiFoodAIProvider } from '../../lib/food-ai/gemini-label';
-import { handleExtractNutritionLabel } from '../../lib/food-ai/extract';
-import { PostgresAiStore } from '../../lib/ai-infra/postgres-store';
+import { GeminiFoodAIProvider } from '../../lib/food-ai/gemini-label.js';
+import { handleExtractNutritionLabel } from '../../lib/food-ai/extract.js';
+import { PostgresAiStore } from '../../lib/ai-infra/postgres-store.js';
 
 const clientKeyFrom = (req: any) => {
   const forwarded = req.headers?.['x-forwarded-for'];

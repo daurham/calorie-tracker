@@ -1,6 +1,6 @@
-import type { EstimateValidation, FallbackNutrition } from '../../types/food-interpretation';
-import type { Nutrition, NutritionConfidence } from '../../types/food-log';
-import { estimatedMacroCalories } from '../food-ai/validate-label';
+import type { EstimateValidation, FallbackNutrition } from '../../types/food-interpretation.js';
+import type { Nutrition, NutritionConfidence } from '../../types/food-log.js';
+import { estimatedMacroCalories } from '../food-ai/validate-label.js';
 
 export const generateCalorieRange = (
   calories: number,

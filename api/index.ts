@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { dispatch } from '../src/server/dispatch';
+import { dispatch } from '../src/server/dispatch.js';
 
 // Single Hobby-plan Serverless Function. Public /api/* URLs are rewritten here.
 export const config = {

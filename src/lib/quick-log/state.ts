@@ -1,4 +1,4 @@
-import type { MatchClassification, SearchCandidate } from '../../types/food-search';
+import type { MatchClassification, SearchCandidate } from '../../types/food-search.js';
 
 export type QuickLogStatus =
   | 'idle'

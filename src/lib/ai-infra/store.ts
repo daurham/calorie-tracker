@@ -4,9 +4,9 @@ import type {
   AiRequestType,
   AiUsageRecord,
   BudgetReservation,
-} from '../../types/ai-infra';
-import { AI_REQUEST_TYPES } from '../../types/ai-infra';
-import { calendarMonthRange, loadBudgetConfig } from './config';
+} from '../../types/ai-infra.js';
+import { AI_REQUEST_TYPES } from '../../types/ai-infra.js';
+import { calendarMonthRange, loadBudgetConfig } from './config.js';
 
 export interface ReserveInput {
   provider: string;

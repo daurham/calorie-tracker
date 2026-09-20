@@ -1,6 +1,6 @@
-import type { BarcodeLookupResponse, PackagedFoodResult } from '../../types/packaged-food';
-import { ProviderError } from '../../types/nutrition-provider';
-import type { OpenFoodFactsProvider } from './off-provider';
+import type { BarcodeLookupResponse, PackagedFoodResult } from '../../types/packaged-food.js';
+import { ProviderError } from '../../types/nutrition-provider.js';
+import type { OpenFoodFactsProvider } from './off-provider.js';
 
 export interface LocalBarcodeStore {
   findByBarcode(barcode: string): Promise<PackagedFoodResult | null>;

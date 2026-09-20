@@ -1,4 +1,4 @@
-import type { AiBudgetConfig } from '../../types/ai-infra';
+import type { AiBudgetConfig } from '../../types/ai-infra.js';
 
 const DEFAULT_MONTHLY_BUDGET_USD = 3;
 const DEFAULT_WARNING_BUDGET_USD = 2;

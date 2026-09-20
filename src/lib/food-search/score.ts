@@ -1,10 +1,10 @@
-import type { MatchClassification, RawSearchRecord } from '../../types/food-search';
+import type { MatchClassification, RawSearchRecord } from '../../types/food-search.js';
 import {
   conflictingAttributes,
   extractAttributes,
   querySpecifiesMissingIdentity,
-} from './attributes';
-import { normalizeName, tokenize } from './normalize';
+} from './attributes.js';
+import { normalizeName, tokenize } from './normalize.js';
 
 export interface ScoredCandidate {
   record: RawSearchRecord;

@@ -1,5 +1,5 @@
-import type { SearchEntityType } from '../../types/food-search';
-import type { ScoredCandidate } from './score';
+import type { SearchEntityType } from '../../types/food-search.js';
+import type { ScoredCandidate } from './score.js';
 
 const ENTITY_PRIORITY: Record<SearchEntityType, number> = {
   food: 0,

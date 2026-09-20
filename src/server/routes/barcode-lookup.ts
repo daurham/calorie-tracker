@@ -1,6 +1,6 @@
-import { findFoodByBarcode } from '../../lib/packaged-foods/db';
-import { lookupBarcode } from '../../lib/packaged-foods/lookup';
-import { OpenFoodFactsProvider } from '../../lib/packaged-foods/off-provider';
+import { findFoodByBarcode } from '../../lib/packaged-foods/db.js';
+import { lookupBarcode } from '../../lib/packaged-foods/lookup.js';
+import { OpenFoodFactsProvider } from '../../lib/packaged-foods/off-provider.js';
 
 export async function handleBarcodeLookup(req: any, res: any) {
   if (req.method === 'OPTIONS') {

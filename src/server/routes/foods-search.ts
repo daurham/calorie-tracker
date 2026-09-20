@@ -1,6 +1,6 @@
-import { FOODS_SCHEMA_STATEMENTS } from '../../lib/db/foods-schema';
-import { loadPersonalSearchRecords } from '../../lib/food-search/load-personal';
-import { searchLocalKnowledge } from '../../lib/food-search/search';
+import { FOODS_SCHEMA_STATEMENTS } from '../../lib/db/foods-schema.js';
+import { loadPersonalSearchRecords } from '../../lib/food-search/load-personal.js';
+import { searchLocalKnowledge } from '../../lib/food-search/search.js';
 import { sql } from '@vercel/postgres';
 
 let tablesReady = false;

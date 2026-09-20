@@ -1,14 +1,14 @@
-import type { FoodSearchResponse } from '../../types/food-search';
-import type { NutritionProvider } from '../../types/nutrition-provider';
-import { ProviderError } from '../../types/nutrition-provider';
+import type { FoodSearchResponse } from '../../types/food-search.js';
+import type { NutritionProvider } from '../../types/nutrition-provider.js';
+import { ProviderError } from '../../types/nutrition-provider.js';
 import type {
   QuickLogResolveRequest,
   ReferenceResolveCandidate,
   ResolveOutcome,
-} from '../../types/quick-log-resolve';
-import { applyParsedQuantityToCandidate } from '../nutrition-providers/math';
-import { classifyUsdaRanking, rankUsdaCandidates } from '../nutrition-providers/usda/rank';
-import { parseQuantityQuery } from './quantity';
+} from '../../types/quick-log-resolve.js';
+import { applyParsedQuantityToCandidate } from '../nutrition-providers/math.js';
+import { classifyUsdaRanking, rankUsdaCandidates } from '../nutrition-providers/usda/rank.js';
+import { parseQuantityQuery } from './quantity.js';
 
 export interface ResolveDependencies {
   searchLocal: (query: string) => FoodSearchResponse | Promise<FoodSearchResponse>;

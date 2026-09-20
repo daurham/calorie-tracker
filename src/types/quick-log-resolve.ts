@@ -1,6 +1,6 @@
-import type { NutritionConfidence } from './food-log';
-import type { MatchClassification, SearchCandidate } from './food-search';
-import type { NutritionCandidate, NutritionReference, PortionReference } from './nutrition-provider';
+import type { NutritionConfidence } from './food-log.js';
+import type { MatchClassification, SearchCandidate } from './food-search.js';
+import type { NutritionCandidate, NutritionReference, PortionReference } from './nutrition-provider.js';
 
 export interface QuickLogResolveRequest {
   input: {

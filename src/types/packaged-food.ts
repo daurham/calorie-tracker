@@ -1,4 +1,4 @@
-import type { Nutrition } from './food-log';
+import type { Nutrition } from './food-log.js';
 
 export type PackagedFoodProvider = 'open_food_facts' | 'nutrition_label' | 'local';
 

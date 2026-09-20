@@ -1,6 +1,6 @@
-import type { FoodLogInput } from '../../types/food-log';
-import type { PackagedFoodResult } from '../../types/packaged-food';
-import { scalePackagedNutrition } from './normalize';
+import type { FoodLogInput } from '../../types/food-log.js';
+import type { PackagedFoodResult } from '../../types/packaged-food.js';
+import { scalePackagedNutrition } from './normalize.js';
 
 export const packagedFoodToFoodLogInput = (
   product: PackagedFoodResult,

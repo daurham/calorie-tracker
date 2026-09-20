@@ -1,10 +1,10 @@
-import { loadPersonalSearchRecords } from '../../lib/food-search/load-personal';
-import { searchLocalKnowledge } from '../../lib/food-search/search';
-import { USDAFoodDataProvider } from '../../lib/nutrition-providers';
-import { GeminiFoodAIProvider } from '../../lib/food-ai/gemini-label';
-import { PostgresAiStore } from '../../lib/ai-infra/postgres-store';
-import { estimateFood } from '../../lib/food-estimate/estimate';
-import { parseQuantityQuery } from '../../lib/quick-log';
+import { loadPersonalSearchRecords } from '../../lib/food-search/load-personal.js';
+import { searchLocalKnowledge } from '../../lib/food-search/search.js';
+import { USDAFoodDataProvider } from '../../lib/nutrition-providers/index.js';
+import { GeminiFoodAIProvider } from '../../lib/food-ai/gemini-label.js';
+import { PostgresAiStore } from '../../lib/ai-infra/postgres-store.js';
+import { estimateFood } from '../../lib/food-estimate/estimate.js';
+import { parseQuantityQuery } from '../../lib/quick-log/index.js';
 
 export async function handleQuickLogEstimate(req: any, res: any) {
   if (req.method === 'OPTIONS') {

@@ -1,4 +1,4 @@
-import type { NullableNutrition, NutritionCandidate, PortionReference } from '../../../types/nutrition-provider';
+import type { NullableNutrition, NutritionCandidate, PortionReference } from '../../../types/nutrition-provider.js';
 
 const ENERGY_IDS = new Set([1008, 2047, 2048]);
 const PROTEIN_IDS = new Set([1003]);

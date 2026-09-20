@@ -1,5 +1,5 @@
-import type { FoodLogInput } from '../../types/food-log';
-import type { ReferenceResolveCandidate } from '../../types/quick-log-resolve';
+import type { FoodLogInput } from '../../types/food-log.js';
+import type { ReferenceResolveCandidate } from '../../types/quick-log-resolve.js';
 
 export const referenceCandidateToFoodLogInput = (
   candidate: ReferenceResolveCandidate,

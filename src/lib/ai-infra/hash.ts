@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import type { AiHashInput, AiRequestType } from '../../types/ai-infra';
+import type { AiHashInput, AiRequestType } from '../../types/ai-infra.js';
 
 export const sha256Hex = (value: string | Buffer) =>
   createHash('sha256').update(value).digest('hex');

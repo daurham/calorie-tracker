@@ -1,18 +1,18 @@
-import { ProviderError } from '../../types/nutrition-provider';
-import { AiGateError } from '../../types/ai-infra';
-import type { FoodAIProvider, ImageInput, NutritionLabelResult, NutritionLabelWarning } from '../../types/nutrition-label';
+import { ProviderError } from '../../types/nutrition-provider.js';
+import { AiGateError } from '../../types/ai-infra.js';
+import type { FoodAIProvider, ImageInput, NutritionLabelResult, NutritionLabelWarning } from '../../types/nutrition-label.js';
 import {
   NUTRITION_LABEL_CACHE_TTL_MS,
   NUTRITION_LABEL_PROMPT_VERSION,
   NUTRITION_LABEL_SCHEMA_VERSION,
   runPaidAiRequest,
-} from '../ai-infra/gate';
-import { hashNutritionLabelRequest } from '../ai-infra/hash';
-import { estimateMaxLabelCostUsd } from '../ai-infra/pricing';
-import { loadAiProviderConfig } from '../ai-infra/config';
-import { MemoryAiStore, type AiInfraStore } from '../ai-infra/store';
-import { checkRateLimit, estimateBase64Bytes, LABEL_RATE_LIMIT } from './rate-limit';
-import { sanitizeNutritionLabel, validateNutritionLabel } from './validate-label';
+} from '../ai-infra/gate.js';
+import { hashNutritionLabelRequest } from '../ai-infra/hash.js';
+import { estimateMaxLabelCostUsd } from '../ai-infra/pricing.js';
+import { loadAiProviderConfig } from '../ai-infra/config.js';
+import { MemoryAiStore, type AiInfraStore } from '../ai-infra/store.js';
+import { checkRateLimit, estimateBase64Bytes, LABEL_RATE_LIMIT } from './rate-limit.js';
+import { sanitizeNutritionLabel, validateNutritionLabel } from './validate-label.js';
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
 

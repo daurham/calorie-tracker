@@ -1,7 +1,7 @@
-import { loadPersonalSearchRecords } from '../../lib/food-search/load-personal';
-import { searchLocalKnowledge } from '../../lib/food-search/search';
-import { USDAFoodDataProvider } from '../../lib/nutrition-providers';
-import { parseQuantityQuery, resolveQuickLog } from '../../lib/quick-log';
+import { loadPersonalSearchRecords } from '../../lib/food-search/load-personal.js';
+import { searchLocalKnowledge } from '../../lib/food-search/search.js';
+import { USDAFoodDataProvider } from '../../lib/nutrition-providers/index.js';
+import { parseQuantityQuery, resolveQuickLog } from '../../lib/quick-log/index.js';
 
 export async function handleQuickLogResolve(req: any, res: any) {
   if (req.method === 'OPTIONS') {

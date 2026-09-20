@@ -1,11 +1,11 @@
-import type { EstimateItem, FallbackNutrition, FoodComponent, FoodInterpretation } from '../../types/food-interpretation';
-import type { Nutrition, NutritionConfidence } from '../../types/food-log';
-import type { FoodSearchResponse } from '../../types/food-search';
-import type { NutritionProvider } from '../../types/nutrition-provider';
-import { applyParsedQuantityToCandidate, calculateFromPer100g, ouncesToGrams } from '../nutrition-providers/math';
-import { classifyUsdaRanking, rankUsdaCandidates } from '../nutrition-providers/usda/rank';
-import { parseQuantityQuery } from '../quick-log/quantity';
-import { downrankConfidence, generateCalorieRange, validateAiNutrition } from './validate';
+import type { EstimateItem, FallbackNutrition, FoodComponent, FoodInterpretation } from '../../types/food-interpretation.js';
+import type { Nutrition, NutritionConfidence } from '../../types/food-log.js';
+import type { FoodSearchResponse } from '../../types/food-search.js';
+import type { NutritionProvider } from '../../types/nutrition-provider.js';
+import { applyParsedQuantityToCandidate, calculateFromPer100g, ouncesToGrams } from '../nutrition-providers/math.js';
+import { classifyUsdaRanking, rankUsdaCandidates } from '../nutrition-providers/usda/rank.js';
+import { parseQuantityQuery } from '../quick-log/quantity.js';
+import { downrankConfidence, generateCalorieRange, validateAiNutrition } from './validate.js';
 
 export interface InterpretationResolveDeps {
   searchLocal: (query: string) => FoodSearchResponse | Promise<FoodSearchResponse>;

@@ -1,8 +1,8 @@
-import type { AiCallUsage, AiGateCode, AiRequestType } from '../../types/ai-infra';
-import { AiGateError } from '../../types/ai-infra';
-import { loadAiProviderConfig } from './config';
-import { settleCostUsd } from './pricing';
-import type { AiInfraStore } from './store';
+import type { AiCallUsage, AiGateCode, AiRequestType } from '../../types/ai-infra.js';
+import { AiGateError } from '../../types/ai-infra.js';
+import { loadAiProviderConfig } from './config.js';
+import { settleCostUsd } from './pricing.js';
+import type { AiInfraStore } from './store.js';
 
 export const NUTRITION_LABEL_SCHEMA_VERSION = 'nutrition_label.v1';
 export const NUTRITION_LABEL_PROMPT_VERSION = 'nutrition_label.prompt.v1';

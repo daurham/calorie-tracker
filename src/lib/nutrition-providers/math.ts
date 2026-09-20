@@ -1,6 +1,6 @@
-import type { Nutrition } from '../../types/food-log';
-import type { NullableNutrition, NutritionCandidate, PortionReference } from '../../types/nutrition-provider';
-import type { ParsedQuantity } from '../quick-log/quantity';
+import type { Nutrition } from '../../types/food-log.js';
+import type { NullableNutrition, NutritionCandidate, PortionReference } from '../../types/nutrition-provider.js';
+import type { ParsedQuantity } from '../quick-log/quantity.js';
 
 export const GRAMS_PER_OUNCE = 28.349523125;
 
