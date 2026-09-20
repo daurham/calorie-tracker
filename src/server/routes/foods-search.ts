@@ -1,6 +1,6 @@
-import { FOODS_SCHEMA_STATEMENTS } from '../../src/lib/db/foods-schema';
-import { loadPersonalSearchRecords } from '../../src/lib/food-search/load-personal';
-import { searchLocalKnowledge } from '../../src/lib/food-search/search';
+import { FOODS_SCHEMA_STATEMENTS } from '../../lib/db/foods-schema';
+import { loadPersonalSearchRecords } from '../../lib/food-search/load-personal';
+import { searchLocalKnowledge } from '../../lib/food-search/search';
 import { sql } from '@vercel/postgres';
 
 let tablesReady = false;
@@ -13,7 +13,7 @@ async function ensureFoodsTable() {
   tablesReady = true;
 }
 
-export default async function handler(req: any, res: any) {
+export async function handleFoodSearch(req: any, res: any) {
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;

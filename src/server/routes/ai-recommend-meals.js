@@ -14,7 +14,7 @@ const cleanFractionalQuantities = (content) => {
   return cleaned;
 };
 
-export default async function handler(req, res) {
+export async function handleAiRecommendMeals(req, res) {
   
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });

@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:seg/:path*",
+      "destination": "/api?__route=/:seg/:path*"
+    },
+    {
+      "source": "/api/:seg",
+      "destination": "/api?__route=/:seg"
+    }
+  ]
+}

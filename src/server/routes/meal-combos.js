@@ -215,7 +215,7 @@ async function deleteMealCombo(req, res) {
   }
 }
 
-export default async function handler(req, res) {
+export async function handleMealCombos(req, res) {
   // Handle preflight request
   if (req.method === 'OPTIONS') {
     res.status(200).end();

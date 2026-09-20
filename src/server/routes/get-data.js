@@ -5,7 +5,7 @@ dotenv.config();
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
-export default async function handler(req, res) {
+export async function handleGetData(req, res) {
   const pool = new Pool({
     connectionString: DATABASE_URL, // Set this in Vercel dashboard or .env
     ssl: {

@@ -1,4 +1,4 @@
-import { MealPlanPromptGenerator } from '../src/lib/meal-planning/prompt-generator.js';
+import { MealPlanPromptGenerator } from '../../lib/meal-planning/prompt-generator.js';
 
 async function generateMealPlanPrompt(req, res) {
   try {
@@ -30,7 +30,7 @@ async function generateMealPlanPrompt(req, res) {
   }
 }
 
-export default async function handler(req, res) {
+export async function handleGenerateMealPlan(req, res) {
   // Handle preflight request
   if (req.method === 'OPTIONS') {
     res.status(200).end();

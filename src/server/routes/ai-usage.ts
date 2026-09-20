@@ -1,7 +1,7 @@
-import { loadBudgetConfig } from '../../src/lib/ai-infra/config';
-import { PostgresAiStore } from '../../src/lib/ai-infra/postgres-store';
+import { loadBudgetConfig } from '../../lib/ai-infra/config';
+import { PostgresAiStore } from '../../lib/ai-infra/postgres-store';
 
-export default async function handler(req: any, res: any) {
+export async function handleAiUsage(req: any, res: any) {
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;

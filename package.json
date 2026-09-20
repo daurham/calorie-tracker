@@ -7,11 +7,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:full": "vercel dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "tsx --test src/lib/utils.nutrition.test.ts src/lib/food-logs/*.test.ts src/lib/food-search/*.test.ts src/lib/quick-log/*.test.ts src/lib/nutrition-providers/**/*.test.ts src/lib/packaged-foods/*.test.ts src/lib/food-ai/*.test.ts src/lib/ai-infra/*.test.ts src/lib/food-estimate/*.test.ts",
+    "test": "tsx --test src/lib/utils.nutrition.test.ts src/lib/food-logs/*.test.ts src/lib/food-search/*.test.ts src/lib/quick-log/*.test.ts src/lib/nutrition-providers/**/*.test.ts src/lib/packaged-foods/*.test.ts src/lib/food-ai/*.test.ts src/lib/ai-infra/*.test.ts src/lib/food-estimate/*.test.ts src/server/*.test.ts",
     "init-db": "tsx scripts/init-db.ts",
     "add-food-logs": "tsx scripts/add-food-logs.ts",
     "add-foods": "tsx scripts/add-foods.ts",

@@ -1,7 +1,7 @@
-import { findFoodByBarcode, upsertCanonicalFood } from '../../src/lib/packaged-foods/db';
-import { savePackagedFood } from '../../src/lib/packaged-foods/save';
+import { findFoodByBarcode, upsertCanonicalFood } from '../../lib/packaged-foods/db';
+import { savePackagedFood } from '../../lib/packaged-foods/save';
 
-export default async function handler(req: any, res: any) {
+export async function handlePackagedFoodSave(req: any, res: any) {
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;

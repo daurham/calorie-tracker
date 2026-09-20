@@ -1,6 +1,6 @@
-import { GeminiFoodAIProvider } from '../../src/lib/food-ai/gemini-label';
-import { handleExtractNutritionLabel } from '../../src/lib/food-ai/extract';
-import { PostgresAiStore } from '../../src/lib/ai-infra/postgres-store';
+import { GeminiFoodAIProvider } from '../../lib/food-ai/gemini-label';
+import { handleExtractNutritionLabel } from '../../lib/food-ai/extract';
+import { PostgresAiStore } from '../../lib/ai-infra/postgres-store';
 
 const clientKeyFrom = (req: any) => {
   const forwarded = req.headers?.['x-forwarded-for'];
@@ -9,7 +9,7 @@ const clientKeyFrom = (req: any) => {
   return req.socket?.remoteAddress || req.headers?.['x-real-ip'] || 'anonymous';
 };
 
-export default async function handler(req: any, res: any) {
+export async function handleNutritionLabelExtract(req: any, res: any) {
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
