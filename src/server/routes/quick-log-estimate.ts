@@ -37,6 +37,9 @@ export async function handleQuickLogEstimate(req: any, res: any) {
         requireProviderConfig: true,
       }
     );
+    if (result.status === 'error') {
+      console.error('Estimate failed:', result.code, result.message);
+    }
     res.status(result.status === 'error' ? (result.code === 'budget_exhausted' ? 503 : 502) : 200).json(result);
   } catch (error) {
     console.error('Error estimating food:', error);

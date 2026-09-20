@@ -7,10 +7,8 @@ import {
   Navbar,
 } from "@/components";
 import QuickLog from "@/components/quick-log/QuickLog";
-import RecentFrequent from "@/components/quick-log/RecentFrequent";
 import UndoToastHost from "@/components/quick-log/UndoToastHost";
-import { candidateKey, candidateToFoodLogInput } from "@/lib/quick-log";
-import type { SearchCandidate } from "@/types/food-search";
+import { candidateToFoodLogInput, recentCandidateToAvailableMeal } from "@/lib/quick-log";
 import {
   MealLogModal,
   IngredientManagementModal,
@@ -68,7 +66,6 @@ const Index = () => {
     undoAction,
     undoLastAction,
   } = useTodaysFoodLogs();
-  const [recentAddingKey, setRecentAddingKey] = useState<string | null>(null);
   const [showMacros, setShowMacros] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -331,12 +328,20 @@ const Index = () => {
     mod.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     mod.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const catalogNames = new Set(
+    mealsData.map(meal => String(meal.name || '').trim().toLowerCase()).filter(Boolean)
+  );
+  const recentAvailableMeals = recentFrequent
+    .filter(candidate => !catalogNames.has(candidate.name.trim().toLowerCase()))
+    .filter(candidate => candidate.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .map(recentCandidateToAvailableMeal);
   
-  // Combine and sort alphabetically
   const filteredMeals = [
+    ...recentAvailableMeals,
     ...filteredRegularMeals,
     ...filteredModMeals
-  ].sort((a, b) => a.name.localeCompare(b.name));
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
@@ -379,22 +384,6 @@ const Index = () => {
         <UndoToastHost action={undoAction} onUndo={undoLastAction} />
         <QuickLog onLog={logFood} onLogGroup={logFoods} />
 
-        <RecentFrequent
-          items={recentFrequent}
-          addingKey={recentAddingKey}
-          onAdd={async (candidate: SearchCandidate) => {
-            const key = candidateKey(candidate);
-            setRecentAddingKey(key);
-            try {
-              await logFood(candidateToFoodLogInput(candidate, {
-                originalInput: candidate.name,
-              }));
-            } finally {
-              setRecentAddingKey(null);
-            }
-          }}
-        />
-
         <TodaysMeals
           meals={todaysMeals}
           availableIngredients={allIngredientsData}
@@ -408,7 +397,23 @@ const Index = () => {
         <AvailableMeals
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          addMealToToday={addMealToToday}
+          addMealToToday={(meal) => {
+            if (meal.origin === 'recent' && meal.candidate) {
+              const portion = Number(meal.portion) || 1;
+              return logFood(candidateToFoodLogInput(meal.candidate, {
+                parsed: {
+                  quantity: portion,
+                  unit: null,
+                  unitKind: 'serving',
+                  foodQuery: meal.candidate.name,
+                  raw: meal.candidate.name,
+                  canScaleByServing: true,
+                },
+                originalInput: meal.candidate.name,
+              }));
+            }
+            return addMealToToday(meal);
+          }}
           openMealEditManagement={openMealEditManagement}
           handleDeleteMealCombo={handleDeleteMealCombo}
           filteredMeals={filteredMeals}

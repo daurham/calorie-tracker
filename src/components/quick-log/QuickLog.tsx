@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Barcode, Camera, Flame, Search, Sparkles } from 'lucide-react';
 import {
   Button,
@@ -46,6 +46,7 @@ const QuickLog = ({ onLog, onLogGroup }: QuickLogProps) => {
   const [estimateError, setEstimateError] = useState<{ message: string; code?: string } | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [isSavingEstimate, setIsSavingEstimate] = useState(false);
+  const estimateInFlight = useRef(false);
 
   useEffect(() => {
     setReference({ status: 'idle' });
@@ -53,18 +54,15 @@ const QuickLog = ({ onLog, onLogGroup }: QuickLogProps) => {
     setEstimateError(null);
   }, [query]);
 
-  const localNeedsReference = query.trim().length > 0
+  const hasQuery = query.trim().length > 0;
+  const localNeedsReference = hasQuery
     && (state.status === 'matches' || state.status === 'error' || state.status === 'idle')
     && (state.classification === 'none' || state.classification === 'weak' || (state.classification == null && state.results.length === 0));
 
   const showSearchDatabase = localNeedsReference
     && state.status !== 'searching'
     && reference.status === 'idle';
-  const showEstimateAction = query.trim().length > 0
-    && localNeedsReference
-    && (reference.status === 'idle' || reference.status === 'error')
-    && !estimate
-    && !estimateError;
+  const textActionsDisabled = !hasQuery || isEstimating || reference.status === 'resolving';
 
   const handleAddLocal = async (candidate: SearchCandidate, nextParsed = parsed) => {
     const key = candidateKey(candidate);
@@ -94,13 +92,19 @@ const QuickLog = ({ onLog, onLogGroup }: QuickLogProps) => {
   };
 
   const handleEstimate = async () => {
-    if (!query.trim() || isEstimating) return;
+    if (!query.trim() || isEstimating || estimateInFlight.current) return;
+    estimateInFlight.current = true;
     setIsEstimating(true);
     setEstimateError(null);
     try {
       const outcome = await estimateFoodRequest({ text: query.trim() });
       if (outcome.status === 'error') {
-        setEstimateError({ message: outcome.message, code: outcome.code });
+        setEstimateError({
+          message: outcome.code === 'timeout'
+            ? 'That estimate took too long. Try again.'
+            : outcome.message,
+          code: outcome.code,
+        });
         return;
       }
       setEstimate(outcome.draft);
@@ -109,6 +113,7 @@ const QuickLog = ({ onLog, onLogGroup }: QuickLogProps) => {
         message: error instanceof Error ? error.message : "Couldn't estimate this food.",
       });
     } finally {
+      estimateInFlight.current = false;
       setIsEstimating(false);
     }
   };
@@ -167,7 +172,7 @@ const QuickLog = ({ onLog, onLogGroup }: QuickLogProps) => {
           <form
             onSubmit={(event) => {
               event.preventDefault();
-              if (showSearchDatabase) {
+              if (hasQuery) {
                 void handleResolve();
               }
             }}
@@ -220,32 +225,8 @@ const QuickLog = ({ onLog, onLogGroup }: QuickLogProps) => {
             </div>
           )}
 
-          {showSearchDatabase && (
-            <div className="space-y-2">
-              {state.results.length === 0 && state.status !== 'error' && (
-                <p className="text-sm text-muted-foreground">No saved match</p>
-              )}
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full h-11 border-emerald-200 hover:bg-emerald-50 dark:border-emerald-800 dark:hover:bg-emerald-950"
-                onClick={() => void handleResolve()}
-              >
-                Search nutrition database
-              </Button>
-              {showEstimateAction && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-11"
-                  onClick={() => void handleEstimate()}
-                  disabled={isEstimating}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {isEstimating ? 'Estimating…' : 'Estimate this food'}
-                </Button>
-              )}
-            </div>
+          {showSearchDatabase && state.results.length === 0 && state.status !== 'error' && (
+            <p className="text-sm text-muted-foreground">No saved match</p>
           )}
 
           {reference.status === 'resolving' && (
@@ -258,10 +239,6 @@ const QuickLog = ({ onLog, onLogGroup }: QuickLogProps) => {
               <p className="text-sm text-red-500">{reference.message}</p>
               <Button type="button" variant="outline" className="w-full" onClick={() => void handleResolve()}>
                 Retry
-              </Button>
-              <Button type="button" variant="outline" className="w-full" onClick={() => void handleEstimate()} disabled={isEstimating}>
-                <Sparkles className="h-4 w-4" />
-                {isEstimating ? 'Estimating…' : 'Estimate this food'}
               </Button>
               <Button type="button" variant="outline" className="w-full" onClick={() => setCaloriesOpen(true)}>
                 Calories
@@ -277,9 +254,6 @@ const QuickLog = ({ onLog, onLogGroup }: QuickLogProps) => {
                   Retry
                 </Button>
               )}
-              <Button type="button" variant="outline" className="w-full" onClick={() => void handleResolve()}>
-                Search nutrition database
-              </Button>
               <Button type="button" variant="outline" className="w-full" onClick={() => setCaloriesOpen(true)}>
                 Calories
               </Button>
@@ -316,6 +290,35 @@ const QuickLog = ({ onLog, onLogGroup }: QuickLogProps) => {
               ))}
             </div>
           )}
+
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-label="Search nutrition database"
+              title={hasQuery ? 'Search nutrition database' : 'Type a food first'}
+              className="h-9 justify-center border-emerald-200 text-xs sm:text-sm hover:bg-emerald-50 dark:border-emerald-800 dark:hover:bg-emerald-950"
+              onClick={() => void handleResolve()}
+              disabled={textActionsDisabled}
+            >
+              <Search className="h-3.5 w-3.5" />
+              <span className="truncate">Search nutrition</span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-label="Estimate this food"
+              title={hasQuery ? 'Estimate this food' : 'Type a food first'}
+              className="h-9 justify-center text-xs sm:text-sm"
+              onClick={() => void handleEstimate()}
+              disabled={textActionsDisabled}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              <span className="truncate">{isEstimating ? 'Estimating…' : 'Estimate'}</span>
+            </Button>
+          </div>
 
           <div className="grid grid-cols-3 gap-2">
             <Button
@@ -386,6 +389,11 @@ const QuickLog = ({ onLog, onLogGroup }: QuickLogProps) => {
           draft={estimate}
           onChange={setEstimate}
           onAdd={() => void handleAddDraft(estimate)}
+          onAddItem={(item) => void handleAddDraft({
+            ...estimate,
+            displayName: item.name,
+            items: [item],
+          })}
           isSaving={isSavingEstimate}
         />
       )}

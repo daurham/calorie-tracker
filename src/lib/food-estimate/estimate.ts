@@ -162,8 +162,12 @@ export const estimateFood = async (
   }
 
   if (input.type === 'text') {
-    const deterministic = await tryDeterministic(originalInput, deps);
-    if (deterministic) return { status: 'draft', draft: deterministic };
+    try {
+      const deterministic = await tryDeterministic(originalInput, deps);
+      if (deterministic) return { status: 'draft', draft: deterministic };
+    } catch (error) {
+      console.error('Deterministic estimate shortcut failed, continuing to AI:', error);
+    }
   }
 
   if (deps.requireProviderConfig) {
@@ -234,7 +238,7 @@ export const estimateFood = async (
       return fail('budget_exhausted', 'AI estimates are unavailable for the rest of this month.');
     }
     if (error instanceof ProviderError && error.code === 'timeout') {
-      return fail('timeout', "Couldn't estimate this food.");
+      return fail('timeout', 'That estimate took too long. Try again.');
     }
     if (error instanceof ProviderError && error.code === 'malformed') {
       return fail('invalid_response', "Couldn't estimate this food.");

@@ -38,7 +38,7 @@ const AvailableMeals = ({
   const [customPortionMeal, setCustomPortionMeal] = useState(null);
   const [customPortionValue, setCustomPortionValue] = useState("");
   const [showCustomPortionDialog, setShowCustomPortionDialog] = useState(false);
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<Array<number | string>>([]);
 
   // Load favorites from localStorage on component mount
   useEffect(() => {
@@ -53,7 +53,7 @@ const AvailableMeals = ({
     localStorage.setItem('availableMealsFavorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  const toggleFavorite = (mealId: number) => {
+  const toggleFavorite = (mealId: number | string) => {
     setFavorites(prev => {
       if (prev.includes(mealId)) {
         return prev.filter(id => id !== mealId);
@@ -63,29 +63,26 @@ const AvailableMeals = ({
     });
   };
 
-  const isFavorite = (mealId: number) => favorites.includes(mealId);
+  const isFavorite = (mealId: number | string) => favorites.includes(mealId);
 
-  // Sort meals to show favorites first, maintaining the order they were favorited
-  const sortedMeals = filteredMeals.sort((a, b) => {
+  // Favorites first, then recent/frequent foods, then the rest alphabetically.
+  const sortedMeals = [...filteredMeals].sort((a, b) => {
     const aIsFavorite = isFavorite(a.id);
     const bIsFavorite = isFavorite(b.id);
     
     if (aIsFavorite && !bIsFavorite) return -1;
     if (!aIsFavorite && bIsFavorite) return 1;
     
-    // If both are favorites, maintain the order they were added to favorites
     if (aIsFavorite && bIsFavorite) {
-      const aIndex = favorites.indexOf(a.id);
-      const bIndex = favorites.indexOf(b.id);
-      return aIndex - bIndex;
+      return favorites.indexOf(a.id) - favorites.indexOf(b.id);
     }
+
+    const aIsRecent = a.origin === 'recent';
+    const bIsRecent = b.origin === 'recent';
+    if (aIsRecent && !bIsRecent) return -1;
+    if (!aIsRecent && bIsRecent) return 1;
     
-    // If both are not favorites, sort alphabetically by name
-    if (!aIsFavorite && !bIsFavorite) {
-      return (a.name || "").localeCompare(b.name || "");
-    }
-    
-    return 0;
+    return (a.name || "").localeCompare(b.name || "");
   });
 
 
@@ -116,6 +113,11 @@ const AvailableMeals = ({
             <h3 className={`font-semibold ${meal.meal_type === 'standalone' ? 'text-yellow-500' : ''} group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors text-sm sm:text-base line-clamp-2`}>
               {meal.name || "Unnamed Meal"}
             </h3>
+            {meal.origin === 'recent' && (
+              <span className="text-[10px] uppercase tracking-wide text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-1.5 py-0.5 rounded flex-shrink-0">
+                Recent
+              </span>
+            )}
             {isFavorite(meal.id) && (
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />
             )}
@@ -125,7 +127,8 @@ const AvailableMeals = ({
           </span>
         </div>
         <div className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3 line-clamp-2 min-h-[1.5rem]">
-          {meal.meal_type === 'composed' &&
+          {meal.origin === 'recent' && (meal.servingDescription || 'Recently logged')}
+          {meal.origin !== 'recent' && meal.meal_type === 'composed' &&
             <IngredientListSummaryText meal={meal} />
           }
         </div>
@@ -172,19 +175,23 @@ const AvailableMeals = ({
                   <Star className={`h-4 w-4 mr-2 ${isFavorite(meal.id) ? 'text-yellow-500 fill-yellow-500' : ''}`} />
                   {isFavorite(meal.id) ? 'Remove from Favorites' : 'Add to Favorites'}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {
-                  openMealEditManagement(meal.id);
-                }}>
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleDeleteClick(meal.id)}
-                  className="text-red-500 focus:text-red-500"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
+                {meal.origin !== 'recent' && (
+                  <>
+                    <DropdownMenuItem onClick={() => {
+                      openMealEditManagement(meal.id);
+                    }}>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleDeleteClick(meal.id)}
+                      className="text-red-500 focus:text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

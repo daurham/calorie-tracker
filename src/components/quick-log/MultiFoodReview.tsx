@@ -1,16 +1,17 @@
 import { Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Input } from '@/components/ui';
 import { formatApproxCalories } from '@/lib/food-estimate/validate';
 import { draftTotals, scaleEstimateItem } from '@/lib/food-estimate/scale-draft';
-import type { EstimateDraft } from '@/types/food-interpretation';
+import type { EstimateDraft, EstimateItem } from '@/types/food-interpretation';
 
 interface MultiFoodReviewProps {
   draft: EstimateDraft;
   onChange: (draft: EstimateDraft) => void;
   onAdd: () => void;
+  onAddItem: (item: EstimateItem) => void;
   isSaving?: boolean;
 }
 
-const MultiFoodReview = ({ draft, onChange, onAdd, isSaving }: MultiFoodReviewProps) => {
+const MultiFoodReview = ({ draft, onChange, onAdd, onAddItem, isSaving }: MultiFoodReviewProps) => {
   const totals = draftTotals(draft.items);
 
   return (
@@ -20,7 +21,7 @@ const MultiFoodReview = ({ draft, onChange, onAdd, isSaving }: MultiFoodReviewPr
       </div>
       <div className="space-y-3">
         {draft.items.map(item => (
-          <div key={item.id} className="rounded-md border p-3 space-y-1">
+          <div key={item.id} className="rounded-md border p-3 space-y-2">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="font-medium">{item.name}</p>
@@ -28,23 +29,35 @@ const MultiFoodReview = ({ draft, onChange, onAdd, isSaving }: MultiFoodReviewPr
               </div>
               <p className="font-semibold">{formatApproxCalories(item.nutrition.calories, item.usedAiFallback)} cal</p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Qty</span>
-              <Input
-                type="number"
-                min="0.5"
-                step="0.5"
-                className="h-8 w-20"
-                value={item.quantity}
-                onChange={(event) => {
-                  const quantity = Number(event.target.value);
-                  if (!Number.isFinite(quantity) || quantity <= 0) return;
-                  onChange({
-                    ...draft,
-                    items: draft.items.map(current => current.id === item.id ? scaleEstimateItem(item, { quantity }) : current),
-                  });
-                }}
-              />
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Qty</span>
+                <Input
+                  type="number"
+                  min="0.5"
+                  step="0.5"
+                  className="h-8 w-20"
+                  value={item.quantity}
+                  onChange={(event) => {
+                    const quantity = Number(event.target.value);
+                    if (!Number.isFinite(quantity) || quantity <= 0) return;
+                    onChange({
+                      ...draft,
+                      items: draft.items.map(current => current.id === item.id ? scaleEstimateItem(item, { quantity }) : current),
+                    });
+                  }}
+                />
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                className="h-8 bg-emerald-500 px-3 hover:bg-emerald-600"
+                onClick={() => onAddItem(item)}
+                disabled={isSaving}
+                aria-label={`Add ${item.name}`}
+              >
+                Add
+              </Button>
             </div>
           </div>
         ))}
@@ -65,15 +78,16 @@ export const MultiFoodReviewDialog = ({
   onOpenChange,
   onChange,
   onAdd,
+  onAddItem,
   isSaving,
 }: MultiFoodReviewProps & { open: boolean; onOpenChange: (open: boolean) => void }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent className="max-w-sm">
       <DialogHeader>
         <DialogTitle>Review foods</DialogTitle>
-        <DialogDescription>Edit any item before adding the group to Today.</DialogDescription>
+        <DialogDescription>Add one item, or add the whole group to Today.</DialogDescription>
       </DialogHeader>
-      <MultiFoodReview draft={draft} onChange={onChange} onAdd={onAdd} isSaving={isSaving} />
+      <MultiFoodReview draft={draft} onChange={onChange} onAdd={onAdd} onAddItem={onAddItem} isSaving={isSaving} />
     </DialogContent>
   </Dialog>
 );

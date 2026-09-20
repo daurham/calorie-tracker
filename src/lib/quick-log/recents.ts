@@ -41,3 +41,17 @@ export const deriveRecentFrequent = (logs: FoodLog[], limit = 8): SearchCandidat
     match: { score: 1, type: 'strong' },
   }));
 };
+
+export const recentCandidateToAvailableMeal = (candidate: SearchCandidate) => ({
+  id: `recent:${candidate.entityType}:${candidate.id}`,
+  name: candidate.name,
+  calories: candidate.calories,
+  protein: candidate.protein,
+  carbs: candidate.carbs,
+  fat: candidate.fat,
+  meal_type: 'recent',
+  ingredients: [],
+  origin: 'recent' as const,
+  servingDescription: candidate.servingDescription,
+  candidate,
+});

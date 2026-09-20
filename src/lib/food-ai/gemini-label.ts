@@ -9,7 +9,13 @@ import { sanitizeNutritionLabel } from './validate-label.js';
 export { NUTRITION_LABEL_PROMPT_VERSION, NUTRITION_LABEL_SCHEMA_VERSION };
 
 const DEFAULT_MODEL = 'gemini-2.0-flash';
-const DEFAULT_TIMEOUT_MS = 20000;
+const DEFAULT_TIMEOUT_MS = 35000;
+const RETRY_DELAY_MS = 800;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isRetryableGeminiStatus = (status: number) =>
+  status === 429 || status === 503 || status === 500;
 
 const LABEL_PROMPT = `You transcribe packaged-food nutrition labels. Do not estimate missing values.
 Return ONLY JSON with this shape:
@@ -99,7 +105,7 @@ export class GeminiFoodAIProvider implements FoodAIProvider {
     return { result: sanitizeFoodInterpretation(parsed), usage };
   }
 
-  private async callGeminiJson(input: { parts: any[]; failure: string }) {
+  private async callGeminiJson(input: { parts: any[]; failure: string; retried?: boolean }) {
     const apiKey = this.options.apiKey || process.env.GEMINI_API_KEY || process.env.AI_GOOGLE_STUDIO_GEMINI_API_KEY;
     if (!apiKey) {
       throw new ProviderError('missing_key', 'GEMINI_API_KEY is not configured');
@@ -114,6 +120,11 @@ export class GeminiFoodAIProvider implements FoodAIProvider {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS);
     const started = Date.now();
+    const retry = async () => {
+      if (input.retried) return null;
+      await sleep(RETRY_DELAY_MS);
+      return this.callGeminiJson({ ...input, retried: true });
+    };
 
     try {
       const response = await fetchImpl(
@@ -136,6 +147,10 @@ export class GeminiFoodAIProvider implements FoodAIProvider {
       );
 
       if (!response.ok) {
+        if (isRetryableGeminiStatus(response.status)) {
+          const retried = await retry();
+          if (retried) return retried;
+        }
         throw new ProviderError('provider_error', `Gemini ${input.failure} failed (${response.status})`);
       }
       const payload = await response.json();
@@ -155,6 +170,8 @@ export class GeminiFoodAIProvider implements FoodAIProvider {
     } catch (error) {
       if (error instanceof ProviderError) throw error;
       if ((error as { name?: string })?.name === 'AbortError') {
+        const retried = await retry();
+        if (retried) return retried;
         throw new ProviderError('timeout', `Gemini ${input.failure} timed out`);
       }
       if (error instanceof SyntaxError) {
