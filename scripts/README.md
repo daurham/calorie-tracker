@@ -22,6 +22,46 @@ npm run backup-db
 
 **Output:** Creates a timestamped backup file in the `data-backup/` directory.
 
+
+### `export-catalog.ts`
+Exports the live ingredients and meals catalog into two editable JSON files.
+
+**Usage:**
+```bash
+npm run export-catalog
+```
+
+**Output:**
+- `data-catalog/ingredients.json`
+- `data-catalog/meals.json`
+
+Keep the `id` fields when editing existing rows so renames update in place. Omit `id` for brand-new entries. Composed meals reference ingredients by **name** + `quantity`.
+
+### `import-catalog.ts`
+Upserts the catalog JSON files back into Postgres (ingredients first, then meals). Matching order: `id` if present in DB, else case-insensitive name.
+
+**Usage:**
+```bash
+# Preview changes without writing
+npm run import-catalog -- --dry-run
+
+# Apply all changes
+npm run import-catalog
+
+# Optional filters
+npm run import-catalog -- --ingredients-only
+npm run import-catalog -- --meals-only
+```
+
+**Workflow:**
+1. `npm run export-catalog`
+2. Edit `data-catalog/ingredients.json` and/or `data-catalog/meals.json`
+3. `npm run import-catalog -- --dry-run`
+4. `npm run import-catalog`
+5. Refresh the app
+
+Import does **not** delete rows that are missing from the JSON files.
+
 ### `generate-meal-plan-prompt.ts`
 Fetches all ingredients and meals from the database, condenses the information, and generates an AI prompt for meal planning.
 
@@ -88,6 +128,11 @@ npm run init-db
 
 # Backup database
 npm run backup-db
+
+# Export / import editable catalog JSON
+npm run export-catalog
+npm run import-catalog -- --dry-run
+npm run import-catalog
 
 # Generate meal plan prompt
 npm run generate-meal-prompt
